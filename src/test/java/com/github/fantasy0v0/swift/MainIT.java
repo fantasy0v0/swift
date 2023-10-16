@@ -1,4 +1,4 @@
-package io.helidon.examples.quickstart.se;
+package com.github.fantasy0v0.swift;
 
 import io.helidon.webclient.http1.Http1Client;
 import io.helidon.webserver.testing.junit5.ServerTest;

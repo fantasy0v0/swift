@@ -1,8 +1,7 @@
-package io.helidon.examples.quickstart.se;
+package com.github.fantasy0v0.swift;
 
 
 import io.helidon.http.Status;
-import io.helidon.config.Config;
 import io.helidon.webserver.testing.junit5.SetUpRoute;
 import io.helidon.webclient.http1.Http1Client;
 import io.helidon.webclient.http1.Http1ClientResponse;
@@ -13,7 +12,6 @@ import jakarta.json.JsonObject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.CoreMatchers.containsString;
 
 abstract class AbstractMainTest {
     private final Http1Client client;
@@ -27,7 +25,7 @@ abstract class AbstractMainTest {
         Main.routing(builder);
     }
 
-    
+
     @Test
     void testRootRoute() {
         try (Http1ClientResponse response = client.get("/greet")
@@ -39,7 +37,7 @@ abstract class AbstractMainTest {
         }
     }
 
-    
+
     @Test
     void testMetricsObserver() {
         try (Http1ClientResponse response = client.get("/observe/metrics").request()) {
@@ -47,7 +45,7 @@ abstract class AbstractMainTest {
         }
     }
 
-    
+
     @Test
     void testSimpleGreet() {
         try (Http1ClientResponse response = client.get("/simple-greet").request()) {

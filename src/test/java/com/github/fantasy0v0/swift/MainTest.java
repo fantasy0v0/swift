@@ -1,4 +1,4 @@
-package io.helidon.examples.quickstart.se;
+package com.github.fantasy0v0.swift;
 
 import io.helidon.webserver.testing.junit5.DirectClient;
 import io.helidon.webserver.testing.junit5.RoutingTest;

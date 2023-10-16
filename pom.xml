@@ -15,7 +15,7 @@
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
-        <mainClass>io.helidon.examples.quickstart.se.Main</mainClass>
+        <mainClass>com.github.fantasy0v0.swift.Main</mainClass>
     </properties>
 
     <dependencies>
