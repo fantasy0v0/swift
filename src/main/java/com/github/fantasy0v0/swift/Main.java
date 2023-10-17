@@ -5,6 +5,13 @@ import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+
+import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
+import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
+
 
 /**
  * The application main class.
@@ -37,6 +44,39 @@ public final class Main {
       .start();
 
     System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
+
+    try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
+      Path path = Path.of("C:\\Users\\fan\\Desktop\\test\\2");
+      path.register(watchService, ENTRY_MODIFY);
+      while (true) {
+        WatchKey key;
+        try {
+          key = watchService.take();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+          return;
+        }
+        for (WatchEvent<?> event : key.pollEvents()) {
+          WatchEvent.Kind<?> kind = event.kind();
+
+          // This key is registered only
+          // for ENTRY_CREATE events,
+          // but an OVERFLOW event can
+          // occur regardless if events
+          // are lost or discarded.
+          if (kind == OVERFLOW) {
+            continue;
+          }
+          WatchEvent<Path> ev = (WatchEvent<Path>)event;
+          Path filename = ev.context();
+          System.out.println(filename.toString());
+          // filename.register(watchService, ENTRY_MODIFY);
+        }
+        key.reset();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -44,9 +84,14 @@ public final class Main {
    */
   static void routing(HttpRouting.Builder routing) {
     routing
+      .any((req, res) -> {
+        req.context().supply("test", String.class, () -> "what?");
+        res.next();
+      })
       .get("/simple-greet", (req, res) -> res.send("Hello World!"))
       .any((req, res) -> {
         res.send("any handle");
+        System.out.println(req.context().get("test", String.class));
       });
   }
 
