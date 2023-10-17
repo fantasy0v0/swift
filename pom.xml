@@ -9,8 +9,8 @@
     <version>4.0.0-RC1</version>
     <relativePath/>
   </parent>
-  <groupId>io.helidon.examples</groupId>
-  <artifactId>helidon-quickstart-se</artifactId>
+  <groupId>com.github.fantasy0v0.swift</groupId>
+  <artifactId>swift-core</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
@@ -91,6 +91,15 @@
             <id>copy-libs</id>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>21</source>
+          <target>21</target>
+          <compilerArgs>--enable-preview</compilerArgs>
+        </configuration>
       </plugin>
     </plugins>
   </build>
