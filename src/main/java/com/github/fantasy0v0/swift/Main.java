@@ -86,12 +86,14 @@ public final class Main {
     routing
       .any((req, res) -> {
         req.context().supply("test", String.class, () -> "what?");
+        System.out.println(Thread.currentThread() + " " + req.path().path() + "  1");
         res.next();
       })
       .get("/simple-greet", (req, res) -> res.send("Hello World!"))
       .any((req, res) -> {
         res.send("any handle");
         System.out.println(req.context().get("test", String.class));
+        System.out.println(Thread.currentThread() + " " + req.path().path() + "  2");
       });
   }
 
