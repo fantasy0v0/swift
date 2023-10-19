@@ -1,6 +1,7 @@
 package com.github.fantasy0v0.swift;
 
 import io.helidon.config.Config;
+import io.helidon.http.Header;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
@@ -89,7 +90,16 @@ public final class Main {
         System.out.println(Thread.currentThread() + " " + req.path().path() + "  1");
         res.next();
       })
-      .get("/simple-greet", (req, res) -> res.send("Hello World!"))
+      .get("/simple-greet", (req, res) -> {
+        // res.send("Hello World!");
+        res.header("content-type", "application/json");
+        res.header("cache-control", "max-age=3600");
+        res.send("""
+        {
+          "test": 123
+        }
+        """);
+      })
       .any((req, res) -> {
         res.send("any handle");
         System.out.println(req.context().get("test", String.class));
