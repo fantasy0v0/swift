@@ -31,8 +31,10 @@ public class JavaScriptEngineTest {
       Source source = Source.newBuilder("js", """
         console.log(`testObj: ${testObj}`);
         console.log(`Java.isJavaObject:${Java.isJavaObject(testObj)}`)
-        console.log(`name: ${testObj.name}`);
         testObj.test();
+        testObj.test1(() => {
+          console.log('Test1#test1');
+        });
         """, "test1#test").build();
       context.eval(source);
     } catch (IOException e) {
