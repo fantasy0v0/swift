@@ -1,12 +1,10 @@
-package com.github.fantasy0v0.swift;
+package com.github.fantasy0v0.swift.core;
 
 import io.helidon.config.Config;
-import io.helidon.http.Header;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -83,7 +81,7 @@ public final class Main {
   /**
    * Updates HTTP Routing.
    */
-  static void routing(HttpRouting.Builder routing) {
+  public static void routing(HttpRouting.Builder routing) {
     routing
       .any((req, res) -> {
         req.context().supply("test", String.class, () -> "what?");

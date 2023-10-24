@@ -15,7 +15,7 @@
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
-    <mainClass>com.github.fantasy0v0.swift.Main</mainClass>
+    <mainClass>com.github.fantasy0v0.swift.core.Main</mainClass>
     <graalvm.version>23.1.0</graalvm.version>
   </properties>
 
@@ -131,6 +131,13 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>--add-exports org.graalvm.polyglot/org.graalvm.polyglot.impl=ALL-UNNAMED</argLine>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -26,12 +26,13 @@ public class JavaScriptEngineTest {
       .allowExperimentalOptions(true).option("js.unhandled-rejections", "warn")
       .build()) {
       Test1 test = new Test1();
-      context.getBindings("js").putMember("testObj", test);
+      context.getBindings("js")
+        .putMember("testObj", test);
       Source source = Source.newBuilder("js", """
         console.log(`testObj: ${testObj}`);
         console.log(`Java.isJavaObject:${Java.isJavaObject(testObj)}`)
         console.log(`name: ${testObj.name}`);
-        // testObj.test();
+        testObj.test();
         """, "test1#test").build();
       context.eval(source);
     } catch (IOException e) {
