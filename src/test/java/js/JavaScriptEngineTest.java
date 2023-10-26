@@ -35,6 +35,9 @@ public class JavaScriptEngineTest {
         testObj.test1(() => {
           console.log('Test1#test1');
         });
+        testObj.test2(name => {
+          console.log(`Test1#test2, Hello ${name}`);
+        });
         """, "test1#test").build();
       context.eval(source);
     } catch (IOException e) {
