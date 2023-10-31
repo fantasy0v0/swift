@@ -43,6 +43,7 @@ public class SwiftServerBuilder {
     WebServer.create(builder -> {
 
     });
+    return null;
   }
 
 }
