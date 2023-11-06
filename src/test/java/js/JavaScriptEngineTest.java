@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class JavaScriptEngineTest {
 
-  private final Logger log = LoggerFactory.getLogger(JavaScriptEngineTest.class);
+  private static final Logger log = LoggerFactory.getLogger(JavaScriptEngineTest.class);
 
-  @Test
-  public void test() {
+  public static void createContext(ConsumerWithException<Context> consumer) {
     try (Context context = Context.newBuilder("js")
       .engine(Engine.newBuilder().build())
       .allowExperimentalOptions(true)
@@ -25,6 +25,15 @@ public class JavaScriptEngineTest {
       // 打印未处理的异常
       .allowExperimentalOptions(true).option("js.unhandled-rejections", "warn")
       .build()) {
+      consumer.accept(context);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void test() {
+    createContext(context -> {
       Test1 test = new Test1();
       context.getBindings("js")
         .putMember("testObj", test);
@@ -40,9 +49,7 @@ public class JavaScriptEngineTest {
         });
         """, "test1#test").build();
       context.eval(source);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    });
   }
 
 }

@@ -2,12 +2,16 @@ package com.github.fantasy0v0.swift.core.server;
 
 import io.helidon.webserver.WebServer;
 
-public class SwiftServer {
+public final class SwiftServer {
 
   private final WebServer webServer;
 
   SwiftServer(WebServer webServer) {
     this.webServer = webServer;
+  }
+
+  public static SwiftServerBuilder builder() {
+    return new SwiftServerBuilder();
   }
 
   public SwiftServer start() {

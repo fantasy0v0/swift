@@ -1,5 +1,7 @@
 package com.github.fantasy0v0.swift.core;
 
+import com.github.fantasy0v0.swift.core.server.SwiftServer;
+import com.github.fantasy0v0.swift.core.server.SwiftServerBuilder;
 import io.helidon.config.Config;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
@@ -30,21 +32,28 @@ public final class Main {
    */
   public static void main(final String[] args) {
     // load logging configuration
-    LogConfig.configureRuntime();
+    // LogConfig.configureRuntime();
 
     // initialize global config from default configuration
-    Config config = Config.create();
-    Config.global(config);
+    /*Config config = Config.create();
+    Config.global(config);*/
 
-    WebServer server = WebServer.builder()
+    /*WebServer server = WebServer.builder()
       .config(Config.global().get("server"))
       .routing(Main::routing)
       .build()
-      .start();
+      .start();*/
+
+    SwiftServer server = SwiftServer.builder()
+      .host("127.0.0.1")
+      .routing(Main::routing)
+      .build();
+
+    server.start();
 
     System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
 
-    try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
+    /*try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
       Path path = Path.of("C:\\Users\\fan\\Desktop\\test\\2");
       path.register(watchService, ENTRY_MODIFY);
       while (true) {
@@ -75,7 +84,7 @@ public final class Main {
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
-    }
+    }*/
   }
 
   /**

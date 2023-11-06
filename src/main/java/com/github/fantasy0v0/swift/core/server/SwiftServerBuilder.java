@@ -2,6 +2,11 @@ package com.github.fantasy0v0.swift.core.server;
 
 import com.github.fantasy0v0.swift.core.server.SwiftServer;
 import io.helidon.webserver.WebServer;
+import io.helidon.webserver.http.HttpRouting;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.function.Consumer;
 
 public class SwiftServerBuilder {
 
@@ -11,32 +16,55 @@ public class SwiftServerBuilder {
 
   private int maxTcpConnections = -1;
 
+  private InetAddress address;
+
   private int port = 0;
 
   private long maxPayloadSize = -1L;
+
+  private Consumer<HttpRouting.Builder> routingConsumer;
 
   SwiftServerBuilder() {
 
   }
 
-  public void backlog(int backlog) {
+  public SwiftServerBuilder backlog(int backlog) {
     this.backlog = backlog;
+    return this;
   }
 
-  public void maxConcurrentRequests(int maxConcurrentRequests) {
+  public SwiftServerBuilder maxConcurrentRequests(int maxConcurrentRequests) {
     this.maxConcurrentRequests = maxConcurrentRequests;
+    return this;
   }
 
-  public void maxTcpConnections(int maxTcpConnections) {
+  public SwiftServerBuilder maxTcpConnections(int maxTcpConnections) {
     this.maxTcpConnections = maxTcpConnections;
+    return this;
   }
 
-  public void port(int port) {
+  public SwiftServerBuilder host(String host) {
+    try {
+      this.address = InetAddress.getByName(host);
+    } catch (UnknownHostException e) {
+      throw new IllegalArgumentException("Failed to get address from host: " + host, e);
+    }
+    return this;
+  }
+
+  public SwiftServerBuilder port(int port) {
     this.port = port;
+    return this;
   }
 
-  public void maxPayloadSize(long maxPayloadSize) {
+  public SwiftServerBuilder maxPayloadSize(long maxPayloadSize) {
     this.maxPayloadSize = maxPayloadSize;
+    return this;
+  }
+
+  public SwiftServerBuilder routing(Consumer<HttpRouting.Builder> consumer) {
+    this.routingConsumer = consumer;
+    return this;
   }
 
   public SwiftServer build() {
@@ -45,8 +73,9 @@ public class SwiftServerBuilder {
         .backlog(backlog)
         .maxConcurrentRequests(maxConcurrentRequests)
         .maxTcpConnections(maxTcpConnections)
-        .port(port)
-        .maxPayloadSize(maxPayloadSize);
+        .address(address).port(port)
+        .maxPayloadSize(maxPayloadSize)
+        .routing(this.routingConsumer);
     });
     return new SwiftServer(webServer);
   }
