@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.core.builder;
+package com.github.fantasy0v0.swift.core.server;
 
 import com.github.fantasy0v0.swift.core.server.SwiftServer;
 import io.helidon.webserver.WebServer;
@@ -40,10 +40,15 @@ public class SwiftServerBuilder {
   }
 
   public SwiftServer build() {
-    WebServer.create(builder -> {
-
+    WebServer webServer = WebServer.create(builder -> {
+      builder
+        .backlog(backlog)
+        .maxConcurrentRequests(maxConcurrentRequests)
+        .maxTcpConnections(maxTcpConnections)
+        .port(port)
+        .maxPayloadSize(maxPayloadSize);
     });
-    return null;
+    return new SwiftServer(webServer);
   }
 
 }
