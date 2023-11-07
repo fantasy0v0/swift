@@ -13,7 +13,7 @@ public class JavaScriptEngineTest {
 
   private static final Logger log = LoggerFactory.getLogger(JavaScriptEngineTest.class);
 
-  public static void createContext(ConsumerWithException<Context> consumer) {
+  public static void createContext(ConsumerWithException<Context> consumer) throws Exception {
     try (Context context = Context.newBuilder("js")
       .engine(Engine.newBuilder().build())
       .allowExperimentalOptions(true)
@@ -26,15 +26,14 @@ public class JavaScriptEngineTest {
       .allowExperimentalOptions(true).option("js.unhandled-rejections", "warn")
       .build()) {
       consumer.accept(context);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
   }
 
   @Test
-  public void test() {
+  public void test() throws Exception {
     createContext(context -> {
       Test1 test = new Test1();
+      context.enter();
       context.getBindings("js")
         .putMember("testObj", test);
       Source source = Source.newBuilder("js", """

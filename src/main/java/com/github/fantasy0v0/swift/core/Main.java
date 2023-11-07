@@ -45,8 +45,13 @@ public final class Main {
       .start();*/
 
     SwiftServer server = SwiftServer.builder()
-      .host("127.0.0.1")
-      .routing(Main::routing)
+      .host("0.0.0.0")
+      .port(9819)
+      .routing(routing -> {
+        routing.get("/simple-greet", (req, res) -> {
+          res.send("Hello World!");
+        });
+      })
       .build();
 
     server.start();
