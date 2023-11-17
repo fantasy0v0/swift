@@ -12,6 +12,7 @@ public class SwiftServerTest {
   @Test
   public void start() throws Exception {
     createContext(context -> {
+      // language="js"
       Source source = Source.newBuilder("js", """
         const SwiftServer = Java.type('com.github.fantasy0v0.swift.core.server.SwiftServer');
         const server = SwiftServer.builder()
