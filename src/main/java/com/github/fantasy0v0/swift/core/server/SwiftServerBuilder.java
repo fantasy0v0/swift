@@ -1,11 +1,16 @@
 package com.github.fantasy0v0.swift.core.server;
 
 import com.github.fantasy0v0.swift.core.server.SwiftServer;
+import io.helidon.http.Method;
 import io.helidon.webserver.WebServer;
+import io.helidon.webserver.http.Handler;
 import io.helidon.webserver.http.HttpRouting;
+import org.graalvm.polyglot.Context;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class SwiftServerBuilder {
@@ -22,7 +27,7 @@ public class SwiftServerBuilder {
 
   private long maxPayloadSize = -1L;
 
-  private Consumer<HttpRouting.Builder> routingConsumer;
+  private Consumer<HttpRouteBuilder> routingConsumer;
 
   SwiftServerBuilder() {
 
@@ -62,12 +67,42 @@ public class SwiftServerBuilder {
     return this;
   }
 
-  public SwiftServerBuilder routing(Consumer<HttpRouting.Builder> consumer) {
+  public SwiftServerBuilder routing(Consumer<HttpRouteBuilder> consumer) {
     this.routingConsumer = consumer;
     return this;
   }
 
-  public SwiftServer build() {
+  public SwiftServer build(Context context) {
+    Consumer<HttpRouting.Builder> builderConsumer = routing -> {
+      if (null == routingConsumer) {
+        return;
+      }
+      HttpRouteBuilder routeBuilder = new HttpRouteBuilder();
+      routingConsumer.accept(routeBuilder);
+      for (Method method : routeBuilder.table.keySet()) {
+        Map<String, List<Handler>> pathPatternMap = routeBuilder.table.get(method);
+        for (String pathPattern : pathPatternMap.keySet()) {
+          List<Handler> handlers = pathPatternMap.get(pathPattern);
+          for (Handler handler : handlers) {
+            Handler handlerWrap = (req, res) -> {
+              context.enter();
+              try {
+                handler.handle(req, res);
+              } finally {
+                context.leave();
+              }
+            };
+            if (null == pathPattern) {
+              routing.route(method, handlerWrap);
+            } else {
+              routing.route(method, pathPattern, handlerWrap);
+            }
+          }
+        }
+
+      }
+    };
+
     WebServer webServer = WebServer.create(builder -> {
       builder
         .backlog(backlog)
@@ -75,7 +110,7 @@ public class SwiftServerBuilder {
         .maxTcpConnections(maxTcpConnections)
         .address(address).port(port)
         .maxPayloadSize(maxPayloadSize)
-        .routing(this.routingConsumer);
+        .routing(builderConsumer);
     });
     return new SwiftServer(webServer);
   }

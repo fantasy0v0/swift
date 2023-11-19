@@ -8,6 +8,7 @@ module swift.core {
   requires jakarta.json;
   requires io.helidon.logging.common;
   requires io.helidon.webclient;
+  requires org.graalvm.polyglot;
 
   opens com.github.fantasy0v0.swift.core.server;
 }
