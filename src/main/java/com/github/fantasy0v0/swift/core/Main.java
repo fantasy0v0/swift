@@ -6,9 +6,16 @@ import io.helidon.config.Config;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Source;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.function.Consumer;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
@@ -18,6 +25,8 @@ import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
  * The application main class.
  */
 public final class Main {
+
+  private static final Logger log = LoggerFactory.getLogger(Main.class);
 
   /**
    * Cannot be instantiated.
@@ -30,7 +39,7 @@ public final class Main {
    *
    * @param args command line arguments.
    */
-  public static void main(final String[] args) {
+  public static void main(final String[] args) throws IOException {
     // load logging configuration
     // LogConfig.configureRuntime();
 
@@ -44,7 +53,8 @@ public final class Main {
       .build()
       .start();*/
 
-    SwiftServer server = SwiftServer.builder()
+    Context context = createContext();
+    /*SwiftServer server = SwiftServer.builder()
       .host("0.0.0.0")
       .port(9819)
       .routing(routing -> {
@@ -52,11 +62,27 @@ public final class Main {
           res.send("Hello World!");
         });
       })
-      .build(null);
+      .build(context);
 
-    server.start();
+    server.start();*/
+    context.getBindings("js").putMember("context", context);
+    // language="js"
+    Source source = Source.newBuilder("js", """
+        const SwiftServer = Java.type('com.github.fantasy0v0.swift.core.server.SwiftServer');
+        const server = SwiftServer.builder()
+          .host("0.0.0.0")
+          .port(9819)
+          .routing(routing => {
+             routing.get("/simple-greet", (req, res) => {
+               res.send("Hello World!");
+             });
+           })
+          .build(context);
+        server.start();
+        console.log(`WEB server is up! http://localhost:${server.port()}/simple-greet`);
+        """, null).build();
 
-    System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
+    // System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
 
     /*try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
       Path path = Path.of("C:\\Users\\fan\\Desktop\\test\\2");
@@ -117,6 +143,20 @@ public final class Main {
         System.out.println(req.context().get("test", String.class));
         System.out.println(Thread.currentThread() + " " + req.path().path() + "  2");
       });
+  }
+
+  public static Context createContext() {
+    return Context.newBuilder("js")
+      .engine(Engine.newBuilder().build())
+      .allowExperimentalOptions(true)
+      .allowHostAccess(HostAccess.ALL)
+      .allowHostClassLookup(clazz -> {
+        log.debug("ClassLookup:{}", clazz);
+        return true;
+      })
+      // 打印未处理的异常
+      .allowExperimentalOptions(true).option("js.unhandled-rejections", "warn")
+      .build();
   }
 
 }
