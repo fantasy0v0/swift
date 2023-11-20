@@ -12,7 +12,6 @@ public class SwiftServerTest {
   @Test
   public void start() throws Exception {
     createContext(context -> {
-      context.getBindings("js").putMember("context", context);
       // language="js"
       Source source = Source.newBuilder("js", """
         const SwiftServer = Java.type('com.github.fantasy0v0.swift.core.server.SwiftServer');
@@ -24,7 +23,7 @@ public class SwiftServerTest {
                res.send("Hello World!");
              });
            })
-          .build(context);
+          .build();
         server.start();
         console.log(`WEB server is up! http://localhost:${server.port()}/simple-greet`);
         """, null).build();

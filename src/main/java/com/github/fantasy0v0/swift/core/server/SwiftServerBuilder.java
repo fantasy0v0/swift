@@ -27,7 +27,7 @@ public class SwiftServerBuilder {
 
   private long maxPayloadSize = -1L;
 
-  private Consumer<HttpRouteBuilder> routingConsumer;
+  private Consumer<HttpRouting.Builder> builderConsumer;
 
   SwiftServerBuilder() {
 
@@ -67,42 +67,12 @@ public class SwiftServerBuilder {
     return this;
   }
 
-  public SwiftServerBuilder routing(Consumer<HttpRouteBuilder> consumer) {
-    this.routingConsumer = consumer;
+  public SwiftServerBuilder routing(Consumer<HttpRouting.Builder> consumer) {
+    this.builderConsumer = consumer;
     return this;
   }
 
-  public SwiftServer build(Context context) {
-    Consumer<HttpRouting.Builder> builderConsumer = routing -> {
-      if (null == routingConsumer) {
-        return;
-      }
-      HttpRouteBuilder routeBuilder = new HttpRouteBuilder();
-      routingConsumer.accept(routeBuilder);
-      for (Method method : routeBuilder.table.keySet()) {
-        Map<String, List<Handler>> pathPatternMap = routeBuilder.table.get(method);
-        for (String pathPattern : pathPatternMap.keySet()) {
-          List<Handler> handlers = pathPatternMap.get(pathPattern);
-          for (Handler handler : handlers) {
-            Handler handlerWrap = (req, res) -> {
-              context.enter();
-              try {
-                handler.handle(req, res);
-              } finally {
-                context.leave();
-              }
-            };
-            if (null == pathPattern) {
-              routing.route(method, handlerWrap);
-            } else {
-              routing.route(method, pathPattern, handlerWrap);
-            }
-          }
-        }
-
-      }
-    };
-
+  public SwiftServer build() {
     WebServer webServer = WebServer.create(builder -> {
       builder
         .backlog(backlog)

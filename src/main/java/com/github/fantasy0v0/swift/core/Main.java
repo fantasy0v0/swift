@@ -6,10 +6,7 @@ import io.helidon.config.Config;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.Source;
+import org.graalvm.polyglot.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,34 +50,29 @@ public final class Main {
       .build()
       .start();*/
 
-    Context context = createContext();
-    /*SwiftServer server = SwiftServer.builder()
+    Source source = Source.newBuilder("js", """
+      (function handler(req, res) {
+        res.send("Hello World!");
+      })
+    """, null).build();
+
+    SwiftServer server = SwiftServer.builder()
       .host("0.0.0.0")
       .port(9819)
       .routing(routing -> {
         routing.get("/simple-greet", (req, res) -> {
-          res.send("Hello World!");
+          Context context = createContext();
+          Value handler = context.eval(source);
+          try {
+            handler.executeVoid(req, res);
+          } catch (RuntimeException e) {
+            throw e;
+          }
         });
       })
-      .build(context);
+      .build();
 
-    server.start();*/
-    context.getBindings("js").putMember("context", context);
-    // language="js"
-    Source source = Source.newBuilder("js", """
-        const SwiftServer = Java.type('com.github.fantasy0v0.swift.core.server.SwiftServer');
-        const server = SwiftServer.builder()
-          .host("0.0.0.0")
-          .port(9819)
-          .routing(routing => {
-             routing.get("/simple-greet", (req, res) => {
-               res.send("Hello World!");
-             });
-           })
-          .build(context);
-        server.start();
-        console.log(`WEB server is up! http://localhost:${server.port()}/simple-greet`);
-        """, null).build();
+    server.start();
 
     // System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
 
