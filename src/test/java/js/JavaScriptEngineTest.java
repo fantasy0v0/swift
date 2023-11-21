@@ -7,6 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class JavaScriptEngineTest {
@@ -48,6 +52,52 @@ public class JavaScriptEngineTest {
         });
         """, "test1#test").build();
       context.eval(source);
+    });
+  }
+
+  @Test
+  public void multiThread() throws InterruptedException {
+    long start = System.currentTimeMillis();
+    CountDownLatch latch = new CountDownLatch(10000);
+    ThreadFactory factory = Thread.ofVirtual().name("java-", 1).factory();
+    for (int i = 0; i < 10000; i++) {
+      factory.newThread(() -> {
+        String name = Thread.currentThread().getName();
+        // System.out.println(name);
+        latch.countDown();
+      }).start();
+    }
+    latch.await();
+    System.out.println(System.currentTimeMillis() - start);
+  }
+
+  @Test
+  public void multiThreadByJs() throws Exception {
+    Source source = Source.newBuilder("js", """
+      let a = {
+        test: function (thread) {
+          // console.log(thread.getName());
+        }
+      }
+      a;
+    """, null).build();
+    long start = System.currentTimeMillis();
+    CountDownLatch latch = new CountDownLatch(10000);
+    ReentrantLock contextLock = new ReentrantLock();
+    ThreadFactory factory = Thread.ofVirtual().name("js-", 1).factory();
+    createContext(context -> {
+      Value testFunction = context.eval(source).getMember("test");
+      for (int i = 0; i < 10000; i++) {
+        factory.newThread(() -> {
+          // contextLock.lock();
+          Thread thread = Thread.currentThread();
+          testFunction.executeVoid(thread);
+          latch.countDown();
+          // contextLock.unlock();
+        }).start();
+      }
+      latch.await();
+      System.out.println(System.currentTimeMillis() - start);
     });
   }
 
