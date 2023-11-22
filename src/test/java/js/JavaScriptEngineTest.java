@@ -6,12 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 public class JavaScriptEngineTest {
 
@@ -37,7 +36,6 @@ public class JavaScriptEngineTest {
   public void test() throws Exception {
     createContext(context -> {
       Test1 test = new Test1();
-      context.enter();
       context.getBindings("js")
         .putMember("testObj", test);
       Source source = Source.newBuilder("js", """
@@ -63,7 +61,7 @@ public class JavaScriptEngineTest {
     for (int i = 0; i < 10000; i++) {
       factory.newThread(() -> {
         String name = Thread.currentThread().getName();
-        // System.out.println(name);
+        System.out.println(name);
         latch.countDown();
       }).start();
     }
@@ -76,7 +74,7 @@ public class JavaScriptEngineTest {
     Source source = Source.newBuilder("js", """
       let a = {
         test: function (thread) {
-          // console.log(thread.getName());
+          console.log(thread.getName());
         }
       }
       a;
@@ -89,16 +87,54 @@ public class JavaScriptEngineTest {
       Value testFunction = context.eval(source).getMember("test");
       for (int i = 0; i < 10000; i++) {
         factory.newThread(() -> {
-          // contextLock.lock();
+          contextLock.lock();
           Thread thread = Thread.currentThread();
           testFunction.executeVoid(thread);
           latch.countDown();
-          // contextLock.unlock();
+          contextLock.unlock();
         }).start();
       }
       latch.await();
       System.out.println(System.currentTimeMillis() - start);
     });
+  }
+
+  @Test
+  public void multiThreadByJsWithSharedEngine() throws Exception {
+    Source source = Source.newBuilder("js", """
+      let a = {
+        test: function (thread) {
+          console.log(thread.getName());
+        }
+      }
+      a;
+    """, null).build();
+
+    Engine sharedEngine = Engine.newBuilder().build();
+    List<Value> pool = new ArrayList<>(10000);
+    for (int i = 0; i < 10000; i++) {
+      Context context = Context.newBuilder("js")
+        .engine(sharedEngine).allowExperimentalOptions(true)
+        .allowHostAccess(HostAccess.ALL).build();
+      Value testFunction = context.eval(source).getMember("test");
+      pool.add(testFunction);
+    }
+    long start = System.currentTimeMillis();
+    CountDownLatch latch = new CountDownLatch(10000);
+    ThreadFactory factory = Thread.ofVirtual().name("js-", 1).factory();
+    for (int i = 0; i < 10000; i++) {
+      Value testFunction = pool.get(i);
+      factory.newThread(() -> {
+        try {
+          Thread thread = Thread.currentThread();
+          testFunction.executeVoid(thread);
+        } finally {
+          latch.countDown();
+        }
+      }).start();
+    }
+    latch.await();
+    System.out.println(System.currentTimeMillis() - start);
   }
 
 }
