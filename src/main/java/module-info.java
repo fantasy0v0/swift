@@ -10,6 +10,7 @@ module swift.core {
   requires io.helidon.webclient;
   requires org.graalvm.polyglot;
   requires org.slf4j;
+  requires org.apache.commons.pool2;
 
   opens com.github.fantasy0v0.swift.core.server;
 }

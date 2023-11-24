@@ -6,6 +6,9 @@ import io.helidon.config.Config;
 import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.graalvm.polyglot.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +39,7 @@ public final class Main {
    *
    * @param args command line arguments.
    */
-  public static void main(final String[] args) throws IOException {
+  public static void main(final String[] args) throws Exception {
     // load logging configuration
     // LogConfig.configureRuntime();
 
@@ -50,23 +53,29 @@ public final class Main {
       .build()
       .start();*/
 
+    Engine engine = Engine.newBuilder().build();
     Source source = Source.newBuilder("js", """
       (function handler(req, res) {
         res.send("Hello World!");
       })
     """, null).build();
 
+    PooledObjectFactory<Value> factory = new ContextValueFactory(engine, source);
+    ObjectPool<Value> pool = new GenericObjectPool<>(factory);
+    pool.addObjects(30);
+
     SwiftServer server = SwiftServer.builder()
       .host("0.0.0.0")
       .port(9819)
       .routing(routing -> {
         routing.get("/simple-greet", (req, res) -> {
-          Context context = createContext();
-          Value handler = context.eval(source);
+          Value function = pool.borrowObject();
           try {
-            handler.executeVoid(req, res);
+            function.executeVoid(req, res);
           } catch (RuntimeException e) {
             throw e;
+          } finally {
+            pool.returnObject(function);
           }
         });
       })
@@ -135,20 +144,6 @@ public final class Main {
         System.out.println(req.context().get("test", String.class));
         System.out.println(Thread.currentThread() + " " + req.path().path() + "  2");
       });
-  }
-
-  public static Context createContext() {
-    return Context.newBuilder("js")
-      .engine(Engine.newBuilder().build())
-      .allowExperimentalOptions(true)
-      .allowHostAccess(HostAccess.ALL)
-      .allowHostClassLookup(clazz -> {
-        log.debug("ClassLookup:{}", clazz);
-        return true;
-      })
-      // 打印未处理的异常
-      .allowExperimentalOptions(true).option("js.unhandled-rejections", "warn")
-      .build();
   }
 
 }
