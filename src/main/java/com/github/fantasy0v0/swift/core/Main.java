@@ -1,25 +1,8 @@
 package com.github.fantasy0v0.swift.core;
 
-import com.github.fantasy0v0.swift.core.server.SwiftServer;
-import com.github.fantasy0v0.swift.core.server.SwiftServerBuilder;
-import io.helidon.config.Config;
-import io.helidon.logging.common.LogConfig;
-import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
-import org.apache.commons.pool2.ObjectPool;
-import org.apache.commons.pool2.PooledObjectFactory;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.graalvm.polyglot.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.function.Consumer;
-
-import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
-import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
-
 
 /**
  * The application main class.
@@ -53,70 +36,7 @@ public final class Main {
       .build()
       .start();*/
 
-    Engine engine = Engine.newBuilder().build();
-    Source source = Source.newBuilder("js", """
-      (function handler(req, res) {
-        res.send("Hello World!");
-      })
-    """, null).build();
 
-    PooledObjectFactory<Value> factory = new ContextValueFactory(engine, source);
-    ObjectPool<Value> pool = new GenericObjectPool<>(factory);
-    pool.addObjects(30);
-
-    SwiftServer server = SwiftServer.builder()
-      .host("0.0.0.0")
-      .port(9819)
-      .routing(routing -> {
-        routing.get("/simple-greet", (req, res) -> {
-          Value function = pool.borrowObject();
-          try {
-            function.executeVoid(req, res);
-          } catch (RuntimeException e) {
-            throw e;
-          } finally {
-            pool.returnObject(function);
-          }
-        });
-      })
-      .build();
-
-    server.start();
-
-    // System.out.println("WEB server is up! http://localhost:" + server.port() + "/simple-greet");
-
-    /*try(WatchService watchService = FileSystems.getDefault().newWatchService()) {
-      Path path = Path.of("C:\\Users\\fan\\Desktop\\test\\2");
-      path.register(watchService, ENTRY_MODIFY);
-      while (true) {
-        WatchKey key;
-        try {
-          key = watchService.take();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-          return;
-        }
-        for (WatchEvent<?> event : key.pollEvents()) {
-          WatchEvent.Kind<?> kind = event.kind();
-
-          // This key is registered only
-          // for ENTRY_CREATE events,
-          // but an OVERFLOW event can
-          // occur regardless if events
-          // are lost or discarded.
-          if (kind == OVERFLOW) {
-            continue;
-          }
-          WatchEvent<Path> ev = (WatchEvent<Path>)event;
-          Path filename = ev.context();
-          System.out.println(filename.toString());
-          // filename.register(watchService, ENTRY_MODIFY);
-        }
-        key.reset();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }*/
   }
 
   /**

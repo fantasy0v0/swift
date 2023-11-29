@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.core;
+package js.factory;
 
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;

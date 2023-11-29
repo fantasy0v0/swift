@@ -57,6 +57,16 @@
       <artifactId>helidon-metrics-system-meters</artifactId>
       <scope>runtime</scope>
     </dependency>-->
+
+
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>13.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -77,12 +87,14 @@
       <groupId>org.graalvm.polyglot</groupId>
       <artifactId>polyglot</artifactId>
       <version>${graalvm.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.graalvm.polyglot</groupId>
       <artifactId>js</artifactId>
       <version>${graalvm.version}</version>
       <type>pom</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -94,6 +106,7 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-pool2</artifactId>
       <version>2.12.0</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

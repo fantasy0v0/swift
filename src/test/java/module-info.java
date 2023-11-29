@@ -11,6 +11,7 @@ module swift.core.test {
   requires io.helidon.webserver.testing.junit5;
   requires org.graalvm.polyglot;
   requires org.slf4j;
+  requires org.apache.commons.pool2;
 
   opens js to org.junit.platform.commons;
   opens js.test;
