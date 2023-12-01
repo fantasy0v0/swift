@@ -17,6 +17,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <mainClass>com.github.fantasy0v0.swift.core.Main</mainClass>
     <graalvm.version>23.1.0</graalvm.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>

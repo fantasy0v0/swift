@@ -2,7 +2,6 @@ package com.github.fantasy0v0.swift.server;
 
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.http.HttpRouting;
-import org.graalvm.polyglot.Context;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
