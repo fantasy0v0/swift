@@ -1,10 +1,8 @@
-package swift.core.test.jdbc;
+package test;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.fantasy0v0.swift.core.jdbc.JdbcUtils.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static com.github.fantasy0v0.swift.jdbc.JdbcUtils.select;
 
 class JdbcUtilsTest {
 

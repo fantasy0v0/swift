@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.core.server;
+package com.github.fantasy0v0.swift.server;
 
 import io.helidon.http.Method;
 import io.helidon.webserver.http.Handler;

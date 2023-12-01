@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.core.jdbc;
+package com.github.fantasy0v0.swift.jdbc;
 
 public final class JdbcUtils {
 

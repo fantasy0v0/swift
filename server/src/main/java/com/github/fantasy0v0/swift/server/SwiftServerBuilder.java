@@ -1,16 +1,11 @@
-package com.github.fantasy0v0.swift.core.server;
+package com.github.fantasy0v0.swift.server;
 
-import com.github.fantasy0v0.swift.core.server.SwiftServer;
-import io.helidon.http.Method;
 import io.helidon.webserver.WebServer;
-import io.helidon.webserver.http.Handler;
 import io.helidon.webserver.http.HttpRouting;
 import org.graalvm.polyglot.Context;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class SwiftServerBuilder {

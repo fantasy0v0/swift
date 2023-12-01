@@ -6,7 +6,7 @@ module swift.core.test {
   requires jakarta.json;
   requires io.helidon.logging.common;
   requires io.helidon.webclient;
-  requires swift.core;
+  requires swift.server;
   requires hamcrest.all;
   requires io.helidon.webserver.testing.junit5;
   requires org.graalvm.polyglot;

@@ -1,6 +1,6 @@
 package js;
 
-import com.github.fantasy0v0.swift.core.server.SwiftServer;
+import com.github.fantasy0v0.swift.server.SwiftServer;
 import js.factory.ContextValueFactory;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.PooledObjectFactory;
@@ -10,7 +10,6 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.time.Duration;
 
 import static js.JavaScriptEngineTest.createContext;

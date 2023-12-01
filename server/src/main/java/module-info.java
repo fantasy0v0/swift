@@ -1,5 +1,5 @@
 
-module swift.core {
+module swift.server {
   requires io.helidon.webserver;
   requires io.helidon.http;
   requires io.helidon.config;
@@ -8,7 +8,5 @@ module swift.core {
   requires io.helidon.webclient;
   requires org.slf4j;
 
-  exports com.github.fantasy0v0.swift.core;
-  exports com.github.fantasy0v0.swift.core.server;
-  exports com.github.fantasy0v0.swift.core.jdbc;
+  exports com.github.fantasy0v0.swift.server;
 }

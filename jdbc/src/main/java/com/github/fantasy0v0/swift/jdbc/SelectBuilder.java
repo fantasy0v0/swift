@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.core.jdbc;
+package com.github.fantasy0v0.swift.jdbc;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class SelectBuilder {
   }
 
   public <T> T fetchOne() {
-
+    return null;
   }
 
 }
