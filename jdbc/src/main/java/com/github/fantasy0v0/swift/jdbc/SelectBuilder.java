@@ -2,7 +2,6 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -20,27 +19,30 @@ public class SelectBuilder {
     this.params = params;
   }
 
-  public void paging() {
-
+  public <T> List<T> paging() {
+    return null;
   }
 
-  private <T> List<T> _fetch(FetchMapper<T> mapper) throws SQLException {
-
+  private <T> List<T> _fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      PreparedStatement statement = conn.prepareStatement(sql);
-      if (0 == params.length) {
-
-      } else {
-
-      }
+      return Utils.executeQuery(conn, sql, params, parameterProcess, mapper);
     }
+  }
 
-    return null;
-
+  public <T> List<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
+    try {
+      return _fetch(mapper, parameterProcess);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper) {
-    return null;
+    try {
+      return fetch(mapper, null);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public <T> T fetchOne(FetchMapper<T> mapper) {
