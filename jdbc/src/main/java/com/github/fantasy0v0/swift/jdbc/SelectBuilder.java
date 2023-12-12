@@ -19,8 +19,8 @@ public class SelectBuilder {
     this.params = params;
   }
 
-  public <T> List<T> paging() {
-    return null;
+  public PagingBuilder paging(Paging paging) {
+    return new PagingBuilder(dataSource, sql, params);
   }
 
   private <T> List<T> _fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
