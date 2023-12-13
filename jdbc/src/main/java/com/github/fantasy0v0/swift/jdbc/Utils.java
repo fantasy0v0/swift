@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class Utils {
+final class Utils {
 
   static Connection getConnection(DataSource dataSource) throws SQLException {
     return dataSource.getConnection();
