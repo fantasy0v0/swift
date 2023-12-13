@@ -15,7 +15,7 @@ class Utils {
                                   ParameterProcess parameterProcess,
                                   FetchMapper<T> fetchMapper) throws SQLException {
     LogUtil.performance().info("executeQuery begin");
-    long startTime = System.nanoTime();
+    long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("executeQuery: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
@@ -28,19 +28,19 @@ class Utils {
         return array;
       }
     } finally {
-      LogUtil.performance().info("executeQuery end. cost:{}", System.nanoTime() - startTime);
+      LogUtil.performance().info("executeQuery end. cost: {}μs", System.nanoTime() / 1000 - startTime);
     }
   }
 
   static boolean execute(Connection conn, String sql, Object[] params, ParameterProcess parameterProcess) throws SQLException {
     LogUtil.performance().info("execute begin");
-    long startTime = System.nanoTime();
+    long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
       return statement.execute();
     } finally {
-      LogUtil.performance().info("execute end. cost:{}", System.nanoTime() - startTime);
+      LogUtil.performance().info("execute end. cost: {}μs", System.nanoTime() / 1000 - startTime);
     }
   }
 
