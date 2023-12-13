@@ -45,6 +45,13 @@ public class SelectBuilder {
     }
   }
 
+  public List<Object> fetch() {
+    return fetch(row -> {
+      // TODO 返回Object
+      return 1;
+    });
+  }
+
   public <T> T fetchOne(FetchMapper<T> mapper) {
     return null;
   }
