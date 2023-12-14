@@ -4,5 +4,6 @@ module swift.jdbc {
   requires org.jetbrains.annotations;
 
   exports com.github.fantasy0v0.swift.jdbc;
+  exports com.github.fantasy0v0.swift.jdbc.predicate;
 
 }
