@@ -2,6 +2,7 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,9 @@ class Utils {
         return array;
       }
     } finally {
-      LogUtil.performance().info("executeQuery end. cost: {}μs", System.nanoTime() / 1000 - startTime);
+      long cost = System.nanoTime() / 1000 - startTime;
+      NumberFormat format = NumberFormat.getNumberInstance();
+      LogUtil.performance().info("executeQuery end. cost: {} μs", format.format(cost));
     }
   }
 
@@ -40,7 +43,9 @@ class Utils {
       fillStatementParams(conn, statement, params, parameterProcess);
       return statement.execute();
     } finally {
-      LogUtil.performance().info("execute end. cost: {}μs", System.nanoTime() / 1000 - startTime);
+      long cost = System.nanoTime() / 1000 - startTime;
+      NumberFormat format = NumberFormat.getNumberInstance();
+      LogUtil.performance().info("execute end. cost: {} μs", format.format(cost));
     }
   }
 

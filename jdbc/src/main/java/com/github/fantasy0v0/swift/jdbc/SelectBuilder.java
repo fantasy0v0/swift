@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class SelectBuilder {
 
@@ -45,10 +46,14 @@ public class SelectBuilder {
     }
   }
 
-  public List<Object> fetch() {
+  public List<Object[]> fetch() {
     return fetch(row -> {
-      // TODO 返回Object
-      return 1;
+      int columnCount = row.getColumnCount();
+      Object[] array = new Object[columnCount];
+      for (int i = 0; i < columnCount; i++) {
+        array[i] = row.getObject(i + 1);
+      }
+      return array;
     });
   }
 
