@@ -1,5 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class DisjunctionPredicate implements Predicate {
 
   @Override
@@ -8,7 +11,7 @@ class DisjunctionPredicate implements Predicate {
   }
 
   @Override
-  public Object[] getParameters() {
-    return new Object[0];
+  public List<Object> getParameters() {
+    return new ArrayList<>();
   }
 }

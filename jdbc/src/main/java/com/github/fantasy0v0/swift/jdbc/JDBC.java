@@ -4,6 +4,7 @@ import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Objects;
 
 public final class JDBC {
@@ -17,7 +18,7 @@ public final class JDBC {
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
-    return new SelectBuilder(Objects.requireNonNull(dataSource), sql, params);
+    return new SelectBuilder(Objects.requireNonNull(dataSource), sql, List.of(params));
   }
 
 }

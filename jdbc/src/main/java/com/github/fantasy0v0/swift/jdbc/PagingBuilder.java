@@ -9,13 +9,13 @@ public class PagingBuilder {
 
   private final String sql;
 
-  private final Object[] params;
+  private final List<Object> params;
 
   private String countSql;
 
-  private Object[] countParams;
+  private List<Object> countParams;
 
-  PagingBuilder(DataSource dataSource, String sql, Object[] params) {
+  PagingBuilder(DataSource dataSource, String sql, List<Object> params) {
     this.dataSource = dataSource;
     this.sql = sql;
     this.params = params;
@@ -23,7 +23,7 @@ public class PagingBuilder {
 
   public PagingBuilder count(String countSql, Object...countParams) {
     this.countSql = countSql;
-    this.countParams = countParams;
+    this.countParams = List.of(countParams);
     return this;
   }
 

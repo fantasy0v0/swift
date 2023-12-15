@@ -1,5 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class SimplePredicate implements Predicate {
 
   private final String expression;
@@ -17,7 +20,7 @@ class SimplePredicate implements Predicate {
   }
 
   @Override
-  public Object[] getParameters() {
-    return parameters;
+  public List<Object> getParameters() {
+    return new ArrayList<>(List.of(parameters));
   }
 }

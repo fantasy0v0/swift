@@ -4,7 +4,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 public class SelectBuilder {
 
@@ -12,9 +11,9 @@ public class SelectBuilder {
 
   private final String sql;
 
-  private final Object[] params;
+  private final List<Object> params;
 
-  SelectBuilder(DataSource dataSource, String sql, Object[] params) {
+  SelectBuilder(DataSource dataSource, String sql, List<Object> params) {
     this.dataSource = dataSource;
     this.sql = sql;
     this.params = params;

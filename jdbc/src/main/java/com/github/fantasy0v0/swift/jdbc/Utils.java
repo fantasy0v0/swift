@@ -12,7 +12,7 @@ final class Utils {
     return dataSource.getConnection();
   }
 
-  static <T> List<T> executeQuery(Connection conn, String sql, Object[] params,
+  static <T> List<T> executeQuery(Connection conn, String sql, List<Object> params,
                                   ParameterProcess parameterProcess,
                                   FetchMapper<T> fetchMapper) throws SQLException {
     LogUtil.performance().info("executeQuery begin");
@@ -35,7 +35,7 @@ final class Utils {
     }
   }
 
-  static boolean execute(Connection conn, String sql, Object[] params, ParameterProcess parameterProcess) throws SQLException {
+  static boolean execute(Connection conn, String sql, List<Object> params, ParameterProcess parameterProcess) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
@@ -50,11 +50,11 @@ final class Utils {
   }
 
   static void fillStatementParams(Connection conn,
-                                  PreparedStatement statement, Object[] params,
+                                  PreparedStatement statement, List<Object> params,
                                   ParameterProcess parameterProcess) throws SQLException {
-    LogUtil.sql().trace("parameter count: {}", params.length);
-    for (int index = 0; index < params.length; index++) {
-      Object parameter = params[index];
+    LogUtil.sql().trace("parameter count: {}", params.size());
+    for (int index = 0; index < params.size(); index++) {
+      Object parameter = params.get(index);
       LogUtil.sql().trace("fill parameter: [{}] - [{}]", index, parameter);
       boolean result = false;
       if (null != parameterProcess) {
