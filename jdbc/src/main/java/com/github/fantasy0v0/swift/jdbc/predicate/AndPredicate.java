@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
-public class AndPredicate implements Predicate {
+class AndPredicate implements Predicate {
 
   private final Predicate[] predicates;
 
@@ -8,5 +8,13 @@ public class AndPredicate implements Predicate {
     this.predicates = predicates;
   }
 
+  @Override
+  public String toSQL() {
+    return null;
+  }
 
+  @Override
+  public Object[] getParameters() {
+    return new Object[0];
+  }
 }
