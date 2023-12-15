@@ -44,13 +44,13 @@ class RowTest {
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
       public %s %s(int columnIndex) throws SQLException {
-        return coalesce(resultSet -> resultSet.%s(columnIndex));
+        return extract(resultSet -> resultSet.%s(columnIndex));
       }""".formatted(resultType, methodName, methodName));
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
       public %s %s(String columnLabel) throws SQLException {
-        return coalesce(resultSet -> resultSet.%s(columnLabel));
+        return extract(resultSet -> resultSet.%s(columnLabel));
       }""".formatted(resultType, methodName, methodName));
     }
     StringBuilder tmp = new StringBuilder();
