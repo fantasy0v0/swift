@@ -3,13 +3,13 @@ package com.github.fantasy0v0.swift.jdbc.predicate;
 import java.util.ArrayList;
 import java.util.List;
 
-class SimplePredicate implements Predicate {
+class ExpressionPredicate implements Predicate {
 
   private final String expression;
 
   private final Object[] parameters;
 
-  SimplePredicate(String expression, Object[] parameters) {
+  ExpressionPredicate(String expression, Object[] parameters) {
     this.expression = expression;
     this.parameters = parameters;
   }
