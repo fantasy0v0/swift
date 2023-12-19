@@ -1,34 +1,58 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class InPredicate implements Predicate {
+
+  private final boolean not;
 
   private final String expression;
 
   private final List<Object> parameters;
 
-  InPredicate(String expression, List<Object> parameters) {
+  private String sql;
+
+  InPredicate(boolean not, String expression, List<Object> parameters) {
+    this.not = not;
     this.expression = expression;
-    this.parameters = parameters;
+    if (parameters.isEmpty()) {
+      throw new SwiftJdbcException("parameters is empty.");
+    } else {
+      this.parameters = parameters;
+    }
   }
 
   @Override
   public String toSQL() {
-    return null;
+    if (null != sql) {
+      return sql;
+    }
+    StringBuilder buff = new StringBuilder();
+    buff.append(expression);
+    buff.append(" ");
+    if (not) {
+      buff.append("not in");
+    } else {
+      buff.append("in");
+    }
+    buff.append("(");
+    buff.append(
+      IntStream.range(0, parameters.size())
+        .mapToObj(i -> "?")
+        .collect(Collectors.joining(","))
+    );
+    buff.append(")");
+    sql = buff.toString();
+    return sql;
   }
 
   @Override
   public List<Object> getParameters() {
     return parameters;
-  }
-
-  /**
-   * @param expression 表达式
-   * @return 是否是in 或 not in表达式
-   */
-  static boolean isInExpression(String expression) {
-    return false;
   }
 
 }
