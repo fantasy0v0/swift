@@ -1,11 +1,10 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.util.List;
-import java.util.Objects;
 
 public final class JDBC {
 
@@ -18,7 +17,14 @@ public final class JDBC {
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
-    return new SelectBuilder(Objects.requireNonNull(dataSource), sql, List.of(params));
+    return new SelectBuilder(requireNonNull(dataSource), sql, List.of(params));
+  }
+
+  private static DataSource requireNonNull(DataSource dataSource) {
+    if (null == dataSource) {
+      throw new SwiftJdbcException("未配置DataSource");
+    }
+    return dataSource;
   }
 
 }

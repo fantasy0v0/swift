@@ -42,6 +42,37 @@ public class PredicateTest {
   }
 
   @Test
+  void expTest() {
+    String expression = "id = ?";
+    Predicate predicate = exp(expression, 1);
+    Assertions.assertEquals(expression, predicate.toSQL());
+  }
+
+  @Test
+  void andTest() {
+    Predicate predicate = and(
+      conjunction(),
+      exp("id = 1"),
+      exp("status > 0")
+    );
+    Assertions.assertEquals("id = 1 and status > 0", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    predicate = and(
+      conjunction(),
+      exp("id = 1"),
+      and(
+        exp("status > 0"),
+        exp("status <= 0")
+      )
+    );
+    Assertions.assertEquals("id = 1 and status > 0 and status <= 0", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    // TODO
+  }
+
+  @Test
   void inTest() {
     Predicate predicate = in("id", List.of(1));
     String sql = predicate.toSQL();

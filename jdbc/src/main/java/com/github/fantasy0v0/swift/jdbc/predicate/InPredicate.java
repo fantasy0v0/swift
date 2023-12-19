@@ -20,7 +20,7 @@ public class InPredicate implements Predicate {
     this.not = not;
     this.expression = expression;
     if (parameters.isEmpty()) {
-      throw new SwiftJdbcException("parameters is empty.");
+      throw new SwiftJdbcException("parameters为空");
     } else {
       this.parameters = parameters;
     }
