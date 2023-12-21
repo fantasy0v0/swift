@@ -55,6 +55,7 @@ public class PredicateTest {
       exp("id = 1"),
       exp("status > 0")
     );
+    log.debug("sql:{}", predicate.toSQL());
     Assertions.assertEquals("id = 1 and status > 0", predicate.toSQL());
     Assertions.assertEquals(0, predicate.getParameters().size());
 
@@ -62,14 +63,68 @@ public class PredicateTest {
       conjunction(),
       exp("id = 1"),
       and(
-        exp("status > 0"),
-        exp("status <= 0")
+        exp("status > 5"),
+        exp("status <= 10")
       )
     );
-    Assertions.assertEquals("id = 1 and status > 0 and status <= 0", predicate.toSQL());
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 and status > 5 and status <= 10", predicate.toSQL());
     Assertions.assertEquals(0, predicate.getParameters().size());
 
     // TODO
+  }
+
+  @Test
+  void orTest() {
+    Predicate predicate = or(
+      conjunction(),
+      exp("id = 1"),
+      exp("status > 0")
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 or status > 0", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    predicate = or(
+      conjunction(),
+      exp("id = 1"),
+      or(
+        exp("status > 5"),
+        exp("status <= 10")
+      )
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 or status > 5 or status <= 10", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    // TODO
+  }
+
+  @Test
+  void andorTest() {
+    Predicate predicate = and(
+      conjunction(),
+      exp("id = 1"),
+      or(
+        exp("status > 5"),
+        exp("status <= 10")
+      )
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 and (status > 5 or status <= 10)", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    predicate = or(
+      conjunction(),
+      exp("id = 1"),
+      and(
+        exp("status > 5"),
+        exp("status <= 10")
+      )
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 or (status > 5 and status <= 10)", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
   }
 
   @Test

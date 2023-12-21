@@ -5,7 +5,7 @@ import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import java.util.Arrays;
 import java.util.List;
 
-class AndPredicate implements Predicate {
+public class OrPredicate implements Predicate {
 
   private final Predicate[] predicates;
 
@@ -13,7 +13,7 @@ class AndPredicate implements Predicate {
 
   private List<Object> parameters;
 
-  AndPredicate(Predicate[] predicates) {
+  OrPredicate(Predicate[] predicates) {
     this.predicates = predicates;
   }
 
@@ -30,10 +30,10 @@ class AndPredicate implements Predicate {
       }
 
       if (!buff.isEmpty()) {
-        buff.append(" and ");
+        buff.append(" or ");
       }
 
-      if (predicate instanceof OrPredicate) {
+      if (predicate instanceof AndPredicate) {
         buff.append("(").append(predicate.toSQL()).append(")");
       } else {
         buff.append(predicate.toSQL());

@@ -8,6 +8,7 @@ public final class Predicates {
     return new ConjunctionPredicate();
   }
 
+  @Deprecated
   public static Predicate disjunction() {
     return new DisjunctionPredicate();
   }
@@ -21,7 +22,7 @@ public final class Predicates {
   }
 
   public static Predicate or(Predicate... predicates) {
-    return null;
+    return new OrPredicate(predicates);
   }
 
   /*public static Predicate not(Predicate predicate) {

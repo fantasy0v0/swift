@@ -1,7 +1,12 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
+
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
