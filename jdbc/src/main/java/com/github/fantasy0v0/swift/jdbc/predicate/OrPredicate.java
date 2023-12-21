@@ -30,10 +30,13 @@ public class OrPredicate implements Predicate {
       }
 
       if (!buff.isEmpty()) {
+        if (predicate instanceof AndPredicate and && 0 == and.size()) {
+          continue;
+        }
         buff.append(" or ");
       }
 
-      if (predicate instanceof AndPredicate) {
+      if (predicate instanceof AndPredicate and && and.size() > 1) {
         buff.append("(").append(predicate.toSQL()).append(")");
       } else {
         buff.append(predicate.toSQL());
@@ -51,5 +54,9 @@ public class OrPredicate implements Predicate {
     parameters = Arrays.stream(predicates)
       .flatMap(p -> p.getParameters().stream()).toList();
     return parameters;
+  }
+
+  public long size() {
+    return predicates.length;
   }
 }

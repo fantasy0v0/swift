@@ -71,7 +71,25 @@ public class PredicateTest {
     Assertions.assertEquals("id = 1 and status > 5 and status <= 10", predicate.toSQL());
     Assertions.assertEquals(0, predicate.getParameters().size());
 
-    // TODO
+    predicate = and(
+      conjunction(),
+      exp("id = 1"),
+      or()
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    predicate = and(
+      conjunction(),
+      exp("id = 1"),
+      or(
+        exp("status > 5")
+      )
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 and status > 5", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
   }
 
   @Test
@@ -97,7 +115,25 @@ public class PredicateTest {
     Assertions.assertEquals("id = 1 or status > 5 or status <= 10", predicate.toSQL());
     Assertions.assertEquals(0, predicate.getParameters().size());
 
-    // TODO
+    predicate = or(
+      conjunction(),
+      exp("id = 1"),
+      and()
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
+
+    predicate = or(
+      conjunction(),
+      exp("id = 1"),
+      and(
+        exp("status > 5")
+      )
+    );
+    log.debug("sql:{}", predicate.toSQL());
+    Assertions.assertEquals("id = 1 or status > 5", predicate.toSQL());
+    Assertions.assertEquals(0, predicate.getParameters().size());
   }
 
   @Test

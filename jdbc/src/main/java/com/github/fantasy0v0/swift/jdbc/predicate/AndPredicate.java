@@ -30,10 +30,14 @@ class AndPredicate implements Predicate {
       }
 
       if (!buff.isEmpty()) {
-        buff.append(" and ");
+        if (predicate instanceof OrPredicate or && 0 == or.size()) {
+          continue;
+        } else {
+          buff.append(" and ");
+        }
       }
 
-      if (predicate instanceof OrPredicate) {
+      if (predicate instanceof OrPredicate or && or.size() > 1) {
         buff.append("(").append(predicate.toSQL()).append(")");
       } else {
         buff.append(predicate.toSQL());
@@ -52,4 +56,9 @@ class AndPredicate implements Predicate {
       .flatMap(p -> p.getParameters().stream()).toList();
     return parameters;
   }
+
+  public long size() {
+    return predicates.length;
+  }
+
 }
