@@ -11,6 +11,7 @@ import test.vo.Student;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,14 +52,16 @@ class SelectTest {
     JDBC.configuration(dataSource);
 
     String sql = "select * from student";
+    List<Object> parameters = new ArrayList<>();
     Predicate predicate = and(
       exp("id > ?", 0),
       exp("status = ?", 2)
     );
     sql += where(predicate);
+    parameters.addAll(predicate.getParameters());
     sql += " order by id asc";
     sql += " limit 20";
-    List<Student> students = select(sql, predicate.getParameters())
+    List<Student> students = select(sql, parameters)
       .fetch(row -> new Student(
         row.getLong(1),
         row.getString(2),
