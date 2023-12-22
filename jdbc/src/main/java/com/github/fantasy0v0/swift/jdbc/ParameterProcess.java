@@ -10,7 +10,7 @@ public interface ParameterProcess {
    * 预编译参数处理
    * @param conn      conn
    * @param statement statement
-   * @param index     索引
+   * @param index     索引, 与JDBC一致, 从1开始
    * @param parameter 参数
    * @return 是否被处理, 如果自行设置了参数, 需要返回true, 否则返回false使用默认处理方法
    */

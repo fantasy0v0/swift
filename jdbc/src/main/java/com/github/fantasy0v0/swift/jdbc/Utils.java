@@ -60,15 +60,22 @@ final class Utils {
     LogUtil.sql().trace("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
-      LogUtil.sql().trace("fill parameter: [{}] - [{}]", index, parameter);
+      LogUtil.sql().trace("fill parameter: [{}] - [{}]", index + 1, parameter);
       boolean result = false;
       if (null != parameterProcess) {
-        result = parameterProcess.process(conn, statement, index, parameter);
+        result = parameterProcess.process(conn, statement, index + 1, parameter);
       }
       // 使用默认的处理方法
       if (!result) {
         LogUtil.sql().debug("use default process");
-        // TODO
+        if (parameter instanceof Integer param) {
+          statement.setInt(index + 1, param);
+        } else if (parameter instanceof Long param) {
+          statement.setLong(index + 1, param);
+        } else {
+          LogUtil.sql().debug("use setObject");
+          statement.setObject(index + 1, parameter);
+        }
       }
     }
   }

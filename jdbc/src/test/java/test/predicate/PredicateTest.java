@@ -6,40 +6,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.vo.Student;
 
 import java.util.List;
 
-import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static com.github.fantasy0v0.swift.jdbc.predicate.Predicates.*;
 
 public class PredicateTest {
 
   private final Logger log = LoggerFactory.getLogger(PredicateTest.class);
-
-  @Test
-  void test() {
-    String sql = """
-    select * from student
-    """;
-    Predicate predicate = conjunction();
-    predicate = and(
-      predicate,
-      exp("status = ?", 1),
-      exp("isDel = false"),
-      or(
-        exp("age > ?", 18),
-        exp("money > ?", 100)
-      ),
-      in("id", List.of(1, 2, 3))
-    );
-    sql += predicate.toSQL();
-    List<Object> parameters = predicate.getParameters();
-    List<Student> students = select(sql, parameters).fetch(row -> new Student(
-      row.getLong(1),
-      row.getString(2)
-    ));
-  }
 
   @Test
   void expTest() {

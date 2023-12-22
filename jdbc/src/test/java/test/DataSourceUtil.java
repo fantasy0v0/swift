@@ -20,11 +20,15 @@ public class DataSourceUtil {
         statement.execute("""
           CREATE TABLE student (
             id INT NOT NULL,
-            name VARCHAR(50) NOT NULL
+            name VARCHAR(50) NOT NULL,
+            status INT NOT NULL
           );
-          insert into student(id, name) values
-          (1, '小明'),
-          (2, '张三');
+          insert into student(id, name, status) values
+          (1, '小明', 0),
+          (2, '张三', 1),
+          (3, '李四', 2),
+          (4, '董超', 2),
+          (5, '薛霸', 2);
           """);
       }
     }

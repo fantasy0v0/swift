@@ -16,8 +16,12 @@ public final class JDBC {
     JDBC.dataSource = dataSource;
   }
 
+  public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {
+    return new SelectBuilder(requireNonNull(dataSource), sql, params);
+  }
+
   public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
-    return new SelectBuilder(requireNonNull(dataSource), sql, List.of(params));
+    return select(sql, List.of(params));
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {

@@ -6,5 +6,6 @@ module swift.jdbc {
   exports com.github.fantasy0v0.swift.jdbc;
   exports com.github.fantasy0v0.swift.jdbc.exception;
   exports com.github.fantasy0v0.swift.jdbc.predicate;
+  exports com.github.fantasy0v0.swift.jdbc.clauses;
 
 }

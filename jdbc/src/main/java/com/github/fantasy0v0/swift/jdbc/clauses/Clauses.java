@@ -7,7 +7,7 @@ public final class Clauses {
   public static String where(Predicate predicate) {
     String sql = predicate.toSQL();
     if (!sql.isBlank()) {
-      return "where " + sql;
+      return " where " + sql;
     }
     return "";
   }
