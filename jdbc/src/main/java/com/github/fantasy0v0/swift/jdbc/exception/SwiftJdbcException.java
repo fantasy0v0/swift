@@ -6,6 +6,10 @@ public class SwiftJdbcException extends RuntimeException {
     super(message);
   }
 
+  public SwiftJdbcException(Throwable cause) {
+    super(cause);
+  }
+
   public SwiftJdbcException(String message, Throwable cause) {
     super(message, cause);
   }

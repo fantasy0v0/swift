@@ -12,8 +12,18 @@ public final class JDBC {
 
   private static DataSource dataSource;
 
+  private static SQLDialect dialect;
+
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
+  }
+
+  public static void configuration(SQLDialect dialect) {
+    JDBC.dialect = dialect;
+  }
+
+  public static SQLDialect getSQLDialect() {
+    return dialect;
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {

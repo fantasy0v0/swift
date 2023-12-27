@@ -29,11 +29,7 @@ class SelectTest {
   void testFetch() throws SQLException {
     DataSource dataSource = DataSourceUtil.create();
     JDBC.configuration(dataSource);
-    List<Student> students = select("select * from student").fetch(row -> new Student(
-      row.getLong(1),
-      row.getString(2),
-      row.getLong(3)
-    ));
+    List<Student> students = select("select * from student").fetch(Student::from);
 
     for (Student student : students) {
       log.debug("student id:{} name:{}", student.id(), student.name());
@@ -65,11 +61,7 @@ class SelectTest {
     sql += " order by id asc";
     sql += " limit 20";
     List<Student> students = select(sql, parameters)
-      .fetch(row -> new Student(
-        row.getLong(1),
-        row.getString(2),
-        row.getLong(3)
-      ));
+      .fetch(Student::from);
     log.debug("student size: {}", students.size());
     Assertions.assertTrue(students.stream().allMatch(student -> 2 == student.status()));
   }

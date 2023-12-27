@@ -17,12 +17,21 @@ final class Utils {
     return dataSource.getConnection();
   }
 
-  static <T> List<T> _fetch(DataSource dataSource,
-                            String sql, List<Object> params,
-                            FetchMapper<T> mapper, ParameterProcess parameterProcess,
-                            boolean firstOnly) throws SQLException {
+  static <T> List<T> fetch(DataSource dataSource,
+                           String sql, List<Object> params,
+                           FetchMapper<T> mapper, ParameterProcess parameterProcess,
+                           boolean firstOnly) throws SQLException {
     try (Connection conn = Utils.getConnection(dataSource)) {
       return executeQuery(conn, sql, params, mapper, parameterProcess, firstOnly);
+    }
+  }
+
+  static <T> T fetchOne(DataSource dataSource,
+                        String sql, List<Object> params,
+                        FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
+    try (Connection conn = Utils.getConnection(dataSource)) {
+      List<T> list = executeQuery(conn, sql, params, mapper, parameterProcess, true);
+      return list.isEmpty() ? null : list.getFirst();
     }
   }
 
@@ -78,20 +87,22 @@ final class Utils {
     LogUtil.sql().trace("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
-      LogUtil.sql().trace("fill parameter: [{}] - [{}]", index + 1, parameter);
+
       boolean result = false;
       if (null != parameterProcess) {
         result = parameterProcess.process(conn, statement, index + 1, parameter);
       }
       // 使用默认的处理方法
-      if (!result) {
-        LogUtil.sql().debug("use default process");
+      if (result) {
+        LogUtil.sql().trace("fill parameter: [{}] - [{}], use parameterProcess", index + 1, parameter);
+      } else {
+        LogUtil.sql().trace("fill parameter: [{}] - [{}], use default process", index + 1, parameter);
         if (parameter instanceof Integer param) {
           statement.setInt(index + 1, param);
         } else if (parameter instanceof Long param) {
           statement.setLong(index + 1, param);
         } else {
-          LogUtil.sql().debug("use setObject");
+          LogUtil.sql().debug("fill parameter use setObject, parameter class:{}", parameter.getClass());
           statement.setObject(index + 1, parameter);
         }
       }
