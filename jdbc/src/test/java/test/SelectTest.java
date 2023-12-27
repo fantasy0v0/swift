@@ -44,6 +44,9 @@ class SelectTest {
       String row = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
       log.debug("row: {}", row);
     }
+
+    Object[] row = select("select * from student limit 1").fetchOne();
+    Assertions.assertNotNull(row);
   }
 
   @Test
