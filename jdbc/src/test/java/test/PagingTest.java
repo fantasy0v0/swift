@@ -76,4 +76,18 @@ class PagingTest {
     Assertions.assertEquals(3, data.data().size());
   }
 
+  @Test
+  void customizeCount() {
+    PagingData<Student> data = select("select * from student")
+      .paging(0, 10)
+      .count("select count(1) from student where status = ?", 2)
+      .fetch(Student::from);
+    log.debug("total: {}", data.total());
+    log.debug("totalPages: {}", data.totalPages());
+    log.debug("dataSize: {}", data.data().size());
+    Assertions.assertEquals(3, data.total());
+    Assertions.assertEquals(1, data.totalPages());
+    Assertions.assertEquals(5, data.data().size());
+  }
+
 }
