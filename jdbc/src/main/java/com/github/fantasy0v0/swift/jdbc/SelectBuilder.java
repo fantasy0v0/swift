@@ -3,7 +3,6 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.List;
 
 public class SelectBuilder {
@@ -43,17 +42,8 @@ public class SelectBuilder {
     return fetch(mapper, null);
   }
 
-  private Object[] getRowByObject(Row row) throws SQLException {
-    int columnCount = row.getColumnCount();
-    Object[] array = new Object[columnCount];
-    for (int i = 0; i < columnCount; i++) {
-      array[i] = row.getObject(i + 1);
-    }
-    return array;
-  }
-
   public List<Object[]> fetch() {
-    return fetch(this::getRowByObject);
+    return fetch(Utils::fetchByRow);
   }
 
   public <T> T fetchOne(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
@@ -69,7 +59,7 @@ public class SelectBuilder {
   }
 
   public Object[] fetchOne() {
-    return fetchOne(this::getRowByObject);
+    return fetchOne(Utils::fetchByRow);
   }
 
 }

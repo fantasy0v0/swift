@@ -17,6 +17,15 @@ final class Utils {
     return dataSource.getConnection();
   }
 
+  static Object[] fetchByRow(Row row) throws SQLException {
+    int columnCount = row.getColumnCount();
+    Object[] array = new Object[columnCount];
+    for (int i = 0; i < columnCount; i++) {
+      array[i] = row.getObject(i + 1);
+    }
+    return array;
+  }
+
   static <T> List<T> fetch(DataSource dataSource,
                            String sql, List<Object> params,
                            FetchMapper<T> mapper, ParameterProcess parameterProcess,
