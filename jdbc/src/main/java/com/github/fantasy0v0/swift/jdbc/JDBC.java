@@ -26,6 +26,13 @@ public final class JDBC {
     return dialect;
   }
 
+  private static DataSource requireNonNull(DataSource dataSource) {
+    if (null == dataSource) {
+      throw new SwiftJdbcException("未配置DataSource");
+    }
+    return dataSource;
+  }
+
   public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {
     return new SelectBuilder(requireNonNull(dataSource), sql, params);
   }
@@ -34,11 +41,12 @@ public final class JDBC {
     return select(sql, List.of(params));
   }
 
-  private static DataSource requireNonNull(DataSource dataSource) {
-    if (null == dataSource) {
-      throw new SwiftJdbcException("未配置DataSource");
-    }
-    return dataSource;
+  public static InsertBuilder insert(@Language("SQL") String sql, List<Object> params) {
+    return new InsertBuilder(requireNonNull(dataSource), sql, params);
+  }
+
+  public static InsertBuilder insert(@Language("SQL") String sql, Object... params) {
+    return insert(sql, List.of(params));
   }
 
 }

@@ -32,7 +32,7 @@ public class SelectBuilder {
 
   public <T> List<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
     try {
-      return Utils.fetch(dataSource, sql, params, mapper, parameterProcess, false);
+      return Utils.fetch(dataSource, sql, params, mapper, parameterProcess);
     } catch (Exception e) {
       throw new SwiftJdbcException(e);
     }

@@ -28,10 +28,9 @@ final class Utils {
 
   static <T> List<T> fetch(DataSource dataSource,
                            String sql, List<Object> params,
-                           FetchMapper<T> mapper, ParameterProcess parameterProcess,
-                           boolean firstOnly) throws SQLException {
+                           FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      return executeQuery(conn, sql, params, mapper, parameterProcess, firstOnly);
+      return executeQuery(conn, sql, params, mapper, parameterProcess, false);
     }
   }
 
@@ -74,7 +73,7 @@ final class Utils {
     }
   }
 
-  static boolean execute(Connection conn,
+  static int executeUpdate(Connection conn,
                          String sql, List<Object> params,
                          ParameterProcess parameterProcess) throws SQLException {
     LogUtil.performance().info("execute begin");
@@ -82,7 +81,7 @@ final class Utils {
     LogUtil.sql().debug("execute: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
-      return statement.execute();
+      return statement.executeUpdate();
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();

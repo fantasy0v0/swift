@@ -70,7 +70,7 @@ public class PagingBuilder {
       select * from (%s) offset ? row fetch first ? row only""".formatted(sql);
     _params.add(offset);
     _params.add(this.pageSize);
-    return Utils.fetch(dataSource, _sql, _params, mapper, parameterProcess, false);
+    return Utils.fetch(dataSource, _sql, _params, mapper, parameterProcess);
   }
 
   public <T> PagingData<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
