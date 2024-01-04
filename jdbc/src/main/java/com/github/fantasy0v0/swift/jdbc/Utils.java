@@ -73,9 +73,44 @@ final class Utils {
     }
   }
 
-  static int executeUpdate(Connection conn,
+  static boolean execute(Connection conn,
                          String sql, List<Object> params,
                          ParameterProcess parameterProcess) throws SQLException {
+    LogUtil.performance().info("execute begin");
+    long startTime = System.nanoTime() / 1000;
+    LogUtil.sql().debug("execute: {}", sql);
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      fillStatementParams(conn, statement, params, parameterProcess);
+      return statement.execute();
+    } finally {
+      long cost = System.nanoTime() / 1000 - startTime;
+      NumberFormat format = NumberFormat.getNumberInstance();
+      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+    }
+  }
+
+  static int[] executeBatch(Connection conn,
+                            String sql, List<List<Object>> batch,
+                            ParameterProcess parameterProcess) throws SQLException {
+    LogUtil.performance().info("execute begin");
+    long startTime = System.nanoTime() / 1000;
+    LogUtil.sql().debug("execute: {}", sql);
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      for (List<Object> params : batch) {
+        fillStatementParams(conn, statement, params, parameterProcess);
+        statement.addBatch();
+      }
+      return statement.executeBatch();
+    } finally {
+      long cost = System.nanoTime() / 1000 - startTime;
+      NumberFormat format = NumberFormat.getNumberInstance();
+      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+    }
+  }
+
+  static int executeUpdate(Connection conn,
+                           String sql, List<Object> params,
+                           ParameterProcess parameterProcess) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
@@ -92,6 +127,9 @@ final class Utils {
   static void fillStatementParams(Connection conn,
                                   PreparedStatement statement, List<Object> params,
                                   ParameterProcess parameterProcess) throws SQLException {
+    if (null == params) {
+      LogUtil.sql().debug("parameter is null");
+    }
     LogUtil.sql().trace("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);

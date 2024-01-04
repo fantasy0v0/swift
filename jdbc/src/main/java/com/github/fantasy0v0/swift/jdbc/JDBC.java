@@ -41,12 +41,8 @@ public final class JDBC {
     return select(sql, List.of(params));
   }
 
-  public static InsertBuilder insert(@Language("SQL") String sql, List<Object> params) {
-    return new InsertBuilder(requireNonNull(dataSource), sql, params);
-  }
-
-  public static InsertBuilder insert(@Language("SQL") String sql, Object... params) {
-    return insert(sql, List.of(params));
+  public static InsertBuilder insert(@Language("SQL") String sql) {
+    return new InsertBuilder(requireNonNull(dataSource), sql);
   }
 
 }
