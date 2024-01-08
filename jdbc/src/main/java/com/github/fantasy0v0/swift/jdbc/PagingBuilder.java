@@ -5,6 +5,7 @@ import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PagingBuilder {
@@ -35,7 +36,7 @@ public class PagingBuilder {
 
   public PagingBuilder count(String countSql, Object...countParams) {
     this.countSql = countSql;
-    this.countParams = List.of(countParams);
+    this.countParams = Arrays.stream(countParams).toList();
     return this;
   }
 

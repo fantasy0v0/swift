@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
-import java.util.List;
+import java.util.Arrays;
 
 public final class Predicates {
 
@@ -30,11 +30,11 @@ public final class Predicates {
   }*/
 
   public static Predicate in(String expression, Object... parameters) {
-    return new InPredicate(false, expression, List.of(parameters));
+    return new InPredicate(false, expression, Arrays.stream(parameters).toList());
   }
 
   public static Predicate notIn(String expression, Object... parameters) {
-    return new InPredicate(true, expression, List.of(parameters));
+    return new InPredicate(true, expression, Arrays.stream(parameters).toList());
   }
 
 }

@@ -29,7 +29,7 @@ public class InsertBuilder {
 
   public int execute(ParameterProcess parameterProcess, Object... params) {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeUpdate(conn, sql, List.of(params), parameterProcess);
+      return Utils.executeUpdate(conn, sql, Arrays.stream(params).toList(), parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
