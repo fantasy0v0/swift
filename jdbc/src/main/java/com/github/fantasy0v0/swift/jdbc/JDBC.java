@@ -42,12 +42,8 @@ public final class JDBC {
     return select(sql, Arrays.stream(params).toList());
   }
 
-  public static InsertBuilder insert(@Language("SQL") String sql) {
-    return new InsertBuilder(requireNonNull(dataSource), sql.trim());
-  }
-
-  public static UpdateBuilder update(@Language("SQL") String sql) {
-    return new UpdateBuilder(requireNonNull(dataSource), sql.trim());
+  public static ModifyBuilder modify(@Language("SQL") String sql) {
+    return new ModifyBuilder(requireNonNull(dataSource), sql.trim());
   }
 
 }

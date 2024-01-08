@@ -20,18 +20,18 @@ public class InsertTest {
     DataSource dataSource = DataSourceUtil.create();
     JDBC.configuration(dataSource);
 
-    int executed = JDBC.insert("""
+    int executed = JDBC.modify("""
       insert into student(id, name, status)
       values(1000, '测试学生', 0)""").execute();
     Assertions.assertEquals(1, executed);
 
-    executed = JDBC.insert("""
+    executed = JDBC.modify("""
       insert into student(id, name, status)
       values(?, ?, ?)""").execute(1001, "测试学生", 0);
     Assertions.assertEquals(1, executed);
 
     // test null
-    executed = JDBC.insert("""
+    executed = JDBC.modify("""
       insert into student(id, name, status, ext)
       values(?, ?, ?, ?)""").execute(1002, "测试学生", 0, null);
     Assertions.assertEquals(1, executed);
@@ -54,7 +54,7 @@ public class InsertTest {
     batchParams.add(List.of(1004, "测试用户5", 4));
     batchParams.add(List.of(1005, "测试用户6", 5));
 
-    int[] executed = JDBC.insert("""
+    int[] executed = JDBC.modify("""
       insert into student(id, name, status)
       values(?, ?, ?)""").executeBatch(batchParams);
     Assertions.assertEquals(6, executed.length);
@@ -68,7 +68,7 @@ public class InsertTest {
     DataSource dataSource = DataSourceUtil.createPg();
     JDBC.configuration(dataSource);
 
-    Object[] result = JDBC.insert("""
+    Object[] result = JDBC.modify("""
       insert into student(id, name, status)
       values(?, ?, ?)
       returning id""").fetch(1000L, "测试学生", 0);

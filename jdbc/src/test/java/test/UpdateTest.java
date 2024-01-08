@@ -18,12 +18,12 @@ public class UpdateTest {
     DataSource dataSource = DataSourceUtil.createPg();
     JDBC.configuration(dataSource);
 
-    int executed = JDBC.update("""
+    int executed = JDBC.modify("""
         update student set name = ? where id = ?
       """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);
 
-    Object[] result = JDBC.update("""
+    Object[] result = JDBC.modify("""
         update student set name = ? where id = ? returning id
       """).fetch("测试修改1", 1);
     Assertions.assertEquals(1, result.length);

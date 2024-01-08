@@ -8,13 +8,13 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class InsertBuilder {
+public class ModifyBuilder {
 
   private final DataSource dataSource;
 
   private final String sql;
 
-  InsertBuilder(DataSource dataSource, String sql) {
+  ModifyBuilder(DataSource dataSource, String sql) {
     this.dataSource = dataSource;
     this.sql = sql;
   }
