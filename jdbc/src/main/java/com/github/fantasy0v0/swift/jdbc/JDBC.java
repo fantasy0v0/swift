@@ -46,4 +46,8 @@ public final class JDBC {
     return new InsertBuilder(requireNonNull(dataSource), sql);
   }
 
+  public static UpdateBuilder update(@Language("SQL") String sql) {
+    return new UpdateBuilder(requireNonNull(dataSource), sql);
+  }
+
 }

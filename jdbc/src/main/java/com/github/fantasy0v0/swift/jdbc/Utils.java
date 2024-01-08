@@ -40,6 +40,22 @@ final class Utils {
     }
   }
 
+  static <T> List<T> fetchByResultSet(ResultSet resultSet,
+                                      FetchMapper<T> fetchMapper,
+                                      boolean firstOnly) throws SQLException {
+    List<T> array = new ArrayList<>();
+    boolean first = true;
+    while (resultSet.next()) {
+      T row = fetchMapper.apply(new Row(resultSet));
+      array.add(row);
+      if (first && firstOnly) {
+        break;
+      }
+      first = false;
+    }
+    return array;
+  }
+
   static <T> List<T> executeQuery(Connection conn,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
@@ -51,17 +67,7 @@ final class Utils {
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
       try (ResultSet resultSet = statement.executeQuery()) {
-        List<T> array = new ArrayList<>();
-        boolean first = true;
-        while (resultSet.next()) {
-          T row = fetchMapper.apply(new Row(resultSet));
-          array.add(row);
-          if (first && firstOnly) {
-            break;
-          }
-          first = false;
-        }
-        return array;
+        return fetchByResultSet(resultSet, fetchMapper, firstOnly);
       }
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
@@ -70,9 +76,10 @@ final class Utils {
     }
   }
 
-  static Object execute(Connection conn,
-                         String sql, List<Object> params,
-                         ParameterProcess parameterProcess) throws SQLException {
+  static <T> T execute(Connection conn,
+                       String sql, List<Object> params,
+                       ParameterProcess parameterProcess,
+                       FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
@@ -83,8 +90,8 @@ final class Utils {
         return null;
       }
       try (ResultSet resultSet = statement.getResultSet()) {
-        // TODO
-        return null;
+        List<T> list = fetchByResultSet(resultSet, mapper, true);
+        return list.isEmpty() ? null : list.getFirst();
       }
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
@@ -93,22 +100,32 @@ final class Utils {
     }
   }
 
-  static int[] executeBatch(Connection conn,
+  static <T> List<T> executeBatch(Connection conn,
                             String sql, List<List<Object>> batch,
-                            ParameterProcess parameterProcess) throws SQLException {
-    LogUtil.performance().info("execute begin");
+                                  ParameterProcess parameterProcess,
+                                  FetchMapper<T> mapper) throws SQLException {
+    LogUtil.performance().info("executeBatch begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("execute: {}", sql);
+    LogUtil.sql().debug("executeBatch: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
         fillStatementParams(conn, statement, params, parameterProcess);
         statement.addBatch();
       }
-      return statement.executeBatch();
+      List<T> list = new ArrayList<>();
+      while (statement.getMoreResults()) {
+        try (ResultSet resultSet = statement.getResultSet()) {
+          List<T> row = fetchByResultSet(resultSet, mapper, true);
+          if (!row.isEmpty()) {
+            list.add(row.getFirst());
+          }
+        }
+      }
+      return list;
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeBatch end, cost: {} μs", format.format(cost));
     }
   }
 
@@ -125,6 +142,25 @@ final class Utils {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
       LogUtil.performance().info("executeUpdate end, cost: {} μs", format.format(cost));
+    }
+  }
+
+  static int[] executeUpdateBatch(Connection conn,
+                                  String sql, List<List<Object>> batch,
+                                  ParameterProcess parameterProcess) throws SQLException {
+    LogUtil.performance().info("execute begin");
+    long startTime = System.nanoTime() / 1000;
+    LogUtil.sql().debug("execute: {}", sql);
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      for (List<Object> params : batch) {
+        fillStatementParams(conn, statement, params, parameterProcess);
+        statement.addBatch();
+      }
+      return statement.executeBatch();
+    } finally {
+      long cost = System.nanoTime() / 1000 - startTime;
+      NumberFormat format = NumberFormat.getNumberInstance();
+      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
     }
   }
 

@@ -28,11 +28,7 @@ public class InsertBuilder {
   }
 
   public int execute(ParameterProcess parameterProcess, Object... params) {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeUpdate(conn, sql, Arrays.stream(params).toList(), parameterProcess);
-    } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
-    }
+    return execute(parameterProcess, Arrays.stream(params).toList());
   }
 
   public int execute(List<Object> params) {
@@ -49,7 +45,7 @@ public class InsertBuilder {
 
   public int[] executeBatch(ParameterProcess parameterProcess, List<List<Object>> batch) {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeBatch(conn, sql, batch, parameterProcess);
+      return Utils.executeUpdateBatch(conn, sql, batch, parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -57,5 +53,61 @@ public class InsertBuilder {
 
   public int[] executeBatch(List<List<Object>> batch) {
     return executeBatch(null, batch);
+  }
+
+  public <T> T fetch(ParameterProcess parameterProcess,
+                     FetchMapper<T> mapper,
+                     List<Object> params) {
+    try (Connection conn = Utils.getConnection(dataSource)) {
+      return Utils.execute(conn, sql, params, parameterProcess, mapper);
+    } catch (SQLException e) {
+      throw new SwiftJdbcException(e);
+    }
+  }
+
+  public <T> T fetch(FetchMapper<T> mapper, List<Object> params) {
+    return fetch(null, mapper, params);
+  }
+
+  public <T> T fetch(FetchMapper<T> mapper, Object... params) {
+    return fetch(mapper, Arrays.stream(params).toList());
+  }
+
+  public <T> T fetch(FetchMapper<T> mapper) {
+    return fetch(null, mapper, null);
+  }
+
+  public Object[] fetch(List<Object> params) {
+    return fetch(null, Utils::fetchByRow, params);
+  }
+
+  public Object[] fetch(Object... params) {
+    return fetch(Utils::fetchByRow, params);
+  }
+
+  public Object[] fetch() {
+    return fetch(null, Utils::fetchByRow, null);
+  }
+
+  public <T> List<T> fetchBatch(ParameterProcess parameterProcess,
+                                FetchMapper<T> mapper,
+                                List<List<Object>> params) {
+    try (Connection conn = Utils.getConnection(dataSource)) {
+      return Utils.executeBatch(conn, sql, params, parameterProcess, mapper);
+    } catch (SQLException e) {
+      throw new SwiftJdbcException(e);
+    }
+  }
+
+  public <T> List<T> fetchBatch(FetchMapper<T> mapper, List<List<Object>> params) {
+    return fetchBatch(null, mapper, params);
+  }
+
+  public <T> List<T> fetchBatch(FetchMapper<T> mapper) {
+    return fetchBatch(null, mapper, null);
+  }
+
+  public List<Object[]> fetchBatch() {
+    return fetchBatch(null, Utils::fetchByRow, null);
   }
 }
