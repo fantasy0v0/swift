@@ -19,9 +19,10 @@ public class DataSourceUtil {
       try (Statement statement = connection.createStatement()) {
         statement.execute("""
           CREATE TABLE student (
-            id INT NOT NULL,
-            name VARCHAR(50) NOT NULL,
-            status INT NOT NULL
+            id     INT NOT NULL,
+            name   VARCHAR(50) NOT NULL,
+            status INT NOT NULL,
+            ext    VARCHAR(50)
           );
           insert into student(id, name, status) values
           (1, '小明', 0),

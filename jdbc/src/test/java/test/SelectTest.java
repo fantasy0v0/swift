@@ -35,7 +35,7 @@ class SelectTest {
       log.debug("student id:{} name:{}", student.id(), student.name());
     }
 
-    List<Object[]> objects = select("select * from student").fetch();
+    List<Object[]> objects = select("select id, name, status from student").fetch();
     for (Object[] array : objects) {
       String row = Arrays.stream(array).map(Object::toString).collect(Collectors.joining(", "));
       log.debug("row: {}", row);

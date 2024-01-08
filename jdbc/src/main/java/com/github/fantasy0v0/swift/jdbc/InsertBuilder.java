@@ -5,6 +5,7 @@ import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 public class InsertBuilder {
@@ -18,31 +19,31 @@ public class InsertBuilder {
     this.sql = sql;
   }
 
-  public boolean execute(ParameterProcess parameterProcess, List<Object> params) {
+  public int execute(ParameterProcess parameterProcess, List<Object> params) {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.execute(conn, sql, params, parameterProcess);
+      return Utils.executeUpdate(conn, sql, params, parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
   }
 
-  public boolean execute(ParameterProcess parameterProcess, Object... params) {
+  public int execute(ParameterProcess parameterProcess, Object... params) {
     try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.execute(conn, sql, List.of(params), parameterProcess);
+      return Utils.executeUpdate(conn, sql, List.of(params), parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
   }
 
-  public boolean execute(List<Object> params) {
+  public int execute(List<Object> params) {
     return execute(null, params);
   }
 
-  public boolean execute(Object... params) {
-    return execute(null, List.of(params));
+  public int execute(Object... params) {
+    return execute(null, Arrays.stream(params).toList());
   }
 
-  public boolean execute() {
+  public int execute() {
     return execute(null, (List<Object>) null);
   }
 

@@ -4,6 +4,7 @@ import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
+import java.util.Arrays;
 import java.util.List;
 
 public final class JDBC {
@@ -38,7 +39,7 @@ public final class JDBC {
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
-    return select(sql, List.of(params));
+    return select(sql, Arrays.stream(params).toList());
   }
 
   public static InsertBuilder insert(@Language("SQL") String sql) {

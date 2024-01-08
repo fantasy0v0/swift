@@ -3,10 +3,7 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +70,7 @@ final class Utils {
     }
   }
 
-  static boolean execute(Connection conn,
+  static Object execute(Connection conn,
                          String sql, List<Object> params,
                          ParameterProcess parameterProcess) throws SQLException {
     LogUtil.performance().info("execute begin");
@@ -81,7 +78,14 @@ final class Utils {
     LogUtil.sql().debug("execute: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
-      return statement.execute();
+      boolean result = statement.execute();
+      if (!result) {
+        return null;
+      }
+      try (ResultSet resultSet = statement.getResultSet()) {
+        // TODO
+        return null;
+      }
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
@@ -111,16 +115,16 @@ final class Utils {
   static int executeUpdate(Connection conn,
                            String sql, List<Object> params,
                            ParameterProcess parameterProcess) throws SQLException {
-    LogUtil.performance().info("execute begin");
+    LogUtil.performance().info("executeUpdate begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("execute: {}", sql);
+    LogUtil.sql().debug("executeUpdate: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterProcess);
       return statement.executeUpdate();
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeUpdate end, cost: {} μs", format.format(cost));
     }
   }
 
@@ -129,6 +133,7 @@ final class Utils {
                                   ParameterProcess parameterProcess) throws SQLException {
     if (null == params) {
       LogUtil.sql().debug("parameter is null");
+      return;
     }
     LogUtil.sql().trace("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
@@ -140,16 +145,18 @@ final class Utils {
       }
       // 使用默认的处理方法
       if (result) {
-        LogUtil.sql().trace("fill parameter: [{}] - [{}], use parameterProcess", index + 1, parameter);
+        LogUtil.sql().trace("fill parameter: [{}] - [{}], use parameter process", index + 1, parameter);
       } else {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use default process", index + 1, parameter);
-        if (parameter instanceof Integer param) {
-          statement.setInt(index + 1, param);
-        } else if (parameter instanceof Long param) {
-          statement.setLong(index + 1, param);
-        } else {
-          LogUtil.sql().debug("fill parameter use setObject, parameter class:{}", parameter.getClass());
-          statement.setObject(index + 1, parameter);
+        switch (parameter) {
+          case Integer param -> statement.setInt(index + 1, param);
+          case Long param -> statement.setLong(index + 1, param);
+          case String param -> statement.setString(index + 1, param);
+          case null -> statement.setNull(index + 1, Types.NULL);
+          default -> {
+            LogUtil.sql().debug("fill parameter use setObject, parameter class:{}", parameter.getClass());
+            statement.setObject(index + 1, parameter);
+          }
         }
       }
     }
