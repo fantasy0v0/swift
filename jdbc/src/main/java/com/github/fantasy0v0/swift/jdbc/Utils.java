@@ -184,9 +184,15 @@ final class Utils {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use parameter process", index + 1, parameter);
       } else {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use default process", index + 1, parameter);
+        // TODO 后期维护到map中
         switch (parameter) {
+          case Byte param -> statement.setByte(index + 1, param);
+          case Short param -> statement.setShort(index + 1, param);
           case Integer param -> statement.setInt(index + 1, param);
+          case Float param -> statement.setFloat(index + 1, param);
+          case Double param -> statement.setDouble(index + 1, param);
           case Long param -> statement.setLong(index + 1, param);
+          case Boolean param -> statement.setBoolean(index + 1, param);
           case String param -> statement.setString(index + 1, param);
           case null -> statement.setNull(index + 1, Types.NULL);
           default -> {
