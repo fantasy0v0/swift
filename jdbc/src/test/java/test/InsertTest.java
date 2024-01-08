@@ -65,13 +65,14 @@ public class InsertTest {
 
   @Test
   void fetch() throws SQLException {
-    DataSource dataSource = DataSourceUtil.create();
+    DataSource dataSource = DataSourceUtil.createPg();
     JDBC.configuration(dataSource);
 
-    int executed = JDBC.insert("""
+    Object[] result = JDBC.insert("""
       insert into student(id, name, status)
-      values(1000, '测试用户', 0); select 1""").execute();
-    Assertions.assertEquals(1, executed);
-    // TODO FETCH
+      values(?, ?, ?)
+      returning id""").fetch(1000L, "测试学生", 0);
+    Assertions.assertEquals(1, result.length);
+    Assertions.assertEquals(1000L, result[0]);
   }
 }

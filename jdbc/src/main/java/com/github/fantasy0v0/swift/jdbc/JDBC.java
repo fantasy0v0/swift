@@ -35,7 +35,7 @@ public final class JDBC {
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {
-    return new SelectBuilder(requireNonNull(dataSource), sql, params);
+    return new SelectBuilder(requireNonNull(dataSource), sql.trim(), params);
   }
 
   public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
@@ -43,11 +43,11 @@ public final class JDBC {
   }
 
   public static InsertBuilder insert(@Language("SQL") String sql) {
-    return new InsertBuilder(requireNonNull(dataSource), sql);
+    return new InsertBuilder(requireNonNull(dataSource), sql.trim());
   }
 
   public static UpdateBuilder update(@Language("SQL") String sql) {
-    return new UpdateBuilder(requireNonNull(dataSource), sql);
+    return new UpdateBuilder(requireNonNull(dataSource), sql.trim());
   }
 
 }
