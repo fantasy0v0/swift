@@ -23,7 +23,7 @@ public final class JDBC {
     JDBC.dialect = dialect;
   }
 
-  public static SQLDialect getSQLDialect() {
+  static SQLDialect getSQLDialect() {
     return dialect;
   }
 
@@ -44,6 +44,14 @@ public final class JDBC {
 
   public static ModifyBuilder modify(@Language("SQL") String sql) {
     return new ModifyBuilder(requireNonNull(dataSource), sql.trim());
+  }
+
+  public static void transaction(Integer level, Runnable runnable) {
+
+  }
+
+  public static void transaction(Runnable runnable) {
+    transaction(null, runnable);
   }
 
 }
