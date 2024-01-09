@@ -17,7 +17,7 @@ public class DataSourceUtil {
   public static DataSource create() throws SQLException {
     HikariConfig config = new HikariConfig();
     config.setDriverClassName("org.h2.Driver");
-    config.setJdbcUrl("jdbc:h2:mem:");
+    config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
     HikariDataSource dataSource = new HikariDataSource(config);
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {

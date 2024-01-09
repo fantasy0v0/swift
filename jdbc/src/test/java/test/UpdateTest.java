@@ -15,10 +15,18 @@ public class UpdateTest {
 
   @Test
   void test() throws SQLException {
-    DataSource dataSource = DataSourceUtil.createPg();
+    DataSource dataSource = DataSourceUtil.create();
     JDBC.configuration(dataSource);
 
     int executed = JDBC.modify("""
+        update student set name = ? where id = ?
+      """).execute("测试修改", 1);
+    Assertions.assertEquals(1, executed);
+
+    dataSource = DataSourceUtil.createPg();
+    JDBC.configuration(dataSource);
+
+    executed = JDBC.modify("""
         update student set name = ? where id = ?
       """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);

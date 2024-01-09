@@ -4,12 +4,11 @@ import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 public final class JDBC {
-
-  // private static final ScopedValue<Connection> CONN = ScopedValue.newInstance();
 
   private static DataSource dataSource;
 
@@ -47,7 +46,12 @@ public final class JDBC {
   }
 
   public static void transaction(Integer level, Runnable runnable) {
-
+    TransactionBuilder builder = new TransactionBuilder(requireNonNull(dataSource), level, runnable);
+    try {
+      builder.execute();
+    } catch (SQLException e) {
+      throw new SwiftJdbcException(e);
+    }
   }
 
   public static void transaction(Runnable runnable) {
