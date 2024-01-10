@@ -1,21 +1,12 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.net.URL;
-import java.sql.Timestamp;
-import java.sql.SQLXML;
-import java.io.Reader;
-import java.sql.Array;
-import java.sql.Date;
-import java.math.BigDecimal;
-import java.sql.RowId;
-import java.sql.Ref;
-import java.sql.NClob;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Row {
@@ -258,6 +249,24 @@ public class Row {
   public LocalTime getLocalTime(int columnIndex) throws SQLException {
     Time value = extract(resultSet -> resultSet.getTime(columnIndex));
     return null != value ? value.toLocalTime() : null;
+  }
+
+  public LocalDate getLocalDate(int columnIndex) throws SQLException {
+    Date value = extract(resultSet -> resultSet.getDate(columnIndex));
+    return null != value ? value.toLocalDate() : null;
+  }
+
+  public LocalDateTime getLocalDateTime(int columnIndex) throws SQLException {
+    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
+    return null != value ? value.toLocalDateTime() : null;
+  }
+
+  public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+    return extract(resultSet -> resultSet.getObject(columnIndex, type));
+  }
+
+  public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+    return extract(resultSet -> resultSet.getObject(columnLabel, type));
   }
 }
 

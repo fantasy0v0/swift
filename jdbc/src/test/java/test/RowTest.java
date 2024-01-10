@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 class RowTest {
@@ -53,14 +56,60 @@ class RowTest {
         return extract(resultSet -> resultSet.%s(columnLabel));
       }""".formatted(resultType, methodName, methodName));
     }
-    StringBuilder tmp = new StringBuilder();
-    tmp.append(System.lineSeparator());
+    methodsBuffer.append(System.lineSeparator());
+    methodsBuffer.append(System.lineSeparator());
+    methodsBuffer.append("""
+      public LocalTime getLocalTime(int columnIndex) throws SQLException {
+        Time value = extract(resultSet -> resultSet.getTime(columnIndex));
+        return null != value ? value.toLocalTime() : null;
+      }
+
+      public LocalDate getLocalDate(int columnIndex) throws SQLException {
+        Date value = extract(resultSet -> resultSet.getDate(columnIndex));
+        return null != value ? value.toLocalDate() : null;
+      }
+
+      public LocalDateTime getLocalDateTime(int columnIndex) throws SQLException {
+        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
+        return null != value ? value.toLocalDateTime() : null;
+      }
+
+      public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        return extract(resultSet -> resultSet.getObject(columnIndex, type));
+      }
+
+      public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+        return extract(resultSet -> resultSet.getObject(columnLabel, type));
+      }""");
+    addPackages(packages, LocalTime.class);
+    addPackages(packages, LocalDate.class);
+    addPackages(packages, LocalDateTime.class);
+    StringBuilder classBuffer = new StringBuilder();
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append("package com.github.fantasy0v0.swift.jdbc;");
+    classBuffer.append(System.lineSeparator());
     for (String pkg : packages) {
-      tmp.append(System.lineSeparator());
-      tmp.append("import %s;".formatted(pkg));
+      classBuffer.append(System.lineSeparator());
+      classBuffer.append("import %s;".formatted(pkg));
     }
-    log.info("need import package: {}", tmp);
-    log.info("methods: {}", methodsBuffer);
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append("""
+      public class Row {
+
+        private final ResultSet resultSet;
+
+        Row(ResultSet resultSet) {
+          this.resultSet = resultSet;
+        }""");
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append(methodsBuffer);
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append(System.lineSeparator());
+    classBuffer.append("""
+      }
+      """);
+    log.info("class: {}", classBuffer);
   }
 
   private static Map<String, String> getPrimitiveTypeMap() {
