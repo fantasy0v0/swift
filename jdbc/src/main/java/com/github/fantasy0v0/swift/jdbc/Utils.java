@@ -10,6 +10,7 @@ import java.util.List;
 
 final class Utils {
 
+  @Deprecated
   static Connection getConnection(DataSource dataSource) throws SQLException {
     return dataSource.getConnection();
   }
@@ -26,16 +27,17 @@ final class Utils {
   static <T> List<T> fetch(DataSource dataSource,
                            String sql, List<Object> params,
                            FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return executeQuery(conn, sql, params, mapper, parameterProcess, false);
+
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      return executeQuery(ref.unwrap(), sql, params, mapper, parameterProcess, false);
     }
   }
 
   static <T> T fetchOne(DataSource dataSource,
                         String sql, List<Object> params,
                         FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      List<T> list = executeQuery(conn, sql, params, mapper, parameterProcess, true);
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      List<T> list = executeQuery(ref.unwrap(), sql, params, mapper, parameterProcess, true);
       return list.isEmpty() ? null : list.getFirst();
     }
   }

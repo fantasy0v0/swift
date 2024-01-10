@@ -22,36 +22,37 @@ public class TransactionBuilder {
 
   private Integer oldLevel;
 
-  /**
-   * 在其他事物里面
-   */
-  private boolean inside;
-
   TransactionBuilder(DataSource dataSource, Integer level, Runnable runnable) {
     this.dataSource = dataSource;
     this.level = level;
     this.runnable = runnable;
   }
 
-  private Connection getConnection() throws SQLException {
-    // TODO 判断是否在其他事物中
-    Connection connection = Utils.getConnection(dataSource);
-    if (connection.getAutoCommit()) {
-      oldAutoCommit = true;
-      LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
+  private ConnectionReference getConnection() throws SQLException {
+    ConnectionReference ref = ConnectionReference.getReference(dataSource);
+    try {
+      Connection connection = ref.unwrap();
+      if (connection.getAutoCommit()) {
+        oldAutoCommit = true;
+        LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
+      }
+      connection.setAutoCommit(false);
+      if (null != level) {
+        oldLevel = connection.getTransactionIsolation();
+        connection.setTransactionIsolation(level);
+        LogUtil.common()
+          .debug("save TransactionIsolation: {}, set TransactionIsolation: {}",
+            oldLevel, level);
+      }
+      return ref;
+    } catch (SQLException | RuntimeException e) {
+      ref.close();
+      throw e;
     }
-    connection.setAutoCommit(false);
-    if (null != level) {
-      oldLevel = connection.getTransactionIsolation();
-      connection.setTransactionIsolation(level);
-      LogUtil.common()
-        .debug("save TransactionIsolation: {}, set TransactionIsolation: {}",
-          oldLevel, level);
-    }
-    return connection;
   }
 
-  private void closeConnection(Connection connection) throws SQLException {
+  private void closeConnection(ConnectionReference wrap) throws SQLException {
+    Connection connection = wrap.unwrap();
     if (null != oldLevel) {
       connection.setTransactionIsolation(oldLevel);
       LogUtil.common().debug("restore TransactionIsolation: {}", oldLevel);
@@ -60,36 +61,38 @@ public class TransactionBuilder {
       connection.setAutoCommit(oldAutoCommit);
       LogUtil.common().debug("restore AutoCommit: {}", oldAutoCommit);
     }
-    connection.close();
+    wrap.close();
   }
 
   void execute() throws SQLException {
     LogUtil.performance().info("transaction begin");
     long startTime = System.nanoTime() / 1000;
-    Connection connection = getConnection();
+    ConnectionReference ref = getConnection();
     try {
+      Connection connection = ref.unwrap();
       Savepoint savepoint = null;
-      if (inside) {
+      if (ref.isInner()) {
         savepoint = connection.setSavepoint();
         LogUtil.common().debug("savepoint");
       }
       try {
         runnable.run();
-        if (!inside) {
+        if (!ref.isInner()) {
           connection.commit();
           LogUtil.common().debug("commit");
         }
       } catch (Exception e) {
         if (null != savepoint) {
           connection.rollback(savepoint);
+          LogUtil.common().debug("rollback by savepoint");
         } else {
           connection.rollback();
+          LogUtil.common().debug("rollback");
         }
-        LogUtil.common().debug("rollback");
         throw e;
       }
     } finally {
-      closeConnection(connection);
+      closeConnection(ref);
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
       LogUtil.performance().info("transaction end, cost: {} μs", format.format(cost));

@@ -3,7 +3,6 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -20,8 +19,8 @@ public class ModifyBuilder {
   }
 
   public int execute(ParameterProcess parameterProcess, List<Object> params) {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeUpdate(conn, sql, params, parameterProcess);
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      return Utils.executeUpdate(ref.unwrap(), sql, params, parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -44,8 +43,8 @@ public class ModifyBuilder {
   }
 
   public int[] executeBatch(ParameterProcess parameterProcess, List<List<Object>> batch) {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeUpdateBatch(conn, sql, batch, parameterProcess);
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterProcess);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -58,8 +57,8 @@ public class ModifyBuilder {
   public <T> T fetch(ParameterProcess parameterProcess,
                      FetchMapper<T> mapper,
                      List<Object> params) {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.execute(conn, sql, params, parameterProcess, mapper);
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      return Utils.execute(ref.unwrap(), sql, params, parameterProcess, mapper);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -92,8 +91,8 @@ public class ModifyBuilder {
   public <T> List<T> fetchBatch(ParameterProcess parameterProcess,
                                 FetchMapper<T> mapper,
                                 List<List<Object>> params) {
-    try (Connection conn = Utils.getConnection(dataSource)) {
-      return Utils.executeBatch(conn, sql, params, parameterProcess, mapper);
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      return Utils.executeBatch(ref.unwrap(), sql, params, parameterProcess, mapper);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
