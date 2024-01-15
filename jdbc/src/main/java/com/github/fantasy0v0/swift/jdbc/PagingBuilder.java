@@ -1,10 +1,10 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,10 +44,10 @@ public class PagingBuilder {
     String _countSql;
     List<Object> _countParams;
     if (null == countSql || countSql.isBlank()) {
-      // TODO 后期根据方言生成SQL, 目前先适配H2和PostgreSQL
-      _countSql = """
-        select count(1) from (%s)""".formatted(sql);
-      _countParams = params;
+      SQLDialect dialect = JDBC.getSQLDialect();
+      Query query = dialect.count(sql, params);
+      _countSql = query.sql();
+      _countParams = query.params();
     } else {
       _countSql = countSql;
       _countParams = countParams;
@@ -61,17 +61,9 @@ public class PagingBuilder {
   }
 
   private <T> List<T> getData(FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
-    // TODO 后期根据方言生成SQL, 目前先适配H2和PostgreSQL
-    List<Object> _params = new ArrayList<>();
-    if (null != params && !params.isEmpty()) {
-      _params.addAll(params);
-    }
-    long offset = this.pageNumber * this.pageSize;
-    String _sql = """
-      select * from (%s) offset ? row fetch first ? row only""".formatted(sql);
-    _params.add(offset);
-    _params.add(this.pageSize);
-    return Utils.fetch(dataSource, _sql, _params, mapper, parameterProcess);
+    SQLDialect dialect = JDBC.getSQLDialect();
+    Query query = dialect.paging(sql, params, pageNumber, pageSize);
+    return Utils.fetch(dataSource, query.sql(), query.params(), mapper, parameterProcess);
   }
 
   public <T> PagingData<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {

@@ -1,5 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
+import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import org.intellij.lang.annotations.Language;
 
@@ -23,7 +25,7 @@ public final class JDBC {
   }
 
   static SQLDialect getSQLDialect() {
-    return dialect;
+    return null == dialect ? ANSI.Instance : dialect;
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {
