@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class JDBC {
 
@@ -48,7 +49,7 @@ public final class JDBC {
   }
 
   public static void transaction(Integer level, Runnable runnable) {
-    TransactionBuilder builder = new TransactionBuilder(requireNonNull(dataSource), level, runnable);
+    TransactionBuilder<?> builder = TransactionBuilder.create(dataSource, level, runnable);
     try {
       builder.execute();
     } catch (SQLException e) {
@@ -58,6 +59,19 @@ public final class JDBC {
 
   public static void transaction(Runnable runnable) {
     transaction(null, runnable);
+  }
+
+  public static <T> T transaction(Integer level, Supplier<T> supplier) {
+    TransactionBuilder<T> builder = TransactionBuilder.create(dataSource, level, supplier);
+    try {
+      return builder.execute();
+    } catch (SQLException e) {
+      throw new SwiftJdbcException(e);
+    }
+  }
+
+  public static <T> T transaction(Supplier<T> supplier) {
+    return transaction(null, supplier);
   }
 
 }

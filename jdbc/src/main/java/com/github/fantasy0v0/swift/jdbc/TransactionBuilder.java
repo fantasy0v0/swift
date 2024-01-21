@@ -7,8 +7,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.text.NumberFormat;
+import java.util.function.Supplier;
 
-public class TransactionBuilder {
+public class TransactionBuilder<T> {
 
   // private static final ScopedValue<Connection> CONN = ScopedValue.newInstance();
 
@@ -18,14 +19,25 @@ public class TransactionBuilder {
 
   private final Runnable runnable;
 
+  private final Supplier<T> supplier;
+
   private Boolean oldAutoCommit;
 
   private Integer oldLevel;
 
-  TransactionBuilder(DataSource dataSource, Integer level, Runnable runnable) {
+  TransactionBuilder(DataSource dataSource, Integer level, Runnable runnable, Supplier<T> supplier) {
     this.dataSource = dataSource;
     this.level = level;
     this.runnable = runnable;
+    this.supplier = supplier;
+  }
+
+  static TransactionBuilder<Object> create(DataSource dataSource, Integer level, Runnable runnable) {
+    return new TransactionBuilder<>(dataSource, level, runnable, null);
+  }
+
+  static <T> TransactionBuilder<T> create(DataSource dataSource, Integer level, Supplier<T> supplier) {
+    return new TransactionBuilder<>(dataSource, level, null, supplier);
   }
 
   private ConnectionReference getConnection() throws SQLException {
@@ -64,7 +76,7 @@ public class TransactionBuilder {
     wrap.close();
   }
 
-  void execute() throws SQLException {
+  T execute() throws SQLException {
     LogUtil.performance().info("transaction begin");
     long startTime = System.nanoTime() / 1000;
     ConnectionReference ref = getConnection();
@@ -76,11 +88,18 @@ public class TransactionBuilder {
         LogUtil.common().debug("savepoint");
       }
       try {
-        runnable.run();
+        T result;
+        if (null != supplier) {
+          result = supplier.get();
+        } else {
+          runnable.run();
+          result = null;
+        }
         if (!ref.isInner()) {
           connection.commit();
           LogUtil.common().debug("commit");
         }
+        return result;
       } catch (Exception e) {
         if (null != savepoint) {
           connection.rollback(savepoint);
