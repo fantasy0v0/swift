@@ -251,13 +251,28 @@ public class Row {
     return null != value ? value.toLocalTime() : null;
   }
 
+  public LocalTime getLocalTime(String columnLabel) throws SQLException {
+    Time value = extract(resultSet -> resultSet.getTime(columnLabel));
+    return null != value ? value.toLocalTime() : null;
+  }
+
   public LocalDate getLocalDate(int columnIndex) throws SQLException {
     Date value = extract(resultSet -> resultSet.getDate(columnIndex));
     return null != value ? value.toLocalDate() : null;
   }
 
+  public LocalDate getLocalDate(String columnLabel) throws SQLException {
+    Date value = extract(resultSet -> resultSet.getDate(columnLabel));
+    return null != value ? value.toLocalDate() : null;
+  }
+
   public LocalDateTime getLocalDateTime(int columnIndex) throws SQLException {
     Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
+    return null != value ? value.toLocalDateTime() : null;
+  }
+
+  public LocalDateTime getLocalDateTime(String columnLabel) throws SQLException {
+    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
     return null != value ? value.toLocalDateTime() : null;
   }
 
