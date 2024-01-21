@@ -57,7 +57,7 @@ class SelectTest {
       exp("id > ?", 0),
       exp("status = ?", 2)
     );
-    sql += where(predicate);
+    sql = where(sql, predicate);
     parameters.addAll(predicate.getParameters());
     sql += " order by id asc";
     sql += " limit 20";
