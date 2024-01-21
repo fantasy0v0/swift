@@ -3,7 +3,7 @@ package com.github.fantasy0v0.swift.jdbc.predicate;
 import java.util.ArrayList;
 import java.util.List;
 
-class ConjunctionPredicate implements Predicate {
+public class ConjunctionPredicate implements Predicate {
 
   @Override
   public String toSQL() {
