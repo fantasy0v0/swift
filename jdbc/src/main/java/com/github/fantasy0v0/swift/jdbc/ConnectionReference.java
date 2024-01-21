@@ -4,7 +4,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-class ConnectionReference implements AutoCloseable {
+public class ConnectionReference implements AutoCloseable {
 
   private static final ThreadLocal<ConnectionReference> threadLocal = new ThreadLocal<>();
 
@@ -37,11 +37,11 @@ class ConnectionReference implements AutoCloseable {
     return referenceCounting > 0;
   }
 
-  Connection unwrap() {
+  public Connection unwrap() {
     return connection;
   }
 
-  static ConnectionReference getReference(DataSource dataSource) throws SQLException {
+  public static ConnectionReference getReference(DataSource dataSource) throws SQLException {
     ConnectionReference ref = threadLocal.get();
     if (null != ref) {
       return ref.reference();

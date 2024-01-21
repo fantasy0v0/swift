@@ -11,5 +11,6 @@
   <modules>
     <module>server</module>
     <module>jdbc</module>
+    <module>jdbc-junit-support</module>
   </modules>
 </project>
