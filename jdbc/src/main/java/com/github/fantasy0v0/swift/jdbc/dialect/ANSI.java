@@ -11,56 +11,6 @@ public class ANSI implements SQLDialect {
   public static final ANSI Instance = new ANSI();
 
   @Override
-  public Predicate equal(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate notEqual(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate lt(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate le(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate gt(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate ge(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate like(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate notLike(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate isNull(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
-  public Predicate isNotNull(String expression, Object... params) {
-    return null;
-  }
-
-  @Override
   public Query count(String sql, List<Object> params) {
     List<Object> countParams = new ArrayList<>();
     if (null != params && !params.isEmpty()) {

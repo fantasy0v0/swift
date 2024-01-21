@@ -23,20 +23,20 @@ public class UpdateTest {
       """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);
 
-    dataSource = DataSourceUtil.createPg();
-    JDBC.configuration(dataSource);
+    try (var dataSource1 = DataSourceUtil.createPg()) {
+      JDBC.configuration(dataSource1);
 
-    executed = JDBC.modify("""
+      executed = JDBC.modify("""
         update student set name = ? where id = ?
       """).execute("测试修改", 1);
-    Assertions.assertEquals(1, executed);
+      Assertions.assertEquals(1, executed);
 
-    Object[] result = JDBC.modify("""
+      Object[] result = JDBC.modify("""
         update student set name = ? where id = ? returning id
       """).fetch("测试修改1", 1);
-    Assertions.assertEquals(1, result.length);
-    Assertions.assertEquals(1L, result[0]);
-
+      Assertions.assertEquals(1, result.length);
+      Assertions.assertEquals(1L, result[0]);
+    }
   }
 
 }

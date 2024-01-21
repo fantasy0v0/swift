@@ -3,6 +3,7 @@ package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
+import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -64,5 +65,19 @@ class SelectTest {
       .fetch(Student::from);
     log.debug("student size: {}", students.size());
     Assertions.assertTrue(students.stream().allMatch(student -> 2 == student.status()));
+  }
+
+  @Test
+  void testJson() throws SQLException {
+    try(HikariDataSource dataSource = DataSourceUtil.createPg()) {
+      JDBC.configuration(dataSource);
+      List<String> result = select("""
+        select '{ "test": 123}'::jsonb
+        """).fetch(row -> {
+          return row.getString(1);
+        });
+      Assertions.assertEquals(1, result.size());
+      Assertions.assertEquals("{\"test\": 123}", result.getFirst());
+    }
   }
 }
