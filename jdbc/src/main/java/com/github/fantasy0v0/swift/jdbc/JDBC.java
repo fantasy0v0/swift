@@ -21,6 +21,10 @@ public final class JDBC {
     JDBC.dataSource = dataSource;
   }
 
+  public static DataSource getDataSource() {
+    return JDBC.dataSource;
+  }
+
   public static void configuration(SQLDialect dialect) {
     JDBC.dialect = dialect;
   }
