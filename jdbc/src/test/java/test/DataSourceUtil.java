@@ -51,7 +51,7 @@ public class DataSourceUtil {
   public static HikariDataSource createPg() throws SQLException {
     HikariConfig config = new HikariConfig();
     config.setDriverClassName("org.postgresql.Driver");
-    config.setJdbcUrl("jdbc:postgresql://172.16.8.2:5432/test");
+    config.setJdbcUrl("jdbc:postgresql://192.168.8.118:5432/test");
     config.setUsername("test");
     config.setPassword("test");
     HikariDataSource dataSource = new HikariDataSource(config);

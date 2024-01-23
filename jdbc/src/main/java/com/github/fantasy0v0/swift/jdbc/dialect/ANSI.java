@@ -1,7 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.dialect;
 
 import com.github.fantasy0v0.swift.jdbc.Query;
-import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;

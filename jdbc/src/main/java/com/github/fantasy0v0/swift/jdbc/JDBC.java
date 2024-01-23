@@ -8,7 +8,9 @@ import org.intellij.lang.annotations.Language;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public final class JDBC {
@@ -16,6 +18,8 @@ public final class JDBC {
   private static DataSource dataSource;
 
   private static SQLDialect dialect;
+
+  static final Map<Class<?>, ParameterHandler> handlerMap = new HashMap<>();
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
@@ -31,6 +35,10 @@ public final class JDBC {
 
   static SQLDialect getSQLDialect() {
     return null == dialect ? ANSI.Instance : dialect;
+  }
+
+  public static void setParameterHandler(Class<?> clazz, ParameterHandler parameterHandler) {
+    handlerMap.put(clazz, parameterHandler);
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {

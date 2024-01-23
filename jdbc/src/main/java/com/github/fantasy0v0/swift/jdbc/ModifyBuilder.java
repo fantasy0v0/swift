@@ -18,16 +18,16 @@ public class ModifyBuilder {
     this.sql = sql;
   }
 
-  public int execute(ParameterProcess parameterProcess, List<Object> params) {
+  public int execute(ParameterHandler parameterHandler, List<Object> params) {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return Utils.executeUpdate(ref.unwrap(), sql, params, parameterProcess);
+      return Utils.executeUpdate(ref.unwrap(), sql, params, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
   }
 
-  public int execute(ParameterProcess parameterProcess, Object... params) {
-    return execute(parameterProcess, Arrays.stream(params).toList());
+  public int execute(ParameterHandler parameterHandler, Object... params) {
+    return execute(parameterHandler, Arrays.stream(params).toList());
   }
 
   public int execute(List<Object> params) {
@@ -42,9 +42,9 @@ public class ModifyBuilder {
     return execute(null, (List<Object>) null);
   }
 
-  public int[] executeBatch(ParameterProcess parameterProcess, List<List<Object>> batch) {
+  public int[] executeBatch(ParameterHandler parameterHandler, List<List<Object>> batch) {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterProcess);
+      return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -54,11 +54,11 @@ public class ModifyBuilder {
     return executeBatch(null, batch);
   }
 
-  public <T> T fetch(ParameterProcess parameterProcess,
+  public <T> T fetch(ParameterHandler parameterHandler,
                      FetchMapper<T> mapper,
                      List<Object> params) {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return Utils.execute(ref.unwrap(), sql, params, parameterProcess, mapper);
+      return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
@@ -88,11 +88,11 @@ public class ModifyBuilder {
     return fetch(null, Utils::fetchByRow, null);
   }
 
-  public <T> List<T> fetchBatch(ParameterProcess parameterProcess,
+  public <T> List<T> fetchBatch(ParameterHandler parameterHandler,
                                 FetchMapper<T> mapper,
                                 List<List<Object>> params) {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), sql, params, parameterProcess, mapper);
+      return Utils.executeBatch(ref.unwrap(), sql, params, parameterHandler, mapper);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }

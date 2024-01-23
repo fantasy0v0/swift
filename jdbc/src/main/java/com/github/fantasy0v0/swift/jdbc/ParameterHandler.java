@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public interface ParameterProcess {
+public interface ParameterHandler {
 
   /**
    * 预编译参数处理
@@ -14,7 +14,7 @@ public interface ParameterProcess {
    * @param parameter 参数
    * @return 是否被处理, 如果自行设置了参数, 需要返回true, 否则返回false使用默认处理方法
    */
-  boolean process(Connection conn,
-                  PreparedStatement statement, int index,
-                  Object parameter) throws SQLException;
+  boolean handle(Connection conn,
+                 PreparedStatement statement, int index,
+                 Object parameter) throws SQLException;
 }

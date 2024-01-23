@@ -60,20 +60,20 @@ public class PagingBuilder {
     return count;
   }
 
-  private <T> List<T> getData(FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
+  private <T> List<T> getData(FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
     SQLDialect dialect = JDBC.getSQLDialect();
     Query query = dialect.paging(sql, params, pageNumber, pageSize);
-    return Utils.fetch(dataSource, query.sql(), query.params(), mapper, parameterProcess);
+    return Utils.fetch(dataSource, query.sql(), query.params(), mapper, parameterHandler);
   }
 
-  public <T> PagingData<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
+  public <T> PagingData<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
       long total = getTotal();
       long totalPages = 0;
       if (this.pageSize > 0) {
         totalPages = (total - 1) / this.pageSize + 1;
       }
-      List<T> data = getData(mapper, parameterProcess);
+      List<T> data = getData(mapper, parameterHandler);
       return new PagingData<>(total, totalPages, data);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);

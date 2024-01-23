@@ -30,9 +30,9 @@ public class SelectBuilder {
     return new PagingBuilder(dataSource, sql, params, number, size);
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
+  public <T> List<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
-      return Utils.fetch(dataSource, sql, params, mapper, parameterProcess);
+      return Utils.fetch(dataSource, sql, params, mapper, parameterHandler);
     } catch (Exception e) {
       throw new SwiftJdbcException(e);
     }
@@ -46,9 +46,9 @@ public class SelectBuilder {
     return fetch(Utils::fetchByRow);
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper, ParameterProcess parameterProcess) {
+  public <T> T fetchOne(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
-      return Utils.fetchOne(dataSource, sql, params, mapper, parameterProcess);
+      return Utils.fetchOne(dataSource, sql, params, mapper, parameterHandler);
     } catch (Exception e) {
       throw new SwiftJdbcException(e);
     }

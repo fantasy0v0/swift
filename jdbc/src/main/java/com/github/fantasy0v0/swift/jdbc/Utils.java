@@ -26,18 +26,18 @@ final class Utils {
 
   static <T> List<T> fetch(DataSource dataSource,
                            String sql, List<Object> params,
-                           FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
+                           FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
 
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return executeQuery(ref.unwrap(), sql, params, mapper, parameterProcess, false);
+      return executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, false);
     }
   }
 
   static <T> T fetchOne(DataSource dataSource,
                         String sql, List<Object> params,
-                        FetchMapper<T> mapper, ParameterProcess parameterProcess) throws SQLException {
+                        FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      List<T> list = executeQuery(ref.unwrap(), sql, params, mapper, parameterProcess, true);
+      List<T> list = executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, true);
       return list.isEmpty() ? null : list.getFirst();
     }
   }
@@ -61,13 +61,13 @@ final class Utils {
   static <T> List<T> executeQuery(Connection conn,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
-                                  ParameterProcess parameterProcess,
+                                  ParameterHandler parameterHandler,
                                   boolean firstOnly) throws SQLException {
     LogUtil.performance().info("executeQuery begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("executeQuery: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      fillStatementParams(conn, statement, params, parameterProcess);
+      fillStatementParams(conn, statement, params, parameterHandler);
       try (ResultSet resultSet = statement.executeQuery()) {
         return fetchByResultSet(resultSet, fetchMapper, firstOnly);
       }
@@ -80,13 +80,13 @@ final class Utils {
 
   static <T> T execute(Connection conn,
                        String sql, List<Object> params,
-                       ParameterProcess parameterProcess,
+                       ParameterHandler parameterHandler,
                        FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      fillStatementParams(conn, statement, params, parameterProcess);
+      fillStatementParams(conn, statement, params, parameterHandler);
       boolean result = statement.execute();
       if (!result) {
         return null;
@@ -104,14 +104,14 @@ final class Utils {
 
   static <T> List<T> executeBatch(Connection conn,
                             String sql, List<List<Object>> batch,
-                                  ParameterProcess parameterProcess,
+                                  ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("executeBatch begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("executeBatch: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
-        fillStatementParams(conn, statement, params, parameterProcess);
+        fillStatementParams(conn, statement, params, parameterHandler);
         statement.addBatch();
       }
       List<T> list = new ArrayList<>();
@@ -133,12 +133,12 @@ final class Utils {
 
   static int executeUpdate(Connection conn,
                            String sql, List<Object> params,
-                           ParameterProcess parameterProcess) throws SQLException {
+                           ParameterHandler parameterHandler) throws SQLException {
     LogUtil.performance().info("executeUpdate begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("executeUpdate: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      fillStatementParams(conn, statement, params, parameterProcess);
+      fillStatementParams(conn, statement, params, parameterHandler);
       return statement.executeUpdate();
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
@@ -149,13 +149,13 @@ final class Utils {
 
   static int[] executeUpdateBatch(Connection conn,
                                   String sql, List<List<Object>> batch,
-                                  ParameterProcess parameterProcess) throws SQLException {
+                                  ParameterHandler parameterHandler) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
-        fillStatementParams(conn, statement, params, parameterProcess);
+        fillStatementParams(conn, statement, params, parameterHandler);
         statement.addBatch();
       }
       return statement.executeBatch();
@@ -168,7 +168,7 @@ final class Utils {
 
   static void fillStatementParams(Connection conn,
                                   PreparedStatement statement, List<Object> params,
-                                  ParameterProcess parameterProcess) throws SQLException {
+                                  ParameterHandler parameterHandler) throws SQLException {
     if (null == params) {
       LogUtil.sql().debug("parameter is null");
       return;
@@ -177,16 +177,25 @@ final class Utils {
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
 
+      // 优先使用参数中的parameterHandler
       boolean result = false;
-      if (null != parameterProcess) {
-        result = parameterProcess.process(conn, statement, index + 1, parameter);
+      if (null != parameterHandler) {
+        result = parameterHandler.handle(conn, statement, index + 1, parameter);
       }
-      // 使用默认的处理方法
+
       if (result) {
-        LogUtil.sql().trace("fill parameter: [{}] - [{}], use parameter process", index + 1, parameter);
+        LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
       } else {
-        LogUtil.sql().trace("fill parameter: [{}] - [{}], use default process", index + 1, parameter);
-        // TODO 后期维护到map中
+        ParameterHandler handler = JDBC.handlerMap.get(parameter.getClass());
+        if (null != handler) {
+          result = handler.handle(conn, statement, index + 1, parameter);
+          if (result) {
+            LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
+            continue;
+          }
+        }
+        // 使用默认的处理方法
+        LogUtil.sql().trace("fill parameter: [{}] - [{}], use default handler", index + 1, parameter);
         switch (parameter) {
           case Byte param -> statement.setByte(index + 1, param);
           case Short param -> statement.setShort(index + 1, param);
