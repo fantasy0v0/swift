@@ -25,6 +25,23 @@ public class Row {
     return resultSet.getMetaData().getColumnLabel(column);
   }
 
+  public int getColumnType(int column) throws SQLException {
+    return resultSet.getMetaData().getColumnType(column);
+  }
+
+  public int findColumnIndex(String expected) throws SQLException {
+    if (null == expected || expected.isBlank()) {
+      return -1;
+    }
+    for (int index = 1; index <= getColumnCount(); index++) {
+      String actual = getColumnLabel(index);
+      if (expected.equals(actual)) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
   private <T> T extract(FunctionWithException<T> function) throws SQLException {
     T value = function.apply(resultSet);
     return resultSet.wasNull() ? null : value;
