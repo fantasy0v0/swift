@@ -33,14 +33,14 @@
       <groupId>io.helidon.webclient</groupId>
       <artifactId>helidon-webclient</artifactId>
     </dependency>
-    <!--<dependency>
+    <dependency>
       <groupId>io.helidon.webserver.observe</groupId>
       <artifactId>helidon-webserver-observe-health</artifactId>
-    </dependency>-->
-    <!--<dependency>
+    </dependency>
+    <dependency>
       <groupId>io.helidon.health</groupId>
       <artifactId>helidon-health-checks</artifactId>
-    </dependency>-->
+    </dependency>
     <dependency>
       <groupId>jakarta.json</groupId>
       <artifactId>jakarta.json-api</artifactId>
