@@ -5,7 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,7 +13,7 @@ public class DataSourceUtil {
 
   private final static Logger log = LoggerFactory.getLogger(DataSourceUtil.class);
 
-  public static DataSource create() throws SQLException {
+  public static HikariDataSource create() throws SQLException {
     HikariConfig config = new HikariConfig();
     config.setDriverClassName("org.h2.Driver");
     config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");

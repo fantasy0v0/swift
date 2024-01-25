@@ -3,6 +3,7 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.typehandles.*;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
@@ -20,6 +21,18 @@ public final class JDBC {
   private static SQLDialect dialect;
 
   static final Map<Class<?>, TypeHandler<?>> handlerMap = new HashMap<>();
+
+  static {
+    configuration(new ByteTypeHandler());
+    configuration(new ShortTypeHandler());
+    configuration(new IntegerTypeHandler());
+    configuration(new FloatTypeHandler());
+    configuration(new DoubleTypeHandler());
+    configuration(new LongTypeHandler());
+    configuration(new BooleanTypeHandler());
+    configuration(new StringTypeHandler());
+    configuration(new LocalDateTimeTypeHandler());
+  }
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;

@@ -197,23 +197,11 @@ final class Utils {
               continue;
             }
           }
-        }
-        // 使用默认的处理方法
-        LogUtil.sql().trace("fill parameter: [{}] - [{}], use default handler", index + 1, parameter);
-        switch (parameter) {
-          case Byte param -> statement.setByte(index + 1, param);
-          case Short param -> statement.setShort(index + 1, param);
-          case Integer param -> statement.setInt(index + 1, param);
-          case Float param -> statement.setFloat(index + 1, param);
-          case Double param -> statement.setDouble(index + 1, param);
-          case Long param -> statement.setLong(index + 1, param);
-          case Boolean param -> statement.setBoolean(index + 1, param);
-          case String param -> statement.setString(index + 1, param);
-          case null -> statement.setNull(index + 1, Types.NULL);
-          default -> {
-            LogUtil.sql().debug("fill parameter use setObject, parameter class:{}", parameter.getClass());
-            statement.setObject(index + 1, parameter);
-          }
+          LogUtil.sql().debug("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
+          statement.setObject(index + 1, parameter);
+        } else {
+          LogUtil.sql().debug("fill parameter: [{}] - [null], use setNull", index + 1);
+          statement.setNull(index + 1, Types.NULL);
         }
       }
     }
