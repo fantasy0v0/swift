@@ -187,7 +187,7 @@ final class Utils {
       if (result) {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
       } else {
-        TypeHandler<?> handler = null;
+        TypeHandler<?> handler;
         if (null != parameter) {
           handler = JDBC.handlerMap.get(parameter.getClass());
           if (null != handler) {
