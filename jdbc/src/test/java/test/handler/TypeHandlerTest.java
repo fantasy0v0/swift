@@ -7,11 +7,10 @@ import org.junit.jupiter.api.Test;
 import test.DataSourceUtil;
 import test.vo.Student;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,9 +57,16 @@ class TypeHandlerTest {
       String p8 = "test";
       Object p9 = null;
       LocalDateTime p10 = LocalDateTime.now();
+      LocalTime p11 = LocalTime.now();
+      LocalDate p12 = LocalDate.now();
       Object[] result = select("""
-        select ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-        """, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10).fetchOne();
+          select
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?
+          """,
+        p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,
+        p11, p12
+      ).fetchOne();
       assertEquals(p1, result[0]);
       assertEquals(p2.intValue(), result[1]);
       assertEquals(p3, result[2]);
@@ -71,6 +77,8 @@ class TypeHandlerTest {
       assertEquals(p8, result[7]);
       assertNull(result[8]);
       assertEquals(Timestamp.valueOf(p10), result[9]);
+      assertEquals(Time.valueOf(p11), result[10]);
+      assertEquals(Date.valueOf(p12), result[11]);
     }
 
   }

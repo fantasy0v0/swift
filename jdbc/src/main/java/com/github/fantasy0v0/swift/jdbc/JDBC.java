@@ -31,6 +31,8 @@ public final class JDBC {
     configuration(new LongTypeHandler());
     configuration(new BooleanTypeHandler());
     configuration(new StringTypeHandler());
+    configuration(new LocalTimeTypeHandler());
+    configuration(new LocalDateTypeHandler());
     configuration(new LocalDateTimeTypeHandler());
   }
 
