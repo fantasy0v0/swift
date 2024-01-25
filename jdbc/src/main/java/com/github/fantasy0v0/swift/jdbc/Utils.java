@@ -187,12 +187,15 @@ final class Utils {
       if (result) {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
       } else {
-        TypeHandler<?> handler = JDBC.handlerMap.get(parameter.getClass());
-        if (null != handler) {
-          result = ((TypeHandler<Object>) handler).handle(conn, statement, index + 1, parameter);
-          if (result) {
-            LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
-            continue;
+        TypeHandler<?> handler = null;
+        if (null != parameter) {
+          handler = JDBC.handlerMap.get(parameter.getClass());
+          if (null != handler) {
+            result = ((TypeHandler<Object>) handler).handle(conn, statement, index + 1, parameter);
+            if (result) {
+              LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
+              continue;
+            }
           }
         }
         // 使用默认的处理方法

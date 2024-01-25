@@ -16,26 +16,26 @@ public class ConnectionReference implements AutoCloseable {
   private final Connection connection;
 
   ConnectionReference(Connection connection) {
-    LogUtil.common().debug("connection create");
+    LogUtil.common().debug("connection create rc:{}", referenceCounting);
     this.connection = connection;
     threadLocal.set(this);
   }
 
   public ConnectionReference reference() {
-    LogUtil.common().debug("connection reference");
     referenceCounting += 1;
+    LogUtil.common().debug("connection reference rc:{}", referenceCounting);
     return this;
   }
 
   @Override
   public void close() throws SQLException {
-    LogUtil.common().debug("connection close");
     if (0 == referenceCounting) {
       threadLocal.remove();
       connection.close();
-      LogUtil.common().debug("connection clear");
+      LogUtil.common().debug("connection clear rc:{}", referenceCounting);
     } else {
       referenceCounting -= 1;
+      LogUtil.common().debug("connection close rc:{}", referenceCounting);
     }
   }
 
