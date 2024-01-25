@@ -9,5 +9,6 @@ module swift.jdbc.test {
 
   opens test to org.junit.platform.commons;
   opens test.predicate to org.junit.platform.commons;
+  opens test.handler to org.junit.platform.commons;
 
 }

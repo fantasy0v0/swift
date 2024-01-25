@@ -166,6 +166,7 @@ final class Utils {
     }
   }
 
+  @SuppressWarnings("unchecked")
   static void fillStatementParams(Connection conn,
                                   PreparedStatement statement, List<Object> params,
                                   ParameterHandler parameterHandler) throws SQLException {
@@ -186,9 +187,9 @@ final class Utils {
       if (result) {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
       } else {
-        ParameterHandler handler = JDBC.handlerMap.get(parameter.getClass());
+        TypeHandler<?> handler = JDBC.handlerMap.get(parameter.getClass());
         if (null != handler) {
-          result = handler.handle(conn, statement, index + 1, parameter);
+          result = ((TypeHandler<Object>) handler).handle(conn, statement, index + 1, parameter);
           if (result) {
             LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
             continue;

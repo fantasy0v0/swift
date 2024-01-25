@@ -19,7 +19,7 @@ public final class JDBC {
 
   private static SQLDialect dialect;
 
-  static final Map<Class<?>, ParameterHandler> handlerMap = new HashMap<>();
+  static final Map<Class<?>, TypeHandler<?>> handlerMap = new HashMap<>();
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
@@ -37,8 +37,8 @@ public final class JDBC {
     return null == dialect ? ANSI.Instance : dialect;
   }
 
-  public static void setParameterHandler(Class<?> clazz, ParameterHandler parameterHandler) {
-    handlerMap.put(clazz, parameterHandler);
+  public static <T> void configuration(TypeHandler<T> typeHandler) {
+    handlerMap.put(typeHandler.supported(), typeHandler);
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {
