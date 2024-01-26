@@ -3,7 +3,9 @@ package test;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.PagingData;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
+import com.zaxxer.hikari.HikariDataSource;
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.vo.Student;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
@@ -22,10 +23,19 @@ class PagingTest {
 
   private final Logger log = LoggerFactory.getLogger(PagingTest.class);
 
+  private static HikariDataSource dataSource;
+
   @BeforeAll
   static void beforeAll() throws SQLException {
-    DataSource dataSource = DataSourceUtil.create();
+    dataSource = DataSourceUtil.create();
     JDBC.configuration(dataSource);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    if (null != dataSource) {
+      dataSource.close();
+    }
   }
 
   @Test

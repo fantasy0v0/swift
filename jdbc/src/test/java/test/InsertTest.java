@@ -2,13 +2,14 @@ package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.exception.WorkException;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,23 @@ public class InsertTest {
 
   private final Logger log = LoggerFactory.getLogger(InsertTest.class);
 
-  @Test
-  void test() throws SQLException {
-    DataSource dataSource = DataSourceUtil.create();
-    JDBC.configuration(dataSource);
+  private static HikariDataSource dataSource;
 
+  @BeforeAll
+  static void beforeAll() throws SQLException {
+    dataSource = DataSourceUtil.create();
+    JDBC.configuration(dataSource);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    if (null != dataSource) {
+      dataSource.close();
+    }
+  }
+
+  @Test
+  void test() {
     Assertions.assertThrowsExactly(WorkException.class, () -> {
       transaction(() -> {
         int executed = JDBC.modify("""
@@ -52,10 +65,7 @@ public class InsertTest {
   }
 
   @Test
-  void testBatch() throws SQLException {
-    DataSource dataSource = DataSourceUtil.create();
-    JDBC.configuration(dataSource);
-
+  void testBatch() {
     List<List<Object>> batchParams = new ArrayList<>();
     batchParams.add(List.of(1000, "测试用户1", 0));
     batchParams.add(List.of(1001, "测试用户2", 1));
@@ -77,13 +87,14 @@ public class InsertTest {
   void fetch() throws SQLException {
     try (HikariDataSource dataSource = DataSourceUtil.createPg()) {
       JDBC.configuration(dataSource);
-
       Object[] result = JDBC.modify("""
         insert into student(id, name, status)
         values(?, ?, ?)
         returning id""").fetch(1000L, "测试学生", 0);
       Assertions.assertEquals(1, result.length);
       Assertions.assertEquals(1000L, result[0]);
+    } finally {
+      JDBC.configuration(dataSource);
     }
   }
 }
