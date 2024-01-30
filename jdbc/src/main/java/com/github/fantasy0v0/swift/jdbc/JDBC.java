@@ -4,6 +4,7 @@ import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
 import com.github.fantasy0v0.swift.jdbc.typehandles.*;
+import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
@@ -46,6 +47,7 @@ public final class JDBC {
 
   public static void configuration(SQLDialect dialect) {
     JDBC.dialect = dialect;
+    LogUtil.common().debug("配置方言");
   }
 
   static SQLDialect getSQLDialect() {
@@ -53,6 +55,10 @@ public final class JDBC {
   }
 
   public static <T> void configuration(TypeHandler<T> typeHandler) {
+    Class<T> supported = typeHandler.supported();
+    if (handlerMap.containsKey(supported)) {
+      LogUtil.common().debug("原有的 {} handler将被替换", supported);
+    }
     handlerMap.put(typeHandler.supported(), typeHandler);
   }
 
@@ -60,6 +66,7 @@ public final class JDBC {
     if (null == dataSource) {
       throw new SwiftJdbcException("未配置DataSource");
     }
+    LogUtil.common().debug("配置数据源");
     return dataSource;
   }
 
