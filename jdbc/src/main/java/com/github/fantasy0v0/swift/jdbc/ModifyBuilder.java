@@ -54,38 +54,73 @@ public class ModifyBuilder {
     return executeBatch(null, batch);
   }
 
-  public <T> T fetch(ParameterHandler parameterHandler,
+  public <T> List<T> fetch(ParameterHandler parameterHandler,
                      FetchMapper<T> mapper,
                      List<Object> params) {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
-      return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper);
+      return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, false);
     } catch (SQLException e) {
       throw new SwiftJdbcException(e);
     }
   }
 
-  public <T> T fetch(FetchMapper<T> mapper, List<Object> params) {
+  public <T> List<T> fetch(FetchMapper<T> mapper, List<Object> params) {
     return fetch(null, mapper, params);
   }
 
-  public <T> T fetch(FetchMapper<T> mapper, Object... params) {
+  public <T> List<T> fetch(FetchMapper<T> mapper, Object... params) {
     return fetch(mapper, Arrays.stream(params).toList());
   }
 
-  public <T> T fetch(FetchMapper<T> mapper) {
+  public <T> List<T> fetch(FetchMapper<T> mapper) {
     return fetch(null, mapper, null);
   }
 
-  public Object[] fetch(List<Object> params) {
+  public List<Object[]> fetch(List<Object> params) {
     return fetch(null, Utils::fetchByRow, params);
   }
 
-  public Object[] fetch(Object... params) {
+  public List<Object[]> fetch(Object... params) {
     return fetch(Utils::fetchByRow, params);
   }
 
-  public Object[] fetch() {
+  public List<Object[]> fetch() {
     return fetch(null, Utils::fetchByRow, null);
+  }
+
+  public <T> T fetchOne(ParameterHandler parameterHandler,
+                        FetchMapper<T> mapper,
+                        List<Object> params) {
+    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+      List<T> list = Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, true);
+      return (list == null || list.isEmpty()) ? null : list.getFirst();
+    } catch (SQLException e) {
+      throw new SwiftJdbcException(e);
+    }
+  }
+
+  public <T> T fetchOne(FetchMapper<T> mapper, List<Object> params) {
+    return fetchOne(null, mapper, params);
+  }
+
+  public <T> T fetchOne(FetchMapper<T> mapper, Object... params) {
+    return fetchOne(mapper, Arrays.stream(params).toList());
+  }
+
+  public <T> T fetchOne(FetchMapper<T> mapper) {
+    return fetchOne(null, mapper, null);
+  }
+
+  public Object[] fetchOne(List<Object> params) {
+    return fetchOne(null, Utils::fetchByRow, params);
+  }
+
+  public Object[] fetchOne(Object... params) {
+    return fetchOne(Utils::fetchByRow, params);
+  }
+
+  public Object[] fetchOne() {
+    return fetchOne(null, Utils::fetchByRow, null);
   }
 
   public <T> List<T> fetchBatch(ParameterHandler parameterHandler,

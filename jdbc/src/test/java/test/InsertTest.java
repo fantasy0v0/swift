@@ -87,12 +87,12 @@ public class InsertTest {
   void fetch() throws SQLException {
     try (HikariDataSource dataSource = DataSourceUtil.createPg()) {
       JDBC.configuration(dataSource);
-      Object[] result = JDBC.modify("""
+      List<Object[]> result = JDBC.modify("""
         insert into student(id, name, status)
         values(?, ?, ?)
         returning id""").fetch(1000L, "测试学生", 0);
-      Assertions.assertEquals(1, result.length);
-      Assertions.assertEquals(1000L, result[0]);
+      Assertions.assertEquals(1, result.size());
+      Assertions.assertEquals(1000L, result.getFirst()[0]);
     } finally {
       JDBC.configuration(dataSource);
     }

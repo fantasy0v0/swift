@@ -78,10 +78,10 @@ final class Utils {
     }
   }
 
-  static <T> T execute(Connection conn,
+  static <T> List<T> execute(Connection conn,
                        String sql, List<Object> params,
                        ParameterHandler parameterHandler,
-                       FetchMapper<T> mapper) throws SQLException {
+                             FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     LogUtil.sql().debug("execute: {}", sql);
@@ -92,8 +92,7 @@ final class Utils {
         return null;
       }
       try (ResultSet resultSet = statement.getResultSet()) {
-        List<T> list = fetchByResultSet(resultSet, mapper, true);
-        return list.isEmpty() ? null : list.getFirst();
+        return fetchByResultSet(resultSet, mapper, firstOnly);
       }
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;

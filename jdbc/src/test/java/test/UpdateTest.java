@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class UpdateTest {
 
@@ -45,11 +46,16 @@ public class UpdateTest {
       """).execute("测试修改", 1);
       Assertions.assertEquals(1, executed);
 
-      Object[] result = JDBC.modify("""
+      List<Object[]> result = JDBC.modify("""
         update student set name = ? where id = ? returning id
       """).fetch("测试修改1", 1);
-      Assertions.assertEquals(1, result.length);
-      Assertions.assertEquals(1L, result[0]);
+      Assertions.assertEquals(1, result.size());
+      Assertions.assertEquals(1L, result.getFirst()[0]);
+
+      result = JDBC.modify("""
+          update student set name = ? returning id
+        """).fetch("测试修改1");
+      Assertions.assertTrue(result.size() > 1);
     } finally {
       JDBC.configuration(dataSource);
     }
