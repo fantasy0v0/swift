@@ -58,6 +58,7 @@ public class DataSourceUtil {
       try (Statement statement = connection.createStatement()) {
         boolean executed = statement.execute("""
           drop table if exists student;
+          drop table if exists datetime_test;
           """);
         log.debug("ddl: {}", executed);
         executed = statement.execute("""
@@ -67,6 +68,10 @@ public class DataSourceUtil {
               status INT NOT NULL,
               ext    text
             );
+          CREATE TABLE datetime_test (
+            id     bigint    NOT NULL,
+            date   timestamp NOT NULL
+          );
           """);
         log.debug("ddl: {}", executed);
         statement.execute("""

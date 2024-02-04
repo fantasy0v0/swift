@@ -32,9 +32,11 @@ public final class JDBC {
     configuration(new LongTypeHandler());
     configuration(new BooleanTypeHandler());
     configuration(new StringTypeHandler());
+    configuration(new TimestampTypeHandler());
     configuration(new LocalTimeTypeHandler());
     configuration(new LocalDateTypeHandler());
     configuration(new LocalDateTimeTypeHandler());
+    configuration(new OffsetDateTimeTypeHandler());
   }
 
   public static void configuration(DataSource dataSource) {

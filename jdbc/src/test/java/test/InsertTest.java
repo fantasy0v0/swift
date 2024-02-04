@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import test.exception.WorkException;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,6 +96,28 @@ public class InsertTest {
         returning id""").fetch(1000L, "测试学生", 0);
       Assertions.assertEquals(1, result.size());
       Assertions.assertEquals(1000L, result.getFirst()[0]);
+    } finally {
+      JDBC.configuration(dataSource);
+    }
+  }
+
+  @Test
+  void testDateTime() throws SQLException {
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    LocalDateTime localDateTime = LocalDateTime.of(1600, 1, 1, 0, 0, 0, 0);
+    try (HikariDataSource dataSource = DataSourceUtil.createPg()) {
+      JDBC.configuration(dataSource);
+      List<Object[]> objects = JDBC.modify("""
+          insert into datetime_test(id, date)
+          values(?, ?) returning date
+        """).fetch(1, offsetDateTime);
+      log.debug("value: {}", objects.getFirst()[0]);
+
+      objects = JDBC.modify("""
+          insert into datetime_test(id, date)
+          values(?, ?) returning date
+        """).fetch(1, localDateTime);
+      log.debug("value: {}", objects.getFirst()[0]);
     } finally {
       JDBC.configuration(dataSource);
     }

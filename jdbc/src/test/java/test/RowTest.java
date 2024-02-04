@@ -89,6 +89,24 @@ class RowTest {
         return null != value ? value.toLocalDateTime() : null;
       }
 
+      public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
+        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
+        if (null != value) {
+          LocalDateTime localDateTime = value.toLocalDateTime();
+          return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+        }
+        return null;
+      }
+
+      public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
+        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
+        if (null != value) {
+          LocalDateTime localDateTime = value.toLocalDateTime();
+          return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+        }
+        return null;
+      }
+
       public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         return extract(resultSet -> resultSet.getObject(columnIndex, type));
       }

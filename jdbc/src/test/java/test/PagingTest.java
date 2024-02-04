@@ -39,7 +39,7 @@ class PagingTest {
   }
 
   @Test
-  void testWithOutWhere() throws SQLException {
+  void testWithOutWhere() {
     PagingData<Student> data = select("select * from student")
       .paging(0, 10)
       .fetch(Student::from);
