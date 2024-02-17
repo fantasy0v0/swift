@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 class RowTest {
@@ -92,8 +93,7 @@ class RowTest {
       public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
         Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
         if (null != value) {
-          LocalDateTime localDateTime = value.toLocalDateTime();
-          return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+          return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
         }
         return null;
       }
@@ -101,8 +101,7 @@ class RowTest {
       public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
         Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
         if (null != value) {
-          LocalDateTime localDateTime = value.toLocalDateTime();
-          return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+          return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
         }
         return null;
       }
@@ -117,6 +116,7 @@ class RowTest {
     addPackages(packages, LocalTime.class);
     addPackages(packages, LocalDate.class);
     addPackages(packages, LocalDateTime.class);
+    addPackages(packages, OffsetDateTime.class);
     StringBuilder classBuffer = new StringBuilder();
     classBuffer.append(System.lineSeparator());
     classBuffer.append("package com.github.fantasy0v0.swift.jdbc;");

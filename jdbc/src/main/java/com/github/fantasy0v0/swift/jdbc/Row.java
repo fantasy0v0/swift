@@ -294,8 +294,7 @@ public class Row {
   public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
     Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
     if (null != value) {
-      LocalDateTime localDateTime = value.toLocalDateTime();
-      return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+      return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
     }
     return null;
   }
@@ -303,8 +302,7 @@ public class Row {
   public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
     Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
     if (null != value) {
-      LocalDateTime localDateTime = value.toLocalDateTime();
-      return OffsetDateTime.of(localDateTime, ZoneOffset.UTC);
+      return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
     }
     return null;
   }
