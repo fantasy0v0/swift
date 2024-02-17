@@ -10,11 +10,6 @@ import java.util.List;
 
 final class Utils {
 
-  @Deprecated
-  static Connection getConnection(DataSource dataSource) throws SQLException {
-    return dataSource.getConnection();
-  }
-
   static Object[] fetchByRow(Row row) throws SQLException {
     int columnCount = row.getColumnCount();
     Object[] array = new Object[columnCount];
@@ -79,8 +74,8 @@ final class Utils {
   }
 
   static <T> List<T> execute(Connection conn,
-                       String sql, List<Object> params,
-                       ParameterHandler parameterHandler,
+                             String sql, List<Object> params,
+                             ParameterHandler parameterHandler,
                              FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
@@ -102,7 +97,7 @@ final class Utils {
   }
 
   static <T> List<T> executeBatch(Connection conn,
-                            String sql, List<List<Object>> batch,
+                                  String sql, List<List<Object>> batch,
                                   ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("executeBatch begin");
