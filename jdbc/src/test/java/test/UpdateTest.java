@@ -61,4 +61,13 @@ public class UpdateTest {
     }
   }
 
+  @Test
+  void testArrayParams() {
+    Object[] params = {"测试修改", 1};
+    int executed = JDBC.modify("""
+        update student set name = ? where id = ?
+      """).execute(params);
+    Assertions.assertEquals(1, executed);
+  }
+
 }
