@@ -139,12 +139,12 @@ public class PredicateTest {
 
   @Test
   void inTest() {
-    Predicate predicate = in("id", List.of(1));
+    Predicate predicate = in("id", List.of(1, 2));
     String sql = predicate.toSQL();
     List<Object> parameters = predicate.getParameters();
     log.info("sql: {}", sql);
-    Assertions.assertEquals("id in(?)", sql);
-    Assertions.assertEquals(1, parameters.size());
+    Assertions.assertEquals("id in(?,?)", sql);
+    Assertions.assertEquals(2, parameters.size());
 
     predicate = in("id", 1, 2, 3);
     sql = predicate.toSQL();
@@ -163,6 +163,16 @@ public class PredicateTest {
     log.info("sql: {}", sql);
     Assertions.assertEquals("id not in(?,?,?)", sql);
     Assertions.assertEquals(3, parameters.size());
+
+    predicate = and(
+      exp("role = ?", 0),
+      in("id", List.of(1, 2, 3))
+    );
+    sql = predicate.toSQL();
+    parameters = predicate.getParameters();
+    log.info("sql: {}", sql);
+    Assertions.assertEquals("role = ? and id in(?,?,?)", sql);
+    Assertions.assertEquals(4, parameters.size());
   }
 
 }
