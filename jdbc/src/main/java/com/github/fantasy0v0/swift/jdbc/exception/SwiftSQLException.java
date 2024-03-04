@@ -2,7 +2,7 @@ package com.github.fantasy0v0.swift.jdbc.exception;
 
 import java.sql.SQLException;
 
-public class SwiftSQLException extends RuntimeException {
+public class SwiftSQLException extends SwiftException {
 
   /**
    * @serial
@@ -16,12 +16,6 @@ public class SwiftSQLException extends RuntimeException {
 
   public SwiftSQLException(SQLException cause) {
     super(cause);
-  }
-
-  public SwiftSQLException(String message, SQLException cause) {
-    super(message, cause);
-    this.sqlState = cause.getSQLState();
-    this.vendorCode = cause.getErrorCode();
   }
 
   /**

@@ -10,4 +10,8 @@ public class SwiftException extends RuntimeException {
     super(message);
   }
 
+  public SwiftException(Throwable throwable) {
+    super(throwable);
+  }
+
 }
