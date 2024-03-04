@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.predicate;
 
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ public class InPredicate implements Predicate {
     this.not = not;
     this.expression = expression;
     if (parameters.isEmpty()) {
-      throw new SwiftJdbcException("parameters为空");
+      throw new SwiftException("parameters为空");
     } else {
       this.parameters = parameters;
     }

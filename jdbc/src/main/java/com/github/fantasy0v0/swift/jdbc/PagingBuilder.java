@@ -1,7 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -55,7 +56,7 @@ public class PagingBuilder {
     Long count = Utils.fetchOne(dataSource, _countSql, _countParams,
       row -> row.getLong(1), null);
     if (null == count) {
-      throw new SwiftJdbcException("没有获取到总记录数, 请检查sql语句是否正确");
+      throw new SwiftException("没有获取到总记录数, 请检查sql语句是否正确");
     }
     return count;
   }
@@ -76,7 +77,7 @@ public class PagingBuilder {
       List<T> data = getData(mapper, parameterHandler);
       return new PagingData<>(total, totalPages, data);
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 

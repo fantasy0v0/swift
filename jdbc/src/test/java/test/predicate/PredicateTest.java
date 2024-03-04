@@ -1,6 +1,6 @@
 package test.predicate;
 
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -153,7 +153,7 @@ public class PredicateTest {
     Assertions.assertEquals("id in(?,?,?)", sql);
     Assertions.assertEquals(3, parameters.size());
 
-    Assertions.assertThrows(SwiftJdbcException.class, () -> {
+    Assertions.assertThrows(SwiftException.class, () -> {
       in("id").toSQL();
     });
 

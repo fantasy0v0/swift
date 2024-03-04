@@ -1,8 +1,9 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.List;
 
 public class SelectBuilder {
@@ -33,8 +34,8 @@ public class SelectBuilder {
   public <T> List<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
       return Utils.fetch(dataSource, sql, params, mapper, parameterHandler);
-    } catch (Exception e) {
-      throw new SwiftJdbcException(e);
+    } catch (SQLException e) {
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -49,8 +50,8 @@ public class SelectBuilder {
   public <T> T fetchOne(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
       return Utils.fetchOne(dataSource, sql, params, mapper, parameterHandler);
-    } catch (Exception e) {
-      throw new SwiftJdbcException(e);
+    } catch (SQLException e) {
+      throw new SwiftSQLException(e);
     }
   }
 

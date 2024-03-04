@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -22,7 +22,7 @@ public class ModifyBuilder {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
       return Utils.executeUpdate(ref.unwrap(), sql, params, parameterHandler);
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -46,7 +46,7 @@ public class ModifyBuilder {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
       return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterHandler);
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -60,7 +60,7 @@ public class ModifyBuilder {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
       return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, false);
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -95,7 +95,7 @@ public class ModifyBuilder {
       List<T> list = Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, true);
       return (list == null || list.isEmpty()) ? null : list.getFirst();
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -129,7 +129,7 @@ public class ModifyBuilder {
     try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
       return Utils.executeBatch(ref.unwrap(), sql, params, parameterHandler, mapper);
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 

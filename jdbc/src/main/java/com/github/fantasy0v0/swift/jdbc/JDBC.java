@@ -2,7 +2,8 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftJdbcException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 import com.github.fantasy0v0.swift.jdbc.typehandles.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import org.intellij.lang.annotations.Language;
@@ -66,7 +67,7 @@ public final class JDBC {
 
   private static DataSource requireNonNull(DataSource dataSource) {
     if (null == dataSource) {
-      throw new SwiftJdbcException("未配置DataSource");
+      throw new SwiftException("未配置DataSource");
     }
     LogUtil.common().debug("配置数据源");
     return dataSource;
@@ -89,7 +90,7 @@ public final class JDBC {
     try {
       builder.execute();
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
@@ -102,7 +103,7 @@ public final class JDBC {
     try {
       return builder.execute();
     } catch (SQLException e) {
-      throw new SwiftJdbcException(e);
+      throw new SwiftSQLException(e);
     }
   }
 
