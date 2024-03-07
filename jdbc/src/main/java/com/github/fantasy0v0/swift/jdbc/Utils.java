@@ -58,23 +58,21 @@ final class Utils {
    */
   static String printCallerInfo() {
     if (!LogUtil.sql().isDebugEnabled()) {
-      return "need enable debug log level";
+      return "need to enable the debug log level";
     }
-    StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-    if (stackTraceElements.length < 1) {
+    var optional = StackWalker.getInstance().walk(s ->
+      s.skip(1)
+        .filter(f -> !f.getClassName().startsWith("com.github.fantasy0v0.swift.jdbc"))
+        .findFirst()
+    );
+    if (optional.isEmpty()) {
       return "not found";
     }
-    for (int index = 1; index < stackTraceElements.length; index++) {
-      StackTraceElement stackTraceElement = stackTraceElements[index];
-      String className = stackTraceElement.getClassName();
-      if (className.startsWith("com.github.fantasy0v0.swift.jdbc")) {
-        continue;
-      }
-      String fileName = stackTraceElement.getFileName();
-      int lineNumber = stackTraceElement.getLineNumber();
-      return "%s(%s:%d)".formatted(className, fileName, lineNumber);
-    }
-    return "not found";
+    var stackFrame = optional.get();
+    String className = stackFrame.getClassName();
+    String fileName = stackFrame.getFileName();
+    int lineNumber = stackFrame.getLineNumber();
+    return "%s(%s:%d)".formatted(className, fileName, lineNumber);
   }
 
   static <T> List<T> executeQuery(Connection conn,
