@@ -53,6 +53,30 @@ final class Utils {
     return array;
   }
 
+  /**
+   * @return 打印调用者信息, 方便定位
+   */
+  static String printCallerInfo() {
+    if (!LogUtil.sql().isDebugEnabled()) {
+      return "need enable debug log level";
+    }
+    StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+    if (stackTraceElements.length < 1) {
+      return "not found";
+    }
+    for (int index = 1; index < stackTraceElements.length; index++) {
+      StackTraceElement stackTraceElement = stackTraceElements[index];
+      String className = stackTraceElement.getClassName();
+      if (className.startsWith("com.github.fantasy0v0.swift.jdbc")) {
+        continue;
+      }
+      String fileName = stackTraceElement.getFileName();
+      int lineNumber = stackTraceElement.getLineNumber();
+      return "%s(%s:%d)".formatted(className, fileName, lineNumber);
+    }
+    return "not found";
+  }
+
   static <T> List<T> executeQuery(Connection conn,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
@@ -60,7 +84,8 @@ final class Utils {
                                   boolean firstOnly) throws SQLException {
     LogUtil.performance().info("executeQuery begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("executeQuery: {}", sql);
+    String callerInfo = printCallerInfo();
+    LogUtil.sql().debug("executeQuery: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       try (ResultSet resultSet = statement.executeQuery()) {
@@ -79,7 +104,8 @@ final class Utils {
                              FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("execute: {}", sql);
+    String callerInfo = printCallerInfo();
+    LogUtil.sql().debug("execute: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       boolean result = statement.execute();
@@ -102,7 +128,8 @@ final class Utils {
                                   FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("executeBatch begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("executeBatch: {}", sql);
+    String callerInfo = printCallerInfo();
+    LogUtil.sql().debug("executeBatch: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
         fillStatementParams(conn, statement, params, parameterHandler);
@@ -130,7 +157,8 @@ final class Utils {
                            ParameterHandler parameterHandler) throws SQLException {
     LogUtil.performance().info("executeUpdate begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("executeUpdate: {}", sql);
+    String callerInfo = printCallerInfo();
+    LogUtil.sql().debug("executeUpdate: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       return statement.executeUpdate();
@@ -146,7 +174,8 @@ final class Utils {
                                   ParameterHandler parameterHandler) throws SQLException {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
-    LogUtil.sql().debug("execute: {}", sql);
+    String callerInfo = printCallerInfo();
+    LogUtil.sql().debug("execute: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
         fillStatementParams(conn, statement, params, parameterHandler);
