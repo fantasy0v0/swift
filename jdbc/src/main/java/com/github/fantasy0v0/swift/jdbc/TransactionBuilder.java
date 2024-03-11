@@ -45,16 +45,18 @@ public class TransactionBuilder<T> {
     try {
       Connection connection = ref.unwrap();
       if (connection.getAutoCommit()) {
-        oldAutoCommit = true;
         LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
+        oldAutoCommit = true;
       }
       connection.setAutoCommit(false);
       if (null != level) {
         oldLevel = connection.getTransactionIsolation();
-        connection.setTransactionIsolation(level);
         LogUtil.common()
-          .debug("save TransactionIsolation: {}, set TransactionIsolation: {}",
-            oldLevel, level);
+          .debug(
+            "save TransactionIsolation: {}, set TransactionIsolation: {}",
+            oldLevel, level
+          );
+        connection.setTransactionIsolation(level);
       }
       return ref;
     } catch (SQLException | RuntimeException e) {
@@ -66,12 +68,12 @@ public class TransactionBuilder<T> {
   private void closeConnection(ConnectionReference wrap) throws SQLException {
     Connection connection = wrap.unwrap();
     if (null != oldLevel) {
-      connection.setTransactionIsolation(oldLevel);
       LogUtil.common().debug("restore TransactionIsolation: {}", oldLevel);
+      connection.setTransactionIsolation(oldLevel);
     }
     if (null != oldAutoCommit) {
-      connection.setAutoCommit(oldAutoCommit);
       LogUtil.common().debug("restore AutoCommit: {}", oldAutoCommit);
+      connection.setAutoCommit(oldAutoCommit);
     }
     wrap.close();
   }
@@ -84,8 +86,8 @@ public class TransactionBuilder<T> {
       Connection connection = ref.unwrap();
       Savepoint savepoint = null;
       if (ref.isInner()) {
-        savepoint = connection.setSavepoint();
         LogUtil.common().debug("savepoint");
+        savepoint = connection.setSavepoint();
       }
       try {
         T result;
@@ -95,18 +97,22 @@ public class TransactionBuilder<T> {
           runnable.run();
           result = null;
         }
+        if (null != savepoint) {
+          LogUtil.common().debug("release savepoint");
+          connection.releaseSavepoint(savepoint);
+        }
         if (!ref.isInner()) {
-          connection.commit();
           LogUtil.common().debug("commit");
+          connection.commit();
         }
         return result;
       } catch (Exception e) {
         if (null != savepoint) {
-          connection.rollback(savepoint);
           LogUtil.common().debug("rollback by savepoint");
+          connection.rollback(savepoint);
         } else {
-          connection.rollback();
           LogUtil.common().debug("rollback");
+          connection.rollback();
         }
         throw e;
       }
