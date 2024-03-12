@@ -23,7 +23,7 @@ final class Utils {
                            String sql, List<Object> params,
                            FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
 
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, false);
     }
   }
@@ -31,7 +31,7 @@ final class Utils {
   static <T> T fetchOne(DataSource dataSource,
                         String sql, List<Object> params,
                         FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       List<T> list = executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, true);
       return list.isEmpty() ? null : list.getFirst();
     }
@@ -129,9 +129,11 @@ final class Utils {
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
-      for (List<Object> params : batch) {
-        fillStatementParams(conn, statement, params, parameterHandler);
-        statement.addBatch();
+      if (null != batch) {
+        for (List<Object> params : batch) {
+          fillStatementParams(conn, statement, params, parameterHandler);
+          statement.addBatch();
+        }
       }
       List<T> list = new ArrayList<>();
       while (statement.getMoreResults()) {

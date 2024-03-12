@@ -19,7 +19,7 @@ public class ModifyBuilder {
   }
 
   public int execute(ParameterHandler parameterHandler, List<Object> params) {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return Utils.executeUpdate(ref.unwrap(), sql, params, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -43,7 +43,7 @@ public class ModifyBuilder {
   }
 
   public int[] executeBatch(ParameterHandler parameterHandler, List<List<Object>> batch) {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -57,7 +57,7 @@ public class ModifyBuilder {
   public <T> List<T> fetch(ParameterHandler parameterHandler,
                      FetchMapper<T> mapper,
                      List<Object> params) {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, false);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -91,7 +91,7 @@ public class ModifyBuilder {
   public <T> T fetchOne(ParameterHandler parameterHandler,
                         FetchMapper<T> mapper,
                         List<Object> params) {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       List<T> list = Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, true);
       return (list == null || list.isEmpty()) ? null : list.getFirst();
     } catch (SQLException e) {
@@ -126,7 +126,7 @@ public class ModifyBuilder {
   public <T> List<T> fetchBatch(ParameterHandler parameterHandler,
                                 FetchMapper<T> mapper,
                                 List<List<Object>> params) {
-    try (ConnectionReference ref = ConnectionReference.getReference(dataSource)) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return Utils.executeBatch(ref.unwrap(), sql, params, parameterHandler, mapper);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);

@@ -41,7 +41,7 @@ public class TransactionBuilder<T> {
   }
 
   private ConnectionReference getConnection() throws SQLException {
-    ConnectionReference ref = ConnectionReference.getReference(dataSource);
+    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
     try {
       Connection connection = ref.unwrap();
       if (connection.getAutoCommit()) {

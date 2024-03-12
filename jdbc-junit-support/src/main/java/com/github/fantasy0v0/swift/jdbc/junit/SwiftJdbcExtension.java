@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.junit;
 
+import com.github.fantasy0v0.swift.jdbc.ConnectionPoolUtil;
 import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -28,7 +29,7 @@ public class SwiftJdbcExtension implements BeforeTestExecutionCallback, AfterTes
   @Override
   public void beforeTestExecution(ExtensionContext extensionContext) throws Exception {
     DataSource dataSource = Objects.requireNonNull(JDBC.getDataSource(), "未配置dataSource");
-    ConnectionReference ref = ConnectionReference.getReference(dataSource);
+    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
     Connection connection = ref.unwrap();
     connection.setAutoCommit(false);
     setConnectionReference(extensionContext, ref);

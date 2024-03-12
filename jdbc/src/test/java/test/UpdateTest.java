@@ -22,6 +22,7 @@ public class UpdateTest {
   static void beforeAll() throws SQLException {
     dataSource = DataSourceUtil.create();
     JDBC.configuration(dataSource);
+
   }
 
   @AfterAll

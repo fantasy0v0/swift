@@ -37,8 +37,11 @@ public class TransactionTest {
     transaction(() -> {
       select("select * from student").fetch();
       transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
-        modify("update student set name = ? where id = ?")
-          .execute("修改", 1L);
+        select("select * from student").fetch();
+        transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
+          modify("update student set name = ? where id = ?")
+            .execute("修改", 1L);
+        });
       });
     });
   }

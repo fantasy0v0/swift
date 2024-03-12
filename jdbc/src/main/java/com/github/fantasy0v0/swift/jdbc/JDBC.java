@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.connection.DefaultConnectionPool;
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
@@ -10,10 +11,7 @@ import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public final class JDBC {
@@ -42,6 +40,10 @@ public final class JDBC {
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
+    ConnectionPoolUtil.pool = ServiceLoader.loadInstalled(ConnectionPool.class)
+      .findFirst()
+      .orElse(new DefaultConnectionPool());
+    LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 
   public static DataSource getDataSource() {
