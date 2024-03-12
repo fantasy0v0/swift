@@ -11,4 +11,8 @@ public final class ConnectionPoolUtil {
     return pool.getReference(dataSource);
   }
 
+  public static void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException {
+    pool.closeReference(reference, dataSource);
+  }
+
 }

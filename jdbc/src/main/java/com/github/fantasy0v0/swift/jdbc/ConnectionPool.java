@@ -10,6 +10,6 @@ public interface ConnectionPool {
 
   ConnectionReference getReference(DataSource dataSource) throws SQLException;
 
-  void closeReference(ConnectionReference reference) throws Exception;
+  void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException;
 
 }

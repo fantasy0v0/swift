@@ -75,7 +75,7 @@ public class TransactionBuilder<T> {
       LogUtil.common().debug("restore AutoCommit: {}", oldAutoCommit);
       connection.setAutoCommit(oldAutoCommit);
     }
-    wrap.close();
+    ConnectionPoolUtil.closeReference(wrap, dataSource);
   }
 
   T execute() throws SQLException {

@@ -20,7 +20,7 @@ public class DefaultConnectionPool implements ConnectionPool {
   }
 
   @Override
-  public void closeReference(ConnectionReference reference) throws Exception {
+  public void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException {
     reference.close();
   }
 }
