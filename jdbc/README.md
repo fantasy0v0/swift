@@ -20,9 +20,7 @@
 
 ```java
 DataSource dataSource = DataSourceUtil.create();
-JDBC.
-
-configuration(dataSource);
+JDBC.configuration(dataSource);
 ```
 
 ## select
@@ -33,8 +31,8 @@ configuration(dataSource);
 
 ```java
 List<Object[]> students = select("""
-  select * from student
-  """).fetch();
+select * from student
+""").fetch();
 ```
 
 ### 查询所有记录(有映射参数, 预编译参数设置)
@@ -42,18 +40,10 @@ List<Object[]> students = select("""
 ```java
 select("""
 select id, name, status from student where id = ?
-""",1L).
-
-fetchOne(row ->new
-
-Student(
+""",1L).fetchOne(row -> new Student(
   row.getLong(1),
-  row.
-
-getString(2),
-  row.
-
-getLong(3)
+  row.getString(2),
+  row.getLong(3)
 ));
 ```
 
