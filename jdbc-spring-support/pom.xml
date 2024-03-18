@@ -37,4 +37,12 @@
     </plugins>
   </build>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub fantasy0v0 Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/fantasy0v0/swift</url>
+    </repository>
+  </distributionManagement>
+
 </project>
