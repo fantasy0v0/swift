@@ -11,13 +11,13 @@ import java.sql.SQLException;
 public class SpringConnectionPool implements ConnectionPool {
 
   @Override
-  public ConnectionReference getReference(DataSource dataSource) throws SQLException {
+  public ConnectionReference getReference(DataSource dataSource) {
     Connection connection = DataSourceUtils.getConnection(dataSource);
     return new SpringConnectionReference(connection, dataSource);
   }
 
   @Override
   public void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException {
-    DataSourceUtils.doCloseConnection(reference.unwrap(), dataSource);
+    reference.close();
   }
 }

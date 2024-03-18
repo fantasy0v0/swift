@@ -5,6 +5,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 class SpringConnectionReference implements ConnectionReference {
 
@@ -33,7 +34,7 @@ class SpringConnectionReference implements ConnectionReference {
   }
 
   @Override
-  public void close() {
-
+  public void close() throws SQLException {
+    DataSourceUtils.doCloseConnection(connection, dataSource);
   }
 }
