@@ -40,7 +40,7 @@ public final class JDBC {
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
-    ConnectionPoolUtil.pool = ServiceLoader.loadInstalled(ConnectionPool.class)
+    ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
       .findFirst()
       .orElse(new DefaultConnectionPool());
     LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
@@ -71,7 +71,6 @@ public final class JDBC {
     if (null == dataSource) {
       throw new SwiftException("未配置DataSource");
     }
-    LogUtil.common().debug("配置数据源");
     return dataSource;
   }
 

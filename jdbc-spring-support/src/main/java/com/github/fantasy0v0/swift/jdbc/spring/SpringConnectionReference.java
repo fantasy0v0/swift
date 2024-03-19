@@ -35,6 +35,6 @@ class SpringConnectionReference implements ConnectionReference {
 
   @Override
   public void close() throws SQLException {
-    DataSourceUtils.doCloseConnection(connection, dataSource);
+    DataSourceUtils.doReleaseConnection(connection, dataSource);
   }
 }

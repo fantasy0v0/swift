@@ -10,7 +10,7 @@
     <relativePath/>
   </parent>
   <groupId>com.github.fantasy0v0.swift</groupId>
-  <artifactId>server</artifactId>
+  <artifactId>swift-server</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
