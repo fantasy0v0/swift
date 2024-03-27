@@ -53,7 +53,7 @@
     <repository>
       <id>github</id>
       <name>GitHub fantasy0v0 Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/fantasy0v0/swift</url>
+      <url>https://maven.pkg.github.com/fantasy0v0/repository</url>
     </repository>
   </distributionManagement>
 
