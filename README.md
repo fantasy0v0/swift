@@ -6,6 +6,8 @@
 
 配置简单, 使用方便, 在不额外学习其他框架的情况下快速方便的使用jdbc进行CRUD。
 
+该项目不是用来代替ORM框架的, 你可以和任何ORM框架搭配使用(可自定义数据库连接获取方式)
+
 欢迎大家提提意见和贡献代码。
 
 ## 如何使用
@@ -17,18 +19,32 @@
     <repository>
       <id>github</id>
       <name>GitHub fantasy0v0 Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/fantasy0v0/swift</url>
+      <url>https://maven.pkg.github.com/fantasy0v0/repository</url>
     </repository>
   </repositories>
 
   <dependencies>
     <dependency>
       <groupId>com.github.fantasy0v0.swift</groupId>
-      <artifactId>jdbc-spring-support</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <artifactId>swift-jdbc</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
+```
+
+## 注意事项
+
+如果想在spring环境下(比如@Transaction)使用spring的事物能力, 需要添加jdbc-spring-support依赖。
+
+如果没有该依赖, swift-jdbc将会获取一个新的数据库连接来开启事物, 这两个连接同时使用的话, 容易产生死锁问题
+
+```xml
+<dependency>
+  <groupId>com.github.fantasy0v0.swift</groupId>
+  <artifactId>jdbc-spring-support</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
 ```
 
 ## 环境要求
@@ -72,16 +88,118 @@ select id, name, status from student where id = ?
 
 ### 动态sql条件
 
-TODO 可先查看SelectTest#testPredicate单元测试
+这个功能我考察过jpa、jooq等orm框架, 但目前仍然无法想出更好的模式来解决这个问题, 所以目前先推出这个简陋的解决方案。
+
+```java
+String sql = "select * from student";
+List<Object> parameters = new ArrayList<>();
+Predicate predicate = and(
+  exp("id > ?", 0),
+  exp("status = ?", 2)
+);
+sql = where(sql, predicate);
+parameters.addAll(predicate.getParameters());
+sql += " order by id asc";
+sql += " fetch first 20 row only";
+List<Student> students = select(sql, parameters)
+  .fetch(Student::from);
+```
 
 ### 分页
 
-TODO 可先查看PagingTest单元测试
+```java
+PagingData<Student> data = select("""
+  select * from student
+""").paging(0, 10).fetch(Student::from);
+```
 
 ## modify
 
-TODO 可先查看InsertTest、UpdateTest单元测试
+insert
+```java
+int executed = JDBC.modify("""
+  insert into student(id, name, status)
+  values(1000, '测试学生', 0)
+""").execute();
+```
+
+支持postgres的returing
+```java
+Long result = JDBC.modify("""
+  insert into student(id, name, status)
+  values(?, ?, ?)
+  returning id
+""").fetchOne(row -> row.getLong(1), 1000L, "测试学生", 0);
+```
+
+批量插入
+```java
+List<List<Object>> batchParams = new ArrayList<>();
+batchParams.add(List.of(1000, "测试用户1", 0));
+batchParams.add(List.of(1001, "测试用户2", 1));
+batchParams.add(List.of(1002, "测试用户3", 2));
+batchParams.add(List.of(1003, "测试用户4", 3));
+batchParams.add(List.of(1004, "测试用户5", 4));
+batchParams.add(List.of(1005, "测试用户6", 5));
+
+int[] executed = JDBC.modify("""
+  insert into student(id, name, status)
+  values(?, ?, ?)
+""").executeBatch(batchParams);
+```
+
+update
+```java
+int executed = JDBC.modify("""
+  update student set name = ? where id = ?
+""").execute("测试修改", 1);
+```
 
 ## 事务
 
-TODO 可先查看TransactionTest单元测试
+### 开启事物
+```java
+transaction(() -> {
+  modify("update student set name = ? where id = ?")
+    .execute("修改", 1L);
+});
+```
+
+也可以明确指定事物级别
+
+```java
+transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
+  modify("update student set name = ? where id = ?")
+    .execute("修改", 1L);
+});
+```
+
+当参数中Lambda方法正常执行完成时, transaction方法会将创建的事物提交, 如果抛出了异常, 则会进行回滚, 并将异常继续向上抛出, 由使用者根据自己的业务自行处理
+
+### 嵌套事物
+
+该方法期望能灵活的处理嵌套事物的问题, 内部物抛出异常, 将会被回滚, 但如果外部事物对该异常进行捕获, 将不会导致外部事物回滚。
+
+```java
+transaction(() -> {
+  select("select * from student").fetch();
+  transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
+    select("select * from student").fetch();
+    transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
+      modify("update student set name = ? where id = ?")
+        .execute("修改", 1L);
+    });
+  });
+});
+```
+
+### 支持带返回值的Lambda
+```java
+public Long getId() {
+  return transaction(() -> {
+    return select("""
+        select id from student limit 1
+      """).fetchOne(row -> row.getLong(1));
+  });
+}
+```
