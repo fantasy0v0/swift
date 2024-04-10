@@ -42,8 +42,8 @@
 ```xml
 <dependency>
   <groupId>com.github.fantasy0v0.swift</groupId>
-  <artifactId>jdbc-spring-support</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>swift-jdbc-spring-support</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
