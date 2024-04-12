@@ -203,3 +203,32 @@ public Long getId() {
   });
 }
 ```
+
+## 调试功能
+
+## 查看SQL执行时间
+
+将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为INFO时, 会在日志中打印执行时间, 时间单位为: μs
+
+```text
+10:51:36:846 INFO executeQuery begin
+10:51:36:846 INFO executeQuery end, cost: 2,413 μs
+```
+
+## 打印执行的SQL
+
+将"com.github.fantasy0v0.swift.jdbc.sql"的日志级别设置为DEBUG时, 会在日志中打印执行的SQL, 日志内容还包含调用者的信息(caller), 方便开发人员快速定位到调用位置
+
+```text
+10:51:36:884 DEBUG executeUpdate: update student set name = ? where id = ?, caller: test.UpdateTest(UpdateTest.java:39)
+```
+
+## 打印参数信息
+
+将"com.github.fantasy0v0.swift.jdbc.sql"的日志级别设置为TRACE时, 会在日志中打印参数信息, 日志内容包含参数的数量, 下标, 内容, 以及使用了哪个parameter handler
+
+```text
+10:51:36:884 TRACE parameter count: 2
+10:51:36:884 TRACE fill parameter: [1] - [测试修改], use global parameter handler
+10:51:36:884 TRACE fill parameter: [2] - [1], use global parameter handler
+```
