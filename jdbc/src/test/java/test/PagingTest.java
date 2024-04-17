@@ -1,7 +1,7 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.github.fantasy0v0.swift.jdbc.PagingData;
+import com.github.fantasy0v0.swift.jdbc.PageData;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import com.zaxxer.hikari.HikariDataSource;
 import org.intellij.lang.annotations.Language;
@@ -40,8 +40,8 @@ class PagingTest {
 
   @Test
   void testWithOutWhere() {
-    PagingData<Student> data = select("select * from student")
-      .paging(0, 10)
+    PageData<Student> data = select("select * from student")
+      .paginate(0, 10)
       .fetch(Student::from);
     log.debug("total: {}", data.total());
     log.debug("totalPages: {}", data.totalPages());
@@ -51,7 +51,7 @@ class PagingTest {
     Assertions.assertEquals(5, data.data().size());
 
     data = select("select * from student")
-      .paging(0, 2)
+      .paginate(0, 2)
       .fetch(Student::from);
     log.debug("total: {}", data.total());
     log.debug("totalPages: {}", data.totalPages());
@@ -61,7 +61,7 @@ class PagingTest {
     Assertions.assertEquals(2, data.data().size());
 
     data = select("select * from student")
-      .paging(0, 5)
+      .paginate(0, 5)
       .fetch(Student::from);
     log.debug("total: {}", data.total());
     log.debug("totalPages: {}", data.totalPages());
@@ -76,8 +76,8 @@ class PagingTest {
     @Language("SQL") String sql = "select * from student";
     Predicate predicate = exp("status = ?", 2);
     sql = where(sql, predicate);
-    PagingData<Student> data = select(sql, predicate.getParameters())
-      .paging(0, 10)
+    PageData<Student> data = select(sql, predicate.getParameters())
+      .paginate(0, 10)
       .fetch(Student::from);
     log.debug("total: {}", data.total());
     log.debug("totalPages: {}", data.totalPages());
@@ -89,8 +89,8 @@ class PagingTest {
 
   @Test
   void customizeCount() {
-    PagingData<Student> data = select("select * from student")
-      .paging(0, 10)
+    PageData<Student> data = select("select * from student")
+      .paginate(0, 10)
       .count("select count(1) from student where status = ?", 2)
       .fetch(Student::from);
     log.debug("total: {}", data.total());

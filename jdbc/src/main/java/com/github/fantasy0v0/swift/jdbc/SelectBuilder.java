@@ -25,10 +25,10 @@ public class SelectBuilder {
    *
    * @param number 页码从0开始
    * @param size   每页大小
-   * @return PagingBuilder
+   * @return PaginateBuilder
    */
-  public PagingBuilder paging(long number, long size) {
-    return new PagingBuilder(dataSource, sql, params, number, size);
+  public PaginateBuilder paginate(long number, long size) {
+    return new PaginateBuilder(dataSource, sql, params, number, size);
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {

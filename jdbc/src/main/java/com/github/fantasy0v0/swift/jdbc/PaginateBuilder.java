@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class PagingBuilder {
+public class PaginateBuilder {
 
   private final DataSource dataSource;
 
@@ -25,9 +25,9 @@ public class PagingBuilder {
 
   private List<Object> countParams;
 
-  PagingBuilder(DataSource dataSource,
-                String sql, List<Object> params,
-                long number, long size) {
+  PaginateBuilder(DataSource dataSource,
+                  String sql, List<Object> params,
+                  long number, long size) {
     this.dataSource = dataSource;
     this.sql = sql;
     this.params = params;
@@ -35,7 +35,7 @@ public class PagingBuilder {
     this.pageSize = size;
   }
 
-  public PagingBuilder count(String countSql, Object...countParams) {
+  public PaginateBuilder count(String countSql, Object...countParams) {
     this.countSql = countSql;
     this.countParams = Arrays.stream(countParams).toList();
     return this;
@@ -67,7 +67,7 @@ public class PagingBuilder {
     return Utils.fetch(dataSource, query.sql(), query.params(), mapper, parameterHandler);
   }
 
-  public <T> PagingData<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
+  public <T> PageData<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
     try {
       long total = getTotal();
       long totalPages = 0;
@@ -75,13 +75,13 @@ public class PagingBuilder {
         totalPages = (total - 1) / this.pageSize + 1;
       }
       List<T> data = getData(mapper, parameterHandler);
-      return new PagingData<>(total, totalPages, data);
+      return new PageData<>(total, totalPages, data);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
   }
 
-  public <T> PagingData<T> fetch(FetchMapper<T> mapper) {
+  public <T> PageData<T> fetch(FetchMapper<T> mapper) {
     return fetch(mapper, null);
   }
 

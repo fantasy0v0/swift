@@ -10,6 +10,6 @@ import java.util.List;
  * @param data       分页结果
  * @param <T>        结果类型
  */
-public record PagingData<T>(long total, long totalPages, List<T> data) {
+public record PageData<T>(long total, long totalPages, List<T> data) {
 
 }
