@@ -27,17 +27,8 @@ public class Row {
     return resultSet.getMetaData().getColumnType(column);
   }
 
-  public int findColumnIndex(String expected) throws SQLException {
-    if (null == expected || expected.isBlank()) {
-      return -1;
-    }
-    for (int index = 1; index <= getColumnCount(); index++) {
-      String actual = getColumnLabel(index);
-      if (expected.equals(actual)) {
-        return index;
-      }
-    }
-    return -1;
+  public int findColumn(String columnLabel) throws SQLException {
+    return resultSet.findColumn(columnLabel);
   }
 
   private <T> T extract(FunctionWithException<T> function) throws SQLException {
