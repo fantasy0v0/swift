@@ -19,8 +19,7 @@ public class OffsetDateTimeTypeHandler implements TypeHandler<OffsetDateTime> {
 
   @Override
   public boolean handle(Connection conn, PreparedStatement statement, int index, OffsetDateTime parameter) throws SQLException {
-    LocalDateTime localDateTime = parameter.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-    statement.setTimestamp(index, Timestamp.valueOf(localDateTime));
+    statement.setTimestamp(index, Timestamp.from(parameter.toInstant()));
     return true;
   }
 }

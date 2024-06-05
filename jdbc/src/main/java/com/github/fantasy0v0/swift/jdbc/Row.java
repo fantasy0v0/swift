@@ -291,10 +291,16 @@ public class Row {
     return null != value ? value.toLocalDateTime() : null;
   }
 
+  private OffsetDateTime timestampToOffsetDateTime(Timestamp value) {
+    ZoneId systemZoneId = ZoneId.systemDefault();
+    ZoneOffset systemZoneOffset = systemZoneId.getRules().getOffset(value.toInstant());
+    return value.toInstant().atOffset(systemZoneOffset);
+  }
+
   public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
     Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
     if (null != value) {
-      return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
+      return timestampToOffsetDateTime(value);
     }
     return null;
   }
@@ -302,7 +308,7 @@ public class Row {
   public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
     Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
     if (null != value) {
-      return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
+      return timestampToOffsetDateTime(value);
     }
     return null;
   }
