@@ -172,10 +172,10 @@ final class Utils {
   static int[] executeUpdateBatch(Connection conn,
                                   String sql, List<List<Object>> batch,
                                   ParameterHandler parameterHandler) throws SQLException {
-    LogUtil.performance().info("execute begin");
+    LogUtil.performance().info("executeUpdateBatch begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("execute: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("executeUpdateBatch: {}, caller: {}", sql, callerInfo);
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       for (List<Object> params : batch) {
         fillStatementParams(conn, statement, params, parameterHandler);
@@ -185,7 +185,7 @@ final class Utils {
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeUpdateBatch end, cost: {} μs", format.format(cost));
     }
   }
 
