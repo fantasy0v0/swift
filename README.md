@@ -88,7 +88,7 @@ select id, name, status from student where id = ?
 
 ### 动态sql条件
 
-这个功能我考察过jpa、jooq等orm框架, 但目前仍然无法想出更好的模式来解决这个问题, 所以目前先推出这个简陋的解决方案。
+临时方案
 
 ```java
 String sql = "select * from student";
