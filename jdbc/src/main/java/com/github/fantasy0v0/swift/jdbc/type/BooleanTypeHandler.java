@@ -2,19 +2,19 @@ package com.github.fantasy0v0.swift.jdbc.type;
 
 import java.sql.*;
 
-public class BooleanTypeHandler extends TypeHandler<Boolean> {
+public class BooleanTypeHandler extends AbstractTypeHandler<Boolean> {
 
   public BooleanTypeHandler() {
-    super(Types.BOOLEAN);
+    super(Boolean.class, Types.BOOLEAN);
   }
 
   @Override
-  protected Boolean doGet(ResultSet resultSet, int columnIndex) throws SQLException {
-    return extract(resultSet, rs -> rs.getBoolean(columnIndex));
+  protected Boolean doGetInternal(ResultSet resultSet, int columnIndex) throws SQLException {
+    return extract(resultSet, columnIndex, resultSet::getBoolean);
   }
 
   @Override
-  protected void doSet(Connection con, PreparedStatement ps, int index, Boolean parameter) throws SQLException {
+  protected void doSetInternal(Connection con, PreparedStatement ps, int index, Boolean parameter) throws SQLException {
     ps.setBoolean(index, parameter);
   }
 }
