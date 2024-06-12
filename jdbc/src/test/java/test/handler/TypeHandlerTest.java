@@ -2,6 +2,7 @@ package test.handler;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.TypeHandler;
+import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,6 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,17 +29,16 @@ class TypeHandlerTest {
   void testCustom() throws SQLException {
     try (HikariDataSource dataSource = DataSourceUtil.create()) {
       JDBC.configuration(dataSource);
-      JDBC.configuration(new TypeHandler<Student>() {
+      JDBC.configuration(new TypeSetHandler<Student>() {
         @Override
-        public Class<Student> supported() {
+        public Class<Student> support() {
           return Student.class;
         }
 
         @Override
-        public boolean handle(Connection conn, PreparedStatement statement, int index, Student parameter) throws SQLException {
+        public void doSet(Connection con, PreparedStatement ps, int index, Student parameter) throws SQLException {
           String value = "%s %s".formatted(parameter.id(), parameter.name());
-          statement.setString(index, value);
-          return true;
+          ps.setString(index, value);
         }
       });
       String value = select("""
@@ -118,6 +120,13 @@ class TypeHandlerTest {
       log.debug("current_timestamp: {}", result[16]);
     }
 
+  }
+
+  @Test
+  void testMap() {
+    Map<String, Object> map = new HashMap<>();
+    Integer object = (Integer) map.get("123");
+    System.out.println(object);
   }
 
 }

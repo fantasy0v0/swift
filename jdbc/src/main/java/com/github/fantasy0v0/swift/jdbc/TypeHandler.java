@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+@Deprecated
 public interface TypeHandler<T> {
 
   Class<T> supported();

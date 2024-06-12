@@ -1,5 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc.type;
 
+import com.github.fantasy0v0.swift.jdbc.ResultSetExtractFunction;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,16 +41,10 @@ public abstract class AbstractTypeHandler<T> implements TypeGetHandler<T>, TypeS
     }
   }
 
-  protected <P> P extract(ResultSet resultSet, int columnIndex, FunctionWithException1<P> function) throws SQLException {
+  protected <P> P extract(ResultSet resultSet, int columnIndex, ResultSetExtractFunction<P> function) throws SQLException {
     P value = function.apply(columnIndex);
     return resultSet.wasNull() ? null : value;
   }
-
-}
-
-interface FunctionWithException1<P> {
-
-  P apply(int columnIndex) throws SQLException;
 
 }
 

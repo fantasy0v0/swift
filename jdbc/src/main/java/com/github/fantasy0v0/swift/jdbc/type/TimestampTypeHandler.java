@@ -2,19 +2,15 @@ package com.github.fantasy0v0.swift.jdbc.type;
 
 import java.sql.*;
 
-public class TimestampTypeHandler extends AbstractTypeHandler<Timestamp> {
+public class TimestampTypeHandler implements TypeSetHandler<Timestamp> {
 
-  public TimestampTypeHandler() {
-    super(Timestamp.class, Types.TIMESTAMP);
+  @Override
+  public Class<Timestamp> support() {
+    return Timestamp.class;
   }
 
   @Override
-  protected Timestamp doGetInternal(ResultSet resultSet, int columnIndex) throws SQLException {
-    return extract(resultSet, columnIndex, resultSet::getTimestamp);
-  }
-
-  @Override
-  protected void doSetInternal(Connection con, PreparedStatement ps, int index, Timestamp parameter) throws SQLException {
+  public void doSet(Connection con, PreparedStatement ps, int index, Timestamp parameter) throws SQLException {
     ps.setTimestamp(index, parameter);
   }
 }

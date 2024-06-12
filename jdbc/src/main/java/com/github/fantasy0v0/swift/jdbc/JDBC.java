@@ -5,13 +5,15 @@ import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
-import com.github.fantasy0v0.swift.jdbc.typehandles.*;
+import com.github.fantasy0v0.swift.jdbc.type.AbstractTypeHandler;
+import com.github.fantasy0v0.swift.jdbc.type.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public final class JDBC {
@@ -20,7 +22,9 @@ public final class JDBC {
 
   private static SQLDialect dialect;
 
-  static final Map<Class<?>, TypeHandler<?>> handlerMap = new HashMap<>();
+  static final Map<Class<?>, TypeGetHandler<?>> GetHandlerMap = new ConcurrentHashMap<>();
+
+  static final Map<Class<?>, TypeSetHandler<?>> SetHandlerMap = new ConcurrentHashMap<>();
 
   static {
     configuration(new ByteTypeHandler());
@@ -59,12 +63,25 @@ public final class JDBC {
     return null == dialect ? ANSI.Instance : dialect;
   }
 
-  public static <T> void configuration(TypeHandler<T> typeHandler) {
-    Class<T> supported = typeHandler.supported();
-    if (handlerMap.containsKey(supported)) {
-      LogUtil.common().debug("原有的 {} handler将被替换", supported);
+  public static <T> void configuration(AbstractTypeHandler<T> typeHandler) {
+    configuration((TypeGetHandler<T>)typeHandler);
+    configuration((TypeSetHandler<T>)typeHandler);
+  }
+
+  public static <T> void configuration(TypeGetHandler<T> handler) {
+    Class<T> supported = handler.support();
+    if (GetHandlerMap.containsKey(supported)) {
+      LogUtil.common().debug("{} 原有的GetHandler将被替换", supported);
     }
-    handlerMap.put(typeHandler.supported(), typeHandler);
+    GetHandlerMap.put(supported, handler);
+  }
+
+  public static <T> void configuration(TypeSetHandler<T> handler) {
+    Class<T> supported = handler.support();
+    if (SetHandlerMap.containsKey(supported)) {
+      LogUtil.common().debug("{} 原有的SetHandler将被替换", supported);
+    }
+    SetHandlerMap.put(supported, handler);
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {

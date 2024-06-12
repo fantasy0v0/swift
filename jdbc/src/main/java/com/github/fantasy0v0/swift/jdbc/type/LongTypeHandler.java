@@ -2,19 +2,15 @@ package com.github.fantasy0v0.swift.jdbc.type;
 
 import java.sql.*;
 
-public class LongTypeHandler extends AbstractTypeHandler<Long> {
+public class LongTypeHandler implements TypeSetHandler<Long> {
 
-  public LongTypeHandler() {
-    super(Long.class, Types.BIGINT);
+  @Override
+  public Class<Long> support() {
+    return Long.class;
   }
 
   @Override
-  protected Long doGetInternal(ResultSet resultSet, int columnIndex) throws SQLException {
-    return extract(resultSet, columnIndex, resultSet::getLong);
-  }
-
-  @Override
-  protected void doSetInternal(Connection con, PreparedStatement ps, int index, Long parameter) throws SQLException {
-
+  public void doSet(Connection con, PreparedStatement ps, int index, Long parameter) throws SQLException {
+    ps.setLong(index, parameter);
   }
 }

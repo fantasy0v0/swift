@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
@@ -43,7 +44,7 @@ final class Utils {
     List<T> array = new ArrayList<>();
     boolean first = true;
     while (resultSet.next()) {
-      T row = fetchMapper.apply(new Row(resultSet));
+      T row = fetchMapper.apply(new Row(resultSet, JDBC.GetHandlerMap));
       array.add(row);
       if (first && firstOnly) {
         break;
@@ -210,18 +211,15 @@ final class Utils {
       if (result) {
         LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
       } else {
-        TypeHandler<?> handler;
         if (null != parameter) {
-          handler = JDBC.handlerMap.get(parameter.getClass());
+          TypeSetHandler<?> handler = JDBC.SetHandlerMap.get(parameter.getClass());
           if (null != handler) {
-            result = ((TypeHandler<Object>) handler).handle(conn, statement, index + 1, parameter);
-            if (result) {
-              LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
-              continue;
-            }
+            ((TypeSetHandler<Object>) handler).doSet(conn, statement, index + 1, parameter);
+            LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
+          } else {
+            LogUtil.sql().debug("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
+            statement.setObject(index + 1, parameter);
           }
-          LogUtil.sql().debug("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
-          statement.setObject(index + 1, parameter);
         } else {
           LogUtil.sql().debug("fill parameter: [{}] - [null], use setNull", index + 1);
           statement.setNull(index + 1, Types.NULL);
