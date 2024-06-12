@@ -1,7 +1,6 @@
 package test.handler;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.github.fantasy0v0.swift.jdbc.TypeHandler;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
