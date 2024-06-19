@@ -14,6 +14,9 @@ public class OffsetDateTimeTypeHandler extends AbstractTypeHandler<OffsetDateTim
   @Override
   protected OffsetDateTime doGetInternal(ResultSet resultSet, int columnIndex) throws SQLException {
     Timestamp value = extract(resultSet, columnIndex, resultSet::getTimestamp);
+    if (null == value) {
+      return null;
+    }
     ZoneId systemZoneId = ZoneId.systemDefault();
     ZoneOffset systemZoneOffset = systemZoneId.getRules().getOffset(value.toInstant());
     return value.toInstant().atOffset(systemZoneOffset);
