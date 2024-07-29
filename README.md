@@ -27,7 +27,7 @@
     <dependency>
       <groupId>com.github.fantasy0v0.swift</groupId>
       <artifactId>swift-jdbc</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
