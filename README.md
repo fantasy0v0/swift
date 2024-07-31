@@ -110,7 +110,7 @@ List<Student> students = select(sql, parameters)
 ```java
 PagingData<Student> data = select("""
   select * from student
-""").paging(0, 10).fetch(Student::from);
+""").paginate(0, 10).fetch(Student::from);
 ```
 
 ## modify
