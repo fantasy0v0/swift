@@ -4,7 +4,6 @@ import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.PageData;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import com.zaxxer.hikari.HikariDataSource;
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -73,7 +72,7 @@ class PagingTest {
 
   @Test
   void testWithWhere() {
-    @Language("SQL") String sql = "select * from student";
+    String sql = "select * from student";
     Predicate predicate = exp("status = ?", 2);
     sql = where(sql, predicate);
     PageData<Student> data = select(sql, predicate.getParameters())

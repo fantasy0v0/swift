@@ -8,7 +8,6 @@ import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 import com.github.fantasy0v0.swift.jdbc.type.AbstractTypeHandler;
 import com.github.fantasy0v0.swift.jdbc.type.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
-import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -91,15 +90,15 @@ public final class JDBC {
     return dataSource;
   }
 
-  public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {
+  public static SelectBuilder select(String sql, List<Object> params) {
     return new SelectBuilder(requireNonNull(dataSource), sql.trim(), params);
   }
 
-  public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
+  public static SelectBuilder select(String sql, Object... params) {
     return select(sql, Arrays.stream(params).toList());
   }
 
-  public static ModifyBuilder modify(@Language("SQL") String sql) {
+  public static ModifyBuilder modify(String sql) {
     return new ModifyBuilder(requireNonNull(dataSource), sql.trim());
   }
 
