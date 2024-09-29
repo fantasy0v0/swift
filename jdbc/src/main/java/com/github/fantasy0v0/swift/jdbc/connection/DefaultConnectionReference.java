@@ -1,6 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc.connection;
 
 import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import java.sql.Connection;
@@ -28,6 +29,11 @@ class DefaultConnectionReference implements ConnectionReference {
   }
 
   @Override
+  public ConnectionTransaction getTransaction(Integer level) throws SQLException {
+    return new DefaultConnectionTransaction(this, level);
+  }
+
+  @Override
   public void close() throws SQLException {
     if (0 == referenceCounting) {
       threadLocal.remove();
@@ -37,11 +43,6 @@ class DefaultConnectionReference implements ConnectionReference {
       referenceCounting -= 1;
       LogUtil.common().debug("connection close rc:{}", referenceCounting);
     }
-  }
-
-  @Override
-  public boolean isInner() {
-    return referenceCounting > 0;
   }
 
   @Override

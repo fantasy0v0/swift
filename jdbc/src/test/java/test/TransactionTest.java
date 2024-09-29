@@ -46,4 +46,12 @@ public class TransactionTest {
     });
   }
 
+  @Test
+  void rollback() {
+    transaction(() -> {
+      modify("update student set name = ? where id = ?")
+        .execute("修改", 1L);
+    });
+  }
+
 }

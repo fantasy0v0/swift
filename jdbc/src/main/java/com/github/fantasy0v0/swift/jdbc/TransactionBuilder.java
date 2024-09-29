@@ -3,9 +3,7 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.text.NumberFormat;
 import java.util.function.Supplier;
 
@@ -20,10 +18,6 @@ public class TransactionBuilder<T> {
   private final Runnable runnable;
 
   private final Supplier<T> supplier;
-
-  private Boolean oldAutoCommit;
-
-  private Integer oldLevel;
 
   TransactionBuilder(DataSource dataSource, Integer level, Runnable runnable, Supplier<T> supplier) {
     this.dataSource = dataSource;
@@ -40,55 +34,12 @@ public class TransactionBuilder<T> {
     return new TransactionBuilder<>(dataSource, level, null, supplier);
   }
 
-  private ConnectionReference getConnection() throws SQLException {
-    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
-    try {
-      Connection connection = ref.unwrap();
-      if (connection.getAutoCommit()) {
-        LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
-        oldAutoCommit = true;
-      }
-      connection.setAutoCommit(false);
-      if (null != level) {
-        oldLevel = connection.getTransactionIsolation();
-        LogUtil.common()
-          .debug(
-            "save TransactionIsolation: {}, set TransactionIsolation: {}",
-            oldLevel, level
-          );
-        connection.setTransactionIsolation(level);
-      }
-      return ref;
-    } catch (SQLException | RuntimeException e) {
-      ref.close();
-      throw e;
-    }
-  }
-
-  private void closeConnection(ConnectionReference wrap) throws SQLException {
-    Connection connection = wrap.unwrap();
-    if (null != oldLevel) {
-      LogUtil.common().debug("restore TransactionIsolation: {}", oldLevel);
-      connection.setTransactionIsolation(oldLevel);
-    }
-    if (null != oldAutoCommit) {
-      LogUtil.common().debug("restore AutoCommit: {}", oldAutoCommit);
-      connection.setAutoCommit(oldAutoCommit);
-    }
-    ConnectionPoolUtil.closeReference(wrap, dataSource);
-  }
-
   T execute() throws SQLException {
     LogUtil.performance().info("transaction begin");
     long startTime = System.nanoTime() / 1000;
-    ConnectionReference ref = getConnection();
+    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
+    ConnectionTransaction transaction = ref.getTransaction(level);
     try {
-      Connection connection = ref.unwrap();
-      Savepoint savepoint = null;
-      if (ref.isInner()) {
-        LogUtil.common().debug("savepoint");
-        savepoint = connection.setSavepoint();
-      }
       try {
         T result;
         if (null != supplier) {
@@ -97,27 +48,14 @@ public class TransactionBuilder<T> {
           runnable.run();
           result = null;
         }
-        if (null != savepoint) {
-          LogUtil.common().debug("release savepoint");
-          connection.releaseSavepoint(savepoint);
-        }
-        if (!ref.isInner()) {
-          LogUtil.common().debug("commit");
-          connection.commit();
-        }
+        transaction.commit();
         return result;
       } catch (Exception e) {
-        if (null != savepoint) {
-          LogUtil.common().debug("rollback by savepoint");
-          connection.rollback(savepoint);
-        } else {
-          LogUtil.common().debug("rollback");
-          connection.rollback();
-        }
+        transaction.rollback();
         throw e;
       }
     } finally {
-      closeConnection(ref);
+      ConnectionPoolUtil.closeReference(ref, dataSource);
       long cost = System.nanoTime() / 1000 - startTime;
       NumberFormat format = NumberFormat.getNumberInstance();
       LogUtil.performance().info("transaction end, cost: {} μs", format.format(cost));

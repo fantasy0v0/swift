@@ -2,14 +2,11 @@ package com.github.fantasy0v0.swift.jdbc.junit;
 
 import com.github.fantasy0v0.swift.jdbc.ConnectionPoolUtil;
 import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.util.Objects;
 
 public class SwiftJdbcExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
@@ -18,21 +15,22 @@ public class SwiftJdbcExtension implements BeforeTestExecutionCallback, AfterTes
 
   @Override
   public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
+    ConnectionTransaction transaction = getConnectionTransaction(extensionContext);
+    if (null != transaction) {
+      transaction.rollback();
+    }
     ConnectionReference ref = getConnectionReference(extensionContext);
     if (null != ref) {
-      Connection connection = ref.unwrap();
-      connection.rollback();
-      ref.close();
+      ConnectionPoolUtil.closeReference(ref, JDBC.getDataSource());
     }
   }
 
   @Override
   public void beforeTestExecution(ExtensionContext extensionContext) throws Exception {
-    DataSource dataSource = Objects.requireNonNull(JDBC.getDataSource(), "未配置dataSource");
-    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
-    Connection connection = ref.unwrap();
-    connection.setAutoCommit(false);
+    ConnectionReference ref = ConnectionPoolUtil.getReference(JDBC.getDataSource());
     setConnectionReference(extensionContext, ref);
+    ConnectionTransaction transaction = ref.getTransaction(null);
+    setConnectionTransaction(extensionContext, transaction);
   }
 
   void setConnectionReference(ExtensionContext context,
@@ -44,6 +42,17 @@ public class SwiftJdbcExtension implements BeforeTestExecutionCallback, AfterTes
   ConnectionReference getConnectionReference(ExtensionContext context) {
     ExtensionContext.Store store = getStore(context);
     return (ConnectionReference) store.get("connectionReference");
+  }
+
+  void setConnectionTransaction(ExtensionContext context,
+                                ConnectionTransaction transaction) {
+    ExtensionContext.Store store = getStore(context);
+    store.put("ConnectionTransaction", transaction);
+  }
+
+  ConnectionTransaction getConnectionTransaction(ExtensionContext context) {
+    ExtensionContext.Store store = getStore(context);
+    return (ConnectionTransaction) store.get("ConnectionTransaction");
   }
 
   private ExtensionContext.Store getStore(ExtensionContext context) {

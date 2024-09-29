@@ -7,7 +7,7 @@ public interface ConnectionReference extends AutoCloseable {
 
   ConnectionReference reference();
 
-  boolean isInner();
+  ConnectionTransaction getTransaction(Integer level) throws SQLException;
 
   Connection unwrap();
 
