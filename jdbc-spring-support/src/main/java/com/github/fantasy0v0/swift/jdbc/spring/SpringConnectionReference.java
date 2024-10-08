@@ -10,14 +10,11 @@ import java.sql.SQLException;
 
 class SpringConnectionReference implements ConnectionReference {
 
-  private final Connection connection;
+  private Connection connection;
 
   private final DataSource dataSource;
 
-  private boolean isClosed = false;
-
-  SpringConnectionReference(Connection connection, DataSource dataSource) {
-    this.connection = connection;
+  SpringConnectionReference(DataSource dataSource) {
     this.dataSource = dataSource;
   }
 
@@ -27,21 +24,21 @@ class SpringConnectionReference implements ConnectionReference {
   }
 
   @Override
-  public ConnectionTransaction getTransaction(Integer level) throws SQLException {
-    // 这个连接不会再被使用到, 需要提前释放
-    DataSourceUtils.doReleaseConnection(connection, dataSource);
-    this.isClosed = true;
+  public ConnectionTransaction getTransaction(Integer level) {
     return new SpringConnectionTransaction(level);
   }
 
   @Override
-  public Connection unwrap() {
+  public Connection unwrap() throws SQLException {
+    if (null == connection) {
+      connection = DataSourceUtils.doGetConnection(dataSource);
+    }
     return connection;
   }
 
   @Override
   public void close() throws SQLException {
-    if (!isClosed) {
+    if (null != connection) {
       DataSourceUtils.doReleaseConnection(connection, dataSource);
     }
   }

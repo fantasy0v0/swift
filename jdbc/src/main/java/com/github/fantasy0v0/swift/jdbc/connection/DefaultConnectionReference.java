@@ -4,6 +4,7 @@ import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -11,13 +12,15 @@ class DefaultConnectionReference implements ConnectionReference {
 
   private int referenceCounting = 0;
 
-  private final Connection connection;
+  private Connection connection;
+
+  private final DataSource dataSource;
 
   private final ThreadLocal<ConnectionReference> threadLocal;
 
-  DefaultConnectionReference(Connection connection, ThreadLocal<ConnectionReference> threadLocal) {
+  DefaultConnectionReference(DataSource dataSource, ThreadLocal<ConnectionReference> threadLocal) {
     LogUtil.common().debug("connection create rc:{}", referenceCounting);
-    this.connection = connection;
+    this.dataSource = dataSource;
     this.threadLocal = threadLocal;
     this.threadLocal.set(this);
   }
@@ -37,7 +40,9 @@ class DefaultConnectionReference implements ConnectionReference {
   public void close() throws SQLException {
     if (0 == referenceCounting) {
       threadLocal.remove();
-      connection.close();
+      if (null != connection) {
+        connection.close();
+      }
       LogUtil.common().debug("connection clear rc:{}", referenceCounting);
     } else {
       referenceCounting -= 1;
@@ -46,7 +51,10 @@ class DefaultConnectionReference implements ConnectionReference {
   }
 
   @Override
-  public Connection unwrap() {
+  public Connection unwrap() throws SQLException {
+    if (null == connection) {
+      connection = dataSource.getConnection();
+    }
     return connection;
   }
 

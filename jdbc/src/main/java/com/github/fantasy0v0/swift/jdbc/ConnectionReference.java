@@ -9,7 +9,7 @@ public interface ConnectionReference extends AutoCloseable {
 
   ConnectionTransaction getTransaction(Integer level) throws SQLException;
 
-  Connection unwrap();
+  Connection unwrap() throws SQLException;
 
   @Override
   void close() throws SQLException;

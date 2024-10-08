@@ -11,12 +11,12 @@ public class DefaultConnectionPool implements ConnectionPool {
   private static final ThreadLocal<ConnectionReference> threadLocal = new ThreadLocal<>();
 
   @Override
-  public ConnectionReference getReference(DataSource dataSource) throws SQLException {
+  public ConnectionReference getReference(DataSource dataSource) {
     ConnectionReference ref = threadLocal.get();
     if (null != ref) {
       return ref.reference();
     }
-    return new DefaultConnectionReference(dataSource.getConnection(), threadLocal);
+    return new DefaultConnectionReference(dataSource, threadLocal);
   }
 
   @Override
