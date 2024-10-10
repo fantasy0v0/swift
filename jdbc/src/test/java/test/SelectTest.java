@@ -3,16 +3,17 @@ package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.ContainerUtil;
+import test.container.JdbcContainer;
 import test.vo.Student;
 
-import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,19 +28,20 @@ class SelectTest {
 
   private final Logger log = LoggerFactory.getLogger(SelectTest.class);
 
-  private static HikariDataSource dataSource;
+
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
 
   @BeforeAll
-  static void beforeAll() throws SQLException {
-    dataSource = DataSourceUtil.create();
+  static void beforeAll() {
+    DataSource dataSource = container.start();
     JDBC.configuration(dataSource);
   }
 
   @AfterAll
   static void afterAll() {
-    if (null != dataSource) {
-      dataSource.close();
-    }
+    container.stop();
   }
 
   @Test
@@ -79,18 +81,11 @@ class SelectTest {
   }
 
   @Test
-  void testJson() throws SQLException {
-    try(HikariDataSource dataSource = DataSourceUtil.createPg()) {
-      JDBC.configuration(dataSource);
-      List<String> result = select("""
-        select '{ "test": 123}'::jsonb
-        """).fetch(row -> {
-          return row.getString(1);
-        });
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals("{\"test\": 123}", result.getFirst());
-    } finally {
-      JDBC.configuration(dataSource);
-    }
+  void testJson() {
+    List<String> result = select("""
+    select '{ "test": 123}'::jsonb
+    """).fetch(row -> row.getString(1));
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals("{\"test\": 123}", result.getFirst());
   }
 }

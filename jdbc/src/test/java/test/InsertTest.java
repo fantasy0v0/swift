@@ -1,16 +1,17 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.ContainerUtil;
+import test.container.JdbcContainer;
 import test.exception.WorkException;
 
-import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,19 +24,19 @@ public class InsertTest {
 
   private final Logger log = LoggerFactory.getLogger(InsertTest.class);
 
-  private static HikariDataSource dataSource;
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
 
   @BeforeAll
-  static void beforeAll() throws SQLException {
-    dataSource = DataSourceUtil.create();
+  static void beforeAll() {
+    DataSource dataSource = container.start();
     JDBC.configuration(dataSource);
   }
 
   @AfterAll
   static void afterAll() {
-    if (null != dataSource) {
-      dataSource.close();
-    }
+    container.stop();
   }
 
   @Test
@@ -87,39 +88,29 @@ public class InsertTest {
   }
 
   @Test
-  void fetch() throws SQLException {
-    try (HikariDataSource dataSource = DataSourceUtil.createPg()) {
-      JDBC.configuration(dataSource);
-      List<Object[]> result = JDBC.modify("""
+  void fetch() {
+    List<Object[]> result = JDBC.modify("""
         insert into student(id, name, status)
         values(?, ?, ?)
         returning id""").fetch(1000L, "测试学生", 0);
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals(1000L, result.getFirst()[0]);
-    } finally {
-      JDBC.configuration(dataSource);
-    }
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(1000L, result.getFirst()[0]);
   }
 
   @Test
-  void testDateTime() throws SQLException {
+  void testDateTime() {
     OffsetDateTime offsetDateTime = OffsetDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
     LocalDateTime localDateTime = LocalDateTime.of(1600, 1, 1, 0, 0, 0, 0);
-    try (HikariDataSource dataSource = DataSourceUtil.createPg()) {
-      JDBC.configuration(dataSource);
-      List<Object[]> objects = JDBC.modify("""
+    List<Object[]> objects = JDBC.modify("""
           insert into datetime_test(id, date)
           values(?, ?) returning date
         """).fetch(1, offsetDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
+    log.debug("value: {}", objects.getFirst()[0]);
 
-      objects = JDBC.modify("""
+    objects = JDBC.modify("""
           insert into datetime_test(id, date)
           values(?, ?) returning date
         """).fetch(1, localDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
-    } finally {
-      JDBC.configuration(dataSource);
-    }
+    log.debug("value: {}", objects.getFirst()[0]);
   }
 }
