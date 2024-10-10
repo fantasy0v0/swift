@@ -43,7 +43,7 @@
 <dependency>
   <groupId>com.github.fantasy0v0.swift</groupId>
   <artifactId>swift-jdbc-spring-support</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -178,7 +178,10 @@ transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
 
 ### 嵌套事物
 
-该方法期望能灵活的处理嵌套事物的问题, 内部物抛出异常, 将会被回滚, 但如果外部事物对该异常进行捕获, 将不会导致外部事物回滚。
+该方法期望能灵活地处理嵌套事物的问题, 内部物抛出异常, 将会被回滚, 但如果外部事物对该异常进行捕获, 将不会导致外部事物回滚。
+
+> [!CAUTION]
+> PostgreSQL 不支持在事务中修改隔离级别
 
 ```java
 transaction(() -> {
