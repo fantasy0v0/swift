@@ -8,7 +8,7 @@
 
 该项目不是框架, 也不是用来代替任何ORM框架的, 它只能算是一个库, 你可以和任何ORM框架搭配使用。
 
-该项目只是期望能方便、快速的执行SQL并提取出结果。如果你能理解并有更好的想法的话，欢迎你与我分享！
+该项目只是期望能方便、快速地执行SQL并提取出结果。如果你能理解并有更好的想法的话，欢迎你与我分享！
 
 ## 如何使用
 
@@ -35,9 +35,9 @@
 
 ## 注意事项
 
-如果想在spring环境下(比如@Transaction)使用spring的事物能力, 需要添加jdbc-spring-support依赖。
+如果想在spring环境下(比如@Transaction)使用spring的事务能力, 需要添加jdbc-spring-support依赖。
 
-如果没有该依赖, swift-jdbc将会获取一个新的数据库连接来开启事物, 这两个连接同时使用的话, 容易产生死锁问题
+如果没有该依赖, swift-jdbc将会获取一个新的数据库连接来开启事务, 这两个连接同时使用的话, 容易产生死锁问题
 
 ```xml
 <dependency>
@@ -123,7 +123,7 @@ int executed = JDBC.modify("""
 """).execute();
 ```
 
-支持postgres的returing
+支持postgres的returning
 ```java
 Long result = JDBC.modify("""
   insert into student(id, name, status)
@@ -157,7 +157,7 @@ int executed = JDBC.modify("""
 
 ## 事务
 
-### 开启事物
+### 开启事务
 ```java
 transaction(() -> {
   modify("update student set name = ? where id = ?")
@@ -165,7 +165,7 @@ transaction(() -> {
 });
 ```
 
-也可以明确指定事物级别
+也可以明确指定事务级别
 
 ```java
 transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
@@ -174,21 +174,21 @@ transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
 });
 ```
 
-当参数中Lambda方法正常执行完成时, transaction方法会将创建的事物提交, 如果抛出了异常, 则会进行回滚, 并将异常继续向上抛出, 由使用者根据自己的业务自行处理
+当参数中Lambda方法正常执行完成时, transaction方法会将创建的事务提交, 如果抛出了异常, 则会进行回滚, 并将异常继续向上抛出, 由使用者根据自己的业务自行处理
 
-### 嵌套事物
+### 嵌套事务
 
-该方法期望能灵活地处理嵌套事物的问题, 内部物抛出异常, 将会被回滚, 但如果外部事物对该异常进行捕获, 将不会导致外部事物回滚。
+该方法期望能灵活地处理嵌套事务的问题, 内部物抛出异常, 将会被回滚, 但如果外部事务对该异常进行捕获, 将不会导致外部事务回滚。
 
 > [!CAUTION]
-> PostgreSQL 不支持在事务中修改隔离级别
+> 不支持在事务中修改隔离级别, 仅在最开始的事务中设置, 后续嵌套的事务隔离级别将不会生效(部分JDBC会直接报错)
 
 ```java
-transaction(() -> {
+transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
   select("select * from student").fetch();
-  transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
+  transaction(() -> {
     select("select * from student").fetch();
-    transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
+    transaction(() -> {
       modify("update student set name = ? where id = ?")
         .execute("修改", 1L);
     });
