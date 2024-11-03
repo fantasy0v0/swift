@@ -47,4 +47,8 @@ public class JdbcContainer {
     container.stop();
   }
 
+  public String getDriverClassName() {
+    return container.getDriverClassName();
+  }
+
 }
