@@ -248,12 +248,15 @@ final class Utils {
     if (null != configuration) {
       if (null != configuration.queryTimeout()) {
         ps.setQueryTimeout(configuration.queryTimeout());
+        LogUtil.common().debug("setQueryTimeout: {}", configuration.queryTimeout());
       }
       if (null != configuration.maxFieldSize()) {
         ps.setMaxFieldSize(configuration.maxFieldSize());
+        LogUtil.common().debug("setMaxFieldSize: {}", configuration.maxFieldSize());
       }
       if (null != configuration.maxRows()) {
         ps.setMaxRows(configuration.maxRows());
+        LogUtil.common().debug("setMaxRows: {}", configuration.maxRows());
       }
     }
     return ps;
