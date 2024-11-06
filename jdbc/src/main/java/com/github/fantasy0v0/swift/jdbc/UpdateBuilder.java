@@ -7,21 +7,45 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-@Deprecated
-public class ModifyBuilder {
+public class UpdateBuilder implements StatementConfigurator {
 
   private final DataSource dataSource;
 
+  private StatementConfiguration statementConfiguration;
+
   private final String sql;
 
-  ModifyBuilder(DataSource dataSource, String sql) {
+  UpdateBuilder(DataSource dataSource, StatementConfiguration statementConfiguration, String sql) {
     this.dataSource = dataSource;
     this.sql = sql;
+    this.statementConfiguration = statementConfiguration;
+  }
+
+  private StatementConfiguration getStatementConfiguration() {
+    if (null == statementConfiguration) {
+      statementConfiguration = new StatementConfiguration();
+    }
+    return statementConfiguration;
+  }
+
+  @Override
+  public void setQueryTimeout(Integer queryTimeout) {
+    getStatementConfiguration().setQueryTimeout(queryTimeout);
+  }
+
+  @Override
+  public void setMaxFieldSize(Integer maxFieldSize) {
+    getStatementConfiguration().setMaxFieldSize(maxFieldSize);
+  }
+
+  @Override
+  public void setMaxRows(Integer maxRows) {
+    getStatementConfiguration().setMaxRows(maxRows);
   }
 
   public int execute(ParameterHandler parameterHandler, List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeUpdate(ref.unwrap(), sql, params, parameterHandler);
+      return Utils.executeUpdate(ref.unwrap(), statementConfiguration, sql, params, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -45,7 +69,7 @@ public class ModifyBuilder {
 
   public int[] executeBatch(ParameterHandler parameterHandler, List<List<Object>> batch) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterHandler);
+      return Utils.executeUpdateBatch(ref.unwrap(), statementConfiguration, sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -55,14 +79,20 @@ public class ModifyBuilder {
     return executeBatch(null, batch);
   }
 
-  public <T> List<T> fetch(ParameterHandler parameterHandler,
-                     FetchMapper<T> mapper,
-                     List<Object> params) {
+  private <T> List<T> _fetch(ParameterHandler parameterHandler,
+                           FetchMapper<T> mapper,
+                           List<Object> params, boolean firstOnly) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, false);
+      return Utils.execute(ref.unwrap(), statementConfiguration, sql, params, parameterHandler, mapper, firstOnly);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
+  }
+
+  public <T> List<T> fetch(ParameterHandler parameterHandler,
+                           FetchMapper<T> mapper,
+                           List<Object> params) {
+    return _fetch(parameterHandler, mapper, params, false);
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper, List<Object> params) {
@@ -92,12 +122,8 @@ public class ModifyBuilder {
   public <T> T fetchOne(ParameterHandler parameterHandler,
                         FetchMapper<T> mapper,
                         List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      List<T> list = Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, true);
-      return (list == null || list.isEmpty()) ? null : list.getFirst();
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
+    List<T> list = _fetch(parameterHandler, mapper, params, true);
+    return (list == null || list.isEmpty()) ? null : list.getFirst();
   }
 
   public <T> T fetchOne(FetchMapper<T> mapper, List<Object> params) {
@@ -124,6 +150,7 @@ public class ModifyBuilder {
     return fetchOne(null, Utils::fetchByRow, null);
   }
 
+  // TODO
   public <T> List<T> fetchBatch(ParameterHandler parameterHandler,
                                 FetchMapper<T> mapper,
                                 List<List<Object>> params) {
@@ -145,4 +172,5 @@ public class ModifyBuilder {
   public List<Object[]> fetchBatch() {
     return fetchBatch(null, Utils::fetchByRow, null);
   }
+
 }
