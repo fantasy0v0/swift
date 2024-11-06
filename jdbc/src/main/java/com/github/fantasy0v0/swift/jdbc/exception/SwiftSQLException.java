@@ -12,10 +12,12 @@ public class SwiftSQLException extends SwiftException {
   /**
    * @serial
    */
-  private int vendorCode;
+  private int errorCode;
 
   public SwiftSQLException(SQLException cause) {
     super(cause);
+    errorCode = cause.getErrorCode();
+    sqlState = cause.getSQLState();
   }
 
   /**
@@ -34,7 +36,7 @@ public class SwiftSQLException extends SwiftException {
    * @return the vendor's error code
    */
   public int getErrorCode() {
-    return vendorCode;
+    return errorCode;
   }
 
 }
