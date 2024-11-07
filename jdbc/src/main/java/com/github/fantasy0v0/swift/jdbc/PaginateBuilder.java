@@ -13,6 +13,8 @@ public class PaginateBuilder {
 
   private final DataSource dataSource;
 
+  private StatementConfiguration statementConfiguration;
+
   private final String sql;
 
   private final List<Object> params;
@@ -25,7 +27,7 @@ public class PaginateBuilder {
 
   private List<Object> countParams;
 
-  PaginateBuilder(DataSource dataSource,
+  PaginateBuilder(DataSource dataSource, StatementConfiguration statementConfiguration,
                   String sql, List<Object> params,
                   long number, long size) {
     this.dataSource = dataSource;
@@ -53,7 +55,7 @@ public class PaginateBuilder {
       _countSql = countSql;
       _countParams = countParams;
     }
-    Long count = Utils.fetchOne(dataSource, _countSql, _countParams,
+    Long count = Utils.fetchOne(dataSource, statementConfiguration, _countSql, _countParams,
       row -> row.getLong(1), null);
     if (null == count) {
       throw new SwiftException("没有获取到总记录数, 请检查sql语句是否正确");
@@ -64,7 +66,7 @@ public class PaginateBuilder {
   private <T> List<T> getData(FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
     SQLDialect dialect = JDBC.getSQLDialect();
     Query query = dialect.paging(sql, params, pageNumber, pageSize);
-    return Utils.fetch(dataSource, query.sql(), query.params(), mapper, parameterHandler);
+    return Utils.fetch(dataSource, statementConfiguration, query.sql(), query.params(), mapper, parameterHandler);
   }
 
   public <T> PageData<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
