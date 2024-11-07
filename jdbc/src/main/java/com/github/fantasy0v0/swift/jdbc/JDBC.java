@@ -28,6 +28,11 @@ public final class JDBC {
   static final Map<Class<?>, TypeSetHandler<?>> SetHandlerMap = new ConcurrentHashMap<>();
 
   static {
+    ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
+      .findFirst()
+      .orElse(new DefaultConnectionPool());
+    LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
+
     configuration(new ByteTypeHandler());
     configuration(new ShortTypeHandler());
     configuration(new IntegerTypeHandler());
@@ -47,10 +52,6 @@ public final class JDBC {
 
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
-    ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
-      .findFirst()
-      .orElse(new DefaultConnectionPool());
-    LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 
   public static DataSource getDataSource() {
