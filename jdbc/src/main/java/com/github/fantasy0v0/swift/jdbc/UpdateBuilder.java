@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class UpdateBuilder implements StatementConfigurator {
+public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   private final DataSource dataSource;
 
@@ -29,18 +29,21 @@ public class UpdateBuilder implements StatementConfigurator {
   }
 
   @Override
-  public void setQueryTimeout(Integer queryTimeout) {
+  public UpdateBuilder setQueryTimeout(Integer queryTimeout) {
     getStatementConfiguration().setQueryTimeout(queryTimeout);
+    return this;
   }
 
   @Override
-  public void setMaxFieldSize(Integer maxFieldSize) {
+  public UpdateBuilder setMaxFieldSize(Integer maxFieldSize) {
     getStatementConfiguration().setMaxFieldSize(maxFieldSize);
+    return this;
   }
 
   @Override
-  public void setMaxRows(Integer maxRows) {
+  public UpdateBuilder setMaxRows(Integer maxRows) {
     getStatementConfiguration().setMaxRows(maxRows);
+    return this;
   }
 
   public int execute(ParameterHandler parameterHandler, List<Object> params) {

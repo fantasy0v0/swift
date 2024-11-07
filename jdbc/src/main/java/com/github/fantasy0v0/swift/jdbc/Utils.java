@@ -20,20 +20,20 @@ final class Utils {
     return array;
   }
 
-  static <T> List<T> fetch(DataSource dataSource,
+  static <T> List<T> fetch(DataSource dataSource, StatementConfiguration statementConfiguration,
                            String sql, List<Object> params,
                            FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
 
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, false);
+      return executeQuery(ref.unwrap(), statementConfiguration, sql, params, mapper, parameterHandler, false);
     }
   }
 
-  static <T> T fetchOne(DataSource dataSource,
+  static <T> T fetchOne(DataSource dataSource, StatementConfiguration statementConfiguration,
                         String sql, List<Object> params,
                         FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      List<T> list = executeQuery(ref.unwrap(), sql, params, mapper, parameterHandler, true);
+      List<T> list = executeQuery(ref.unwrap(), statementConfiguration, sql, params, mapper, parameterHandler, true);
       return list.isEmpty() ? null : list.getFirst();
     }
   }
@@ -88,7 +88,7 @@ final class Utils {
    * @param <T> 映射后的类型
    * @throws SQLException 执行失败异常
    */
-  static <T> List<T> executeQuery(Connection conn,
+  static <T> List<T> executeQuery(Connection conn, StatementConfiguration statementConfiguration,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
                                   ParameterHandler parameterHandler,
@@ -97,7 +97,7 @@ final class Utils {
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeQuery: {}, caller: {}", sql, callerInfo);
-    try (PreparedStatement statement = prepareStatement(conn, sql, null)) {
+    try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       try (ResultSet resultSet = statement.executeQuery()) {
         return fetchByResultSet(resultSet, fetchMapper, firstOnly);
