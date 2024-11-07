@@ -21,7 +21,7 @@ public class ModifyBuilder {
 
   public int execute(ParameterHandler parameterHandler, List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeUpdate(ref.unwrap(), sql, params, parameterHandler);
+      return Utils.executeUpdate(ref.unwrap(), null, sql, params, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -45,7 +45,7 @@ public class ModifyBuilder {
 
   public int[] executeBatch(ParameterHandler parameterHandler, List<List<Object>> batch) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeUpdateBatch(ref.unwrap(), sql, batch, parameterHandler);
+      return Utils.executeUpdateBatch(ref.unwrap(), null, sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -59,7 +59,7 @@ public class ModifyBuilder {
                      FetchMapper<T> mapper,
                      List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, false);
+      return Utils.execute(ref.unwrap(), null, sql, params, parameterHandler, mapper, false);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -93,7 +93,7 @@ public class ModifyBuilder {
                         FetchMapper<T> mapper,
                         List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      List<T> list = Utils.execute(ref.unwrap(), sql, params, parameterHandler, mapper, true);
+      List<T> list = Utils.execute(ref.unwrap(), null, sql, params, parameterHandler, mapper, true);
       return (list == null || list.isEmpty()) ? null : list.getFirst();
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
