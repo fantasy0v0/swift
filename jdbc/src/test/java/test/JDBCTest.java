@@ -10,8 +10,11 @@ import test.container.ContainerUtil;
 import test.container.JdbcContainer;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JDBCTest {
 
@@ -34,10 +37,17 @@ class JDBCTest {
 
   @Test
   void testStatement() {
-    log.debug("test");
-    select("""
+    List<Object[]> data = select("""
       select * from student;
     """).fetch();
+    log.debug("data size: {}", data.size());
+    assertTrue(data.size() > 2);
+
+    data = select("""
+        select * from student
+      """).setQueryTimeout(3).setFetchSize(1).setMaxRows(2).fetch();
+    log.debug("data size: {}", data.size());
+    assertEquals(2, data.size());
   }
 
 }

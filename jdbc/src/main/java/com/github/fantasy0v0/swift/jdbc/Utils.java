@@ -96,7 +96,7 @@ final class Utils {
     LogUtil.performance().info("executeQuery begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("executeQuery: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("executeQuery: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       try (ResultSet resultSet = statement.executeQuery()) {
@@ -116,7 +116,7 @@ final class Utils {
     LogUtil.performance().info("execute begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("execute: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("execute: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       boolean result = statement.execute();
@@ -140,7 +140,7 @@ final class Utils {
     LogUtil.performance().info("executeBatch begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("executeBatch: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("executeBatch: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, null)) {
       if (null != batch) {
         for (List<Object> params : batch) {
@@ -171,7 +171,7 @@ final class Utils {
     LogUtil.performance().info("executeUpdate begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("executeUpdate: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("executeUpdate: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       return statement.executeUpdate();
@@ -188,7 +188,7 @@ final class Utils {
     LogUtil.performance().info("executeUpdateBatch begin");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
-    LogUtil.sql().debug("executeUpdateBatch: {}, caller: {}", sql, callerInfo);
+    LogUtil.sql().debug("executeUpdateBatch: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       for (List<Object> params : batch) {
         fillStatementParams(conn, statement, params, parameterHandler);
@@ -250,9 +250,9 @@ final class Utils {
         ps.setQueryTimeout(configuration.getQueryTimeout());
         LogUtil.common().debug("setQueryTimeout: {}", configuration.getQueryTimeout());
       }
-      if (null != configuration.getMaxFieldSize()) {
-        ps.setMaxFieldSize(configuration.getMaxFieldSize());
-        LogUtil.common().debug("setMaxFieldSize: {}", configuration.getMaxFieldSize());
+      if (null != configuration.getFetchSize()) {
+        ps.setFetchSize(configuration.getFetchSize());
+        LogUtil.common().debug("setFetchSize: {}", configuration.getFetchSize());
       }
       if (null != configuration.getMaxRows()) {
         ps.setMaxRows(configuration.getMaxRows());
