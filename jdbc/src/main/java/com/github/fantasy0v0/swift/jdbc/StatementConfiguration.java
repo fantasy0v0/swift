@@ -3,14 +3,14 @@ package com.github.fantasy0v0.swift.jdbc;
 public class StatementConfiguration {
 
   private Integer queryTimeout;
-  private Integer maxFieldSize;
+  private Integer fetchSize;
   private Integer maxRows;
 
   public StatementConfiguration(Integer queryTimeout,
-                                Integer maxFieldSize,
+                                Integer fetchSize,
                                 Integer maxRows) {
     this.queryTimeout = queryTimeout;
-    this.maxFieldSize = maxFieldSize;
+    this.fetchSize = fetchSize;
     this.maxRows = maxRows;
   }
 
@@ -26,12 +26,12 @@ public class StatementConfiguration {
     this.queryTimeout = queryTimeout;
   }
 
-  public Integer getMaxFieldSize() {
-    return maxFieldSize;
+  public Integer getFetchSize() {
+    return fetchSize;
   }
 
-  public void setMaxFieldSize(Integer maxFieldSize) {
-    this.maxFieldSize = maxFieldSize;
+  public void setFetchSize(Integer fetchSize) {
+    this.fetchSize = fetchSize;
   }
 
   public Integer getMaxRows() {
