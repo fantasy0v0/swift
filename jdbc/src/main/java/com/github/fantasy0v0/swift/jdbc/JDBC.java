@@ -108,8 +108,13 @@ public final class JDBC {
     return select(sql, Arrays.stream(params).toList());
   }
 
+  @Deprecated
   public static ModifyBuilder modify(String sql) {
     return new ModifyBuilder(requireNonNull(dataSource), sql.trim());
+  }
+
+  public static UpdateBuilder update(String sql) {
+    return new UpdateBuilder(requireNonNull(dataSource), statementConfiguration, sql.trim());
   }
 
   public static void transaction(Integer level, Runnable runnable) {
