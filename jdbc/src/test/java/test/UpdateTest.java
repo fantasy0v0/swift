@@ -21,13 +21,13 @@ public class UpdateTest {
   List<DynamicTest> testAllDatabase() {
     return ContainerUtil.testAllContainers(() -> List.of(
       new JdbcTest("test", this::test),
+      new JdbcTest("testFetch", this::testFetch),
       new JdbcTest("testArrayParams", this::testArrayParams),
       new JdbcTest("testExecuteBatch", this::testExecuteBatch)
     ));
   }
 
   void test(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     int executed = JDBC.update("""
     update student set name = ? where id = ?
     """).execute("测试修改", 1);
@@ -36,7 +36,10 @@ public class UpdateTest {
     update student set name = ? where id = ?
     """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);
+  }
 
+  void testFetch(DataSource dataSource) throws SQLException {
+    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     if (driverClassName.contains("postgresql")) {
       List<Object[]> result = JDBC.update("""
       update student set name = ? where id = ? returning id
@@ -48,16 +51,31 @@ public class UpdateTest {
       update student set name = ? returning id
       """).fetch("测试修改1");
       Assertions.assertTrue(result.size() > 1);
-    }
 
+      Object[] fetchOne1 = JDBC.update("""
+      update student set name = ? where id = ? returning id
+      """).fetchOne("测试修改2", 1L);
+      Assertions.assertEquals(1, fetchOne1.length);
+      Assertions.assertEquals(1L, fetchOne1[0]);
+
+      long fetchOne2 = JDBC.update("""
+      update student set name = ? where id = ? returning id
+      """).fetchOne(row -> row.getLong(1), "测试修改3", 1L);
+      Assertions.assertEquals(1L, fetchOne2);
+    }
   }
 
   void testArrayParams(DataSource dataSource) {
-    Object[] params = {"测试修改", 1};
+    Object[] params = {"测试修改", 1L};
     int executed = JDBC.update("""
     update student set name = ? where id = ?
     """).execute(params);
     Assertions.assertEquals(1, executed);
+    Object[] result = JDBC.select("""
+      select name, id from student where id = ?
+      """, params[1]).fetchOne();
+    Assertions.assertEquals(params[0], result[0]);
+    Assertions.assertEquals(params[1], result[1]);
   }
 
   void testExecuteBatch(DataSource dataSource) {
