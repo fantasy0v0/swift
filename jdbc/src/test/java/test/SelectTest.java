@@ -67,7 +67,7 @@ class SelectTest {
     sql = where(sql, predicate);
     parameters.addAll(predicate.getParameters());
     sql += " order by id asc";
-    sql += " fetch first 20 row only";
+    sql += " limit 20 offset 0";
     List<Student> students = select(sql, parameters)
       .fetch(Student::from);
     log.debug("student size: {}", students.size());
