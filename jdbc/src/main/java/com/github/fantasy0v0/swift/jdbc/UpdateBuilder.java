@@ -21,7 +21,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     this.statementConfiguration = statementConfiguration;
   }
 
-  private StatementConfiguration getStatementConfiguration() {
+  protected StatementConfiguration getStatementConfiguration() {
     if (null == statementConfiguration) {
       statementConfiguration = new StatementConfiguration();
     }
