@@ -29,10 +29,10 @@ class SelectTest {
   @TestFactory
   List<DynamicTest> testAllDatabase() {
     return ContainerUtil.testAllContainers(() -> List.of(
-      new JdbcTest("testFetch", this::testFetch),
-      new JdbcTest("testFetchOne", this::testFetchOne),
-      new JdbcTest("testPredicate", this::testPredicate),
-      new JdbcTest("testJson", this::testJson)
+      JdbcTest.of("testFetch", this::testFetch),
+      JdbcTest.of("testFetchOne", this::testFetchOne),
+      JdbcTest.of("testPredicate", this::testPredicate),
+      JdbcTest.of("testJson", this::testJson)
     ));
   }
 
