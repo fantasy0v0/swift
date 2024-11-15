@@ -13,7 +13,9 @@ public class PaginateBuilder {
 
   private final DataSource dataSource;
 
-  private StatementConfiguration statementConfiguration;
+  private final StatementConfiguration statementConfiguration;
+
+  private final ParameterHandler parameterHandler;
 
   private final String sql;
 
@@ -27,13 +29,14 @@ public class PaginateBuilder {
 
   private List<Object> countParams;
 
-  PaginateBuilder(DataSource dataSource, StatementConfiguration statementConfiguration,
-                  String sql, List<Object> params,
-                  long number, long size) {
+  PaginateBuilder(DataSource dataSource,
+                  StatementConfiguration statementConfiguration, ParameterHandler parameterHandler,
+                  String sql, List<Object> params, long number, long size) {
     this.dataSource = dataSource;
     this.statementConfiguration = statementConfiguration;
     this.sql = sql;
     this.params = params;
+    this.parameterHandler = parameterHandler;
     this.pageNumber = number;
     this.pageSize = size;
   }
@@ -70,7 +73,7 @@ public class PaginateBuilder {
     return Utils.fetch(dataSource, statementConfiguration, query.sql(), query.params(), mapper, parameterHandler);
   }
 
-  public <T> PageData<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
+  public <T> PageData<T> fetch(FetchMapper<T> mapper) {
     try {
       long total = getTotal();
       long totalPages = 0;
@@ -82,10 +85,6 @@ public class PaginateBuilder {
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
-  }
-
-  public <T> PageData<T> fetch(FetchMapper<T> mapper) {
-    return fetch(mapper, null);
   }
 
 }
