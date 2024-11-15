@@ -16,6 +16,8 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   private final List<Object> params;
 
+  private ParameterHandler parameterHandler;
+
   SelectBuilder(DataSource dataSource,
                 StatementConfiguration statementConfiguration,
                 String sql, List<Object> params) {
@@ -50,6 +52,11 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
     return this;
   }
 
+  public SelectBuilder setParameterHandler(ParameterHandler parameterHandler) {
+    this.parameterHandler = parameterHandler;
+    return this;
+  }
+
   /**
    * 进行分页
    *
@@ -58,10 +65,14 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
    * @return PaginateBuilder
    */
   public PaginateBuilder paginate(long number, long size) {
-    return new PaginateBuilder(dataSource, statementConfiguration, sql, params, number, size);
+    return new PaginateBuilder(
+      dataSource,
+      statementConfiguration, parameterHandler,
+      sql, params, number, size
+    );
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
+  public <T> List<T> fetch(FetchMapper<T> mapper) {
     try {
       return Utils.fetch(dataSource, statementConfiguration, sql, params, mapper, parameterHandler);
     } catch (SQLException e) {
@@ -69,24 +80,16 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
     }
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper) {
-    return fetch(mapper, null);
-  }
-
   public List<Object[]> fetch() {
     return fetch(Utils::fetchByRow);
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
+  public <T> T fetchOne(FetchMapper<T> mapper) {
     try {
       return Utils.fetchOne(dataSource, statementConfiguration, sql, params, mapper, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
-  }
-
-  public <T> T fetchOne(FetchMapper<T> mapper) {
-    return fetchOne(mapper, null);
   }
 
   public Object[] fetchOne() {

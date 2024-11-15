@@ -2,6 +2,8 @@ package test.container;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.DynamicTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -12,6 +14,8 @@ import java.util.List;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 public final class ContainerUtil {
+
+  private static final Logger log = LoggerFactory.getLogger(ContainerUtil.class);
 
   public static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:16-alpine");
 
