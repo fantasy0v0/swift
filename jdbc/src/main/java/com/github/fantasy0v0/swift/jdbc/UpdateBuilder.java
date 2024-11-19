@@ -9,13 +9,13 @@ import java.util.List;
 
 public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
-  private final DataSource dataSource;
+  protected final DataSource dataSource;
 
-  private StatementConfiguration statementConfiguration;
+  protected StatementConfiguration statementConfiguration;
 
-  private final String sql;
+  protected final String sql;
 
-  private ParameterHandler parameterHandler;
+  protected ParameterHandler parameterHandler;
 
   UpdateBuilder(DataSource dataSource, StatementConfiguration statementConfiguration, String sql) {
     this.dataSource = dataSource;
@@ -117,7 +117,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public List<Object[]> fetch(Object... params) {
-    return fetch(Utils::fetchByRow, params);
+    return fetch(Utils::fetchByRow, Arrays.stream(params).toList());
   }
 
   public List<Object[]> fetch() {
@@ -143,7 +143,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public Object[] fetchOne(Object... params) {
-    return fetchOne(Utils::fetchByRow, params);
+    return fetchOne(Utils::fetchByRow, Arrays.stream(params).toList());
   }
 
   public Object[] fetchOne() {
