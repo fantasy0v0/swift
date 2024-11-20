@@ -1,13 +1,12 @@
 package test.jdbc;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.container.ContainerUtil;
-import test.container.JdbcTest;
+import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -17,19 +16,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(SwiftJdbcExtension.class)
 public class StatementTest {
 
   private final static Logger log = LoggerFactory.getLogger(StatementTest.class);
 
-  @TestFactory
-  List<DynamicTest> testAllDatabase() {
-    return ContainerUtil.testAllContainers(() -> List.of(
-      JdbcTest.of("execute", this::execute),
-      JdbcTest.of("executeUpdate", this::executeUpdate),
-      JdbcTest.of("executeBatch", this::executeBatch)
-    ));
-  }
-
+  @TestTemplate
   void execute(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
 
@@ -107,6 +99,7 @@ public class StatementTest {
     }
   }
 
+  @TestTemplate
   void executeUpdate(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     // 取出生成的key
@@ -147,11 +140,14 @@ public class StatementTest {
     }
   }
 
+  @TestTemplate
   void executeBatch(DataSource dataSource) throws SQLException {
+    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     List<Object[]> params = List.of(
       new Object[]{"fantasy1", 1},
       new Object[]{"fantasy2", 2}
     );
+    // 使用executeBatch, 并取出生成的主键
     try (Connection connection = dataSource.getConnection()) {
       String sql = "insert into swift_user(name, status) values(?, ?)";
       try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -174,6 +170,24 @@ public class StatementTest {
           }
         }
         assertEquals(params.size(), keyResult.size());
+      }
+    }
+    if (driverClassName.contains("postgresql")) {
+      try (Connection connection = dataSource.getConnection()) {
+        String sql = "insert into swift_user(name, status) values(?, ?) returning id";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+          for (Object[] param : params) {
+            ps.setString(1, param[0].toString());
+            ps.setInt(2, (int)param[1]);
+            ps.addBatch();
+          }
+          int[] batchResult = ps.executeBatch();
+          assertEquals(params.size(), batchResult.length);
+          assertNull(ps.getResultSet());
+          try (ResultSet resultSet = ps.getGeneratedKeys()) {
+            assertFalse(resultSet.next());
+          }
+        }
       }
     }
   }
