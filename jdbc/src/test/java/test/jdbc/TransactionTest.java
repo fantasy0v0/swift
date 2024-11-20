@@ -5,10 +5,13 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcTest;
+import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -17,18 +20,13 @@ import java.util.List;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.*;
 
+@ExtendWith(SwiftJdbcExtension.class)
 public class TransactionTest {
 
   private final Logger log = LoggerFactory.getLogger(TransactionTest.class);
 
-  @TestFactory
-  List<DynamicTest> testAllDatabase() {
-    return ContainerUtil.testAllContainers(() -> List.of(
-      JdbcTest.of("test", this::test),
-      JdbcTest.of("rollback", this::rollback)
-    ));
-  }
 
+  @TestTemplate
   void test(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     try {
@@ -53,6 +51,7 @@ public class TransactionTest {
     }
   }
 
+  @TestTemplate
   void rollback(DataSource dataSource) {
     transaction(() -> {
       update("update student set name = ? where id = ?")
