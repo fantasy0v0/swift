@@ -1,11 +1,11 @@
 package test.jdbc;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
+import test.container.JdbcContainer;
 import test.container.JdbcTest;
 
 import javax.sql.DataSource;
@@ -20,10 +20,17 @@ public class StatementTest {
 
   @TestFactory
   List<DynamicTest> testAllDatabase() {
-    return ContainerUtil.testAllContainers(() -> List.of(
-      new JdbcTest("execute", this::execute),
-      new JdbcTest("executeUpdate", this::executeUpdate)
+    return ContainerUtil.testAllContainers(dataSource -> List.of(
+      new JdbcTest("execute", () -> this.execute(dataSource)),
+      new JdbcTest("executeUpdate", () -> this.executeUpdate(dataSource))
     ));
+  }
+
+  @AfterAll
+  static void afterAll() {
+    for (JdbcContainer container : ContainerUtil.containers) {
+      container.stop();
+    }
   }
 
   void execute(DataSource dataSource) throws SQLException {

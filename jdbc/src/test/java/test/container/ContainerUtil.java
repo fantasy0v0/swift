@@ -25,21 +25,14 @@ public final class ContainerUtil {
     JdbcContainer.create(MYSQL, MYSQL_LOCATIONS)
   );
 
-  public static List<DynamicTest> testAllContainers(ContainerExecutable executable) {
+  public static List<DynamicTest> testAllContainers(Executable executable) {
     List<DynamicTest> tests = new ArrayList<>();
     for (JdbcContainer container : ContainerUtil.containers) {
+      DataSource dataSource = container.start();
       String name = container.getDriverClassName();
       tests.addAll(
-        executable.execute()
-          .stream()
-          .map(test -> dynamicTest(name + " " + test.name(), () -> {
-            DataSource dataSource = container.start();
-            try {
-              test.executable().execute(dataSource);
-            } finally {
-              container.stop();
-            }
-          }))
+        executable.execute(dataSource)
+          .stream().map(test -> dynamicTest(name + " " + test.name(),test.executable()))
           .toList()
       );
     }
