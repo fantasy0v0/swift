@@ -7,6 +7,8 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.ContainerUtil;
+import test.container.JdbcTest;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
