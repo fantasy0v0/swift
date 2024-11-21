@@ -6,10 +6,8 @@ import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,8 +34,8 @@ public class InsertBuilder extends UpdateBuilder {
     }
   }
 
-  private <T> List<T> _fetchKey(FetchMapper<T> mapper,
-                                List<Object> params, boolean firstOnly) {
+  private <T> T _fetchKey(FetchMapper<T> mapper,
+                          List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       Connection conn = ref.unwrap();
       LogUtil.performance().info("fetchKey begin");
@@ -48,7 +46,8 @@ public class InsertBuilder extends UpdateBuilder {
         fillStatementParams(conn, statement, params, parameterHandler);
         int updated = statement.executeUpdate();
         LogUtil.sql().debug("executeUpdate: {}", updated);
-        return fetchByResultSet(statement.getGeneratedKeys(), mapper, firstOnly);
+        List<T> list = fetchByResultSet(statement.getGeneratedKeys(), mapper, true);
+        return list.isEmpty() ? null : list.getFirst();
       } finally {
         long cost = System.nanoTime() / 1000 - startTime;
         NumberFormat format = NumberFormat.getNumberInstance();
@@ -59,52 +58,27 @@ public class InsertBuilder extends UpdateBuilder {
     }
   }
 
-  public <T> List<T> fetchKey(FetchMapper<T> mapper, List<Object> params) {
-    return _fetchKey(mapper, params, false);
+  public <T> T fetchKey(FetchMapper<T> mapper, List<Object> params) {
+    return _fetchKey(mapper, params);
   }
 
-  public <T> List<T> fetchKey(FetchMapper<T> mapper, Object... params) {
+  public <T> T fetchKey(FetchMapper<T> mapper, Object... params) {
     return fetchKey(mapper, Arrays.stream(params).toList());
   }
 
-  public <T> List<T> fetchKey(FetchMapper<T> mapper) {
+  public <T> T fetchKey(FetchMapper<T> mapper) {
     return fetchKey(mapper, (List<Object>) null);
   }
 
-  public List<Object[]> fetchKey(List<Object> params) {
+  public Object[] fetchKey(List<Object> params) {
     return fetchKey(Utils::fetchByRow, params);
   }
 
-  public List<Object[]> fetchKey(Object... params) {
+  public Object[] fetchKey(Object... params) {
     return fetchKey(Arrays.stream(params).toList());
   }
 
-  public List<Object[]> fetchKey() {
+  public Object[] fetchKey() {
     return fetchKey(Utils::fetchByRow, (List<Object>) null);
-  }
-
-  public <T> T fetchKeyOne(FetchMapper<T> mapper, List<Object> params) {
-    List<T> list = _fetchKey(mapper, params, true);
-    return list.isEmpty() ? null : list.getFirst();
-  }
-
-  public <T> T fetchKeyOne(FetchMapper<T> mapper, Object... params) {
-    return fetchKeyOne(mapper, Arrays.stream(params).toList());
-  }
-
-  public <T> T fetchKeyOne(FetchMapper<T> mapper) {
-    return fetchKeyOne(mapper, (List<Object>) null);
-  }
-
-  public Object[] fetchKeyOne(List<Object> params) {
-    return fetchKeyOne(Utils::fetchByRow, params);
-  }
-
-  public Object[] fetchKeyOne(Object... params) {
-    return fetchKeyOne(Arrays.stream(params).toList());
-  }
-
-  public Object[] fetchKeyOne() {
-    return fetchKeyOne((List<Object>) null);
   }
 }

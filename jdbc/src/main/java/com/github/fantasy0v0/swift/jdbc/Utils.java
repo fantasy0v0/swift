@@ -148,7 +148,8 @@ final class Utils {
         fillStatementParams(conn, statement, params, parameterHandler);
         statement.addBatch();
       }
-      statement.executeBatch();
+      int[] result = statement.executeBatch();
+      LogUtil.sql().debug("executeBatch: {}", result.length);
       return fetchByResultSet(statement.getGeneratedKeys(), mapper, false);
     } finally {
       long cost = System.nanoTime() / 1000 - startTime;

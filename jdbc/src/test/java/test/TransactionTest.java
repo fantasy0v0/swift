@@ -1,18 +1,10 @@
 package test;
 
-import com.github.fantasy0v0.swift.jdbc.JDBC;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.container.ContainerUtil;
-import test.container.JdbcContainer;
 import test.container.SwiftJdbcExtension;
-
-import javax.sql.DataSource;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.*;
 
@@ -40,7 +32,7 @@ public class TransactionTest {
       transaction(() -> {
         select("select * from student").fetch();
         transaction(() -> {
-          modify("update student set name = ? where id = ?")
+          update("update student set name = ? where id = ?")
             .execute("修改", 1L);
         });
       });
@@ -50,7 +42,7 @@ public class TransactionTest {
   @TestTemplate
   void rollback() {
     transaction(() -> {
-      modify("update student set name = ? where id = ?")
+      update("update student set name = ? where id = ?")
         .execute("修改", 1L);
     });
   }
