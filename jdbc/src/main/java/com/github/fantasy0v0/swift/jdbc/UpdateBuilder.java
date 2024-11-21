@@ -78,9 +78,13 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     return execute((List<Object>) null);
   }
 
-  public int[] batch(List<List<Object>> batchParams) {
+  /**
+   * 执行更新语句, 这里虽然叫execute, 但执行的是executeUpdate
+   * @return 受影响的行数
+   */
+  public int[] batch(List<List<Object>> batch) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler);
+      return Utils.executeUpdateBatch(ref.unwrap(), statementConfiguration, sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -146,7 +150,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     return fetchOne(Utils::fetchByRow, (List<Object>) null);
   }
 
-  /*public <T> List<T> fetchBatch(FetchMapper<T> mapper,
+  public <T> List<T> fetchBatch(FetchMapper<T> mapper,
                                 List<List<Object>> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       return Utils.executeBatch(ref.unwrap(), statementConfiguration, sql, params, parameterHandler, mapper);
@@ -157,6 +161,6 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   public List<Object[]> fetchBatch(List<List<Object>> params) {
     return fetchBatch(Utils::fetchByRow, params);
-  }*/
+  }
 
 }

@@ -45,7 +45,7 @@ public class ModifyBuilder {
 
   public int[] executeBatch(ParameterHandler parameterHandler, List<List<Object>> batch) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), null, sql, batch, parameterHandler);
+      return Utils.executeUpdateBatch(ref.unwrap(), null, sql, batch, parameterHandler);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }

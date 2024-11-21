@@ -21,23 +21,8 @@ public class InsertBuilder extends UpdateBuilder {
     super(dataSource, statementConfiguration, sql);
   }
 
-  /**
-   * 执行executeBatch, 并返回生成的主键
-   * @param batchParams 参数
-   * @param keyMapper 主键映射类
-   * @param <T> 主键类型
-   * @return 返回生成的主键
-   */
-  public <T> List<T> batch(List<List<Object>> batchParams, FetchMapper<T> keyMapper) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler, keyMapper);
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
-  }
-
   private <T> List<T> _fetchKey(FetchMapper<T> mapper,
-                                List<Object> params, boolean firstOnly) {
+                             List<Object> params, boolean firstOnly) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       Connection conn = ref.unwrap();
       LogUtil.performance().info("fetchKey begin");
