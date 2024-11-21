@@ -16,7 +16,7 @@ public class ANSI implements SQLDialect {
       countParams.addAll(params);
     }
     return new Query(
-      "select count(1) from (%s) t".formatted(sql),
+      "select count(1) from (%s)".formatted(sql),
       countParams
     );
   }
@@ -28,10 +28,10 @@ public class ANSI implements SQLDialect {
       pagingParams.addAll(params);
     }
     long offset = pageNumber * pageSize;
-    pagingParams.add(pageSize);
     pagingParams.add(offset);
+    pagingParams.add(pageSize);
     return new Query(
-      "select * from (%s) t limit ? offset ?".formatted(sql),
+      "select * from (%s) offset ? row fetch first ? row only".formatted(sql),
       pagingParams
     );
   }

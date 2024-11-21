@@ -4,12 +4,10 @@ package test;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcTest;
-import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
 import javax.sql.DataSource;
@@ -24,13 +22,20 @@ import static com.github.fantasy0v0.swift.jdbc.clauses.Clauses.where;
 import static com.github.fantasy0v0.swift.jdbc.predicate.Predicates.and;
 import static com.github.fantasy0v0.swift.jdbc.predicate.Predicates.exp;
 
-@ExtendWith(SwiftJdbcExtension.class)
 class SelectTest {
 
   private final Logger log = LoggerFactory.getLogger(SelectTest.class);
 
+  @TestFactory
+  List<DynamicTest> testAllDatabase() {
+    return ContainerUtil.testAllContainers(() -> List.of(
+      JdbcTest.of("testFetch", this::testFetch),
+      JdbcTest.of("testFetchOne", this::testFetchOne),
+      JdbcTest.of("testPredicate", this::testPredicate),
+      JdbcTest.of("testJson", this::testJson)
+    ));
+  }
 
-  @TestTemplate
   void testFetch(DataSource dataSource) {
     List<Student> students = select("select * from student").fetch(Student::from);
 
@@ -45,13 +50,11 @@ class SelectTest {
     }
   }
 
-  @TestTemplate
   void testFetchOne(DataSource dataSource) {
     Object[] row = select("select * from student limit 1").fetchOne();
     Assertions.assertNotNull(row);
   }
 
-  @TestTemplate
   void testPredicate(DataSource dataSource) {
     String sql = "select * from student";
     Predicate predicate = and(
@@ -68,7 +71,6 @@ class SelectTest {
     Assertions.assertTrue(students.stream().allMatch(student -> 2 == student.status()));
   }
 
-  @TestTemplate
   void testJson(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     if (driverClassName.contains("postgresql")) {

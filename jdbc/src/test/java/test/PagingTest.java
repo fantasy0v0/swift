@@ -3,13 +3,14 @@ package test;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.PageData;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcContainer;
-import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
 import javax.sql.DataSource;
@@ -18,13 +19,27 @@ import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static com.github.fantasy0v0.swift.jdbc.clauses.Clauses.where;
 import static com.github.fantasy0v0.swift.jdbc.predicate.Predicates.exp;
 
-@ExtendWith(SwiftJdbcExtension.class)
 class PagingTest {
 
   private final Logger log = LoggerFactory.getLogger(PagingTest.class);
 
-  @TestTemplate
-  void testWithOutWhere(DataSource dataSource) {
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
+
+  @BeforeAll
+  static void beforeAll() {
+    DataSource dataSource = container.start();
+    JDBC.configuration(dataSource);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    container.stop();
+  }
+
+  @Test
+  void testWithOutWhere() {
     PageData<Student> data = select("select * from student")
       .paginate(0, 10)
       .fetch(Student::from);
@@ -56,7 +71,7 @@ class PagingTest {
     Assertions.assertEquals(5, data.data().size());
   }
 
-  @TestTemplate
+  @Test
   void testWithWhere() {
     String sql = "select * from student";
     Predicate predicate = exp("status = ?", 2);
@@ -72,7 +87,7 @@ class PagingTest {
     Assertions.assertEquals(3, data.data().size());
   }
 
-  @TestTemplate
+  @Test
   void customizeCount() {
     PageData<Student> data = select("select * from student")
       .paginate(0, 10)

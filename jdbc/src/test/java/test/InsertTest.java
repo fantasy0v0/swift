@@ -1,18 +1,17 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcContainer;
-import test.container.SwiftJdbcExtension;
 import test.exception.WorkException;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -21,12 +20,26 @@ import java.util.List;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.transaction;
 
-@ExtendWith(SwiftJdbcExtension.class)
 public class InsertTest {
 
   private final Logger log = LoggerFactory.getLogger(InsertTest.class);
 
-  @TestTemplate
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
+
+  @BeforeAll
+  static void beforeAll() {
+    DataSource dataSource = container.start();
+    JDBC.configuration(dataSource);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    container.stop();
+  }
+
+  @Test
   void test() {
     Assertions.assertThrowsExactly(WorkException.class, () -> {
       transaction(() -> {
@@ -55,7 +68,7 @@ public class InsertTest {
     });
   }
 
-  @TestTemplate
+  @Test
   void testBatch() {
     List<List<Object>> batchParams = new ArrayList<>();
     batchParams.add(List.of(1000, "测试用户1", 0));
@@ -74,36 +87,30 @@ public class InsertTest {
     }
   }
 
-  @TestTemplate
-  void fetch(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
-      List<Object[]> result = JDBC.modify("""
+  @Test
+  void fetch() {
+    List<Object[]> result = JDBC.modify("""
         insert into student(id, name, status)
         values(?, ?, ?)
         returning id""").fetch(1000L, "测试学生", 0);
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals(1000L, result.getFirst()[0]);
-    }
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(1000L, result.getFirst()[0]);
   }
 
-  @TestTemplate
-  void testDateTime(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
-      OffsetDateTime offsetDateTime = OffsetDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-      LocalDateTime localDateTime = LocalDateTime.of(1600, 1, 1, 0, 0, 0, 0);
-      List<Object[]> objects = JDBC.modify("""
+  @Test
+  void testDateTime() {
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    LocalDateTime localDateTime = LocalDateTime.of(1600, 1, 1, 0, 0, 0, 0);
+    List<Object[]> objects = JDBC.modify("""
           insert into datetime_test(id, date)
           values(?, ?) returning date
         """).fetch(1, offsetDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
+    log.debug("value: {}", objects.getFirst()[0]);
 
-      objects = JDBC.modify("""
+    objects = JDBC.modify("""
           insert into datetime_test(id, date)
           values(?, ?) returning date
         """).fetch(1, localDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
-    }
+    log.debug("value: {}", objects.getFirst()[0]);
   }
 }

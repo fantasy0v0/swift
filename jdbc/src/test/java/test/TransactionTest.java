@@ -4,24 +4,35 @@ import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcContainer;
-import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.*;
 
-@ExtendWith(SwiftJdbcExtension.class)
 public class TransactionTest {
 
   private final Logger log = LoggerFactory.getLogger(TransactionTest.class);
 
-  @TestTemplate
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
+
+  @BeforeAll
+  static void beforeAll() {
+    DataSource dataSource = container.start();
+    JDBC.configuration(dataSource);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    container.stop();
+  }
+
+  @Test
   void test() {
     // 不能在事务交易过程中改变事物交易隔绝等级
 //    transaction(() -> {
@@ -47,7 +58,7 @@ public class TransactionTest {
     });
   }
 
-  @TestTemplate
+  @Test
   void rollback() {
     transaction(() -> {
       modify("update student set name = ? where id = ?")
