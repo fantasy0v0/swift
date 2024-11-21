@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-@Deprecated
 public class ModifyBuilder {
 
   private final DataSource dataSource;

@@ -41,8 +41,6 @@ public final class JDBC {
     configuration(new OffsetDateTimeTypeHandler());
   }
 
-  static StatementConfiguration statementConfiguration;
-
   public static void configuration(DataSource dataSource) {
     JDBC.dataSource = dataSource;
     ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
@@ -83,11 +81,6 @@ public final class JDBC {
       LogUtil.common().debug("{} 原有的SetHandler将被替换", supported);
     }
     SetHandlerMap.put(supported, handler);
-  }
-
-  public static void configuration(StatementConfiguration statementConfiguration) {
-    JDBC.statementConfiguration = statementConfiguration;
-    LogUtil.common().debug("配置Statement Configuration");
   }
 
   private static DataSource requireNonNull(DataSource dataSource) {
