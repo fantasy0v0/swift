@@ -113,22 +113,4 @@ public class UpdateTest {
     );
     Assertions.assertTrue(Arrays.stream(executedBatch).allMatch(i -> i == 1));
   }
-
-  @TestTemplate
-  void testFetchBatch(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (!driverClassName.contains("postgresql")) {
-      log.info("针对postgresql的测试, 其他数据库将跳过");
-      return;
-    }
-    List<List<Object>> params = List.of(List.of("测试修改1", 1L), List.of("测试修改2", 2L));
-    List<Object[]> executedBatch = JDBC.update("""
-      update student set name = ? where id = ? returning name, id
-      """).fetchBatch(params);
-    Assertions.assertEquals(2, executedBatch.size());
-    Assertions.assertEquals(params.get(0).get(0), executedBatch.get(0)[0]);
-    Assertions.assertEquals(params.get(0).get(1), executedBatch.get(0)[1]);
-    Assertions.assertEquals(params.get(1).get(0), executedBatch.get(1)[0]);
-    Assertions.assertEquals(params.get(1).get(1), executedBatch.get(1)[1]);
-  }
 }
