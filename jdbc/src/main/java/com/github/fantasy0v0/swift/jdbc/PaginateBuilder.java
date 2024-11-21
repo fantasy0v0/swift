@@ -31,7 +31,6 @@ public class PaginateBuilder {
                   String sql, List<Object> params,
                   long number, long size) {
     this.dataSource = dataSource;
-    this.statementConfiguration = statementConfiguration;
     this.sql = sql;
     this.params = params;
     this.pageNumber = number;
