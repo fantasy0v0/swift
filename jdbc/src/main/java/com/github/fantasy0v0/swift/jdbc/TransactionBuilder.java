@@ -38,8 +38,8 @@ public class TransactionBuilder<T> {
     LogUtil.performance().info("transaction begin");
     long startTime = System.nanoTime() / 1000;
     ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
+    ConnectionTransaction transaction = ref.getTransaction(level);
     try {
-      ConnectionTransaction transaction = ref.getTransaction(level);
       try {
         T result;
         if (null != supplier) {
