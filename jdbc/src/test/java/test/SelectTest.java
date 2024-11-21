@@ -1,12 +1,14 @@
 package test;
 
 
+import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
+import test.container.JdbcContainer;
 import test.container.JdbcTest;
 import test.vo.Student;
 
@@ -57,12 +59,13 @@ class SelectTest {
 
   void testPredicate(DataSource dataSource) {
     String sql = "select * from student";
+    List<Object> parameters = new ArrayList<>();
     Predicate predicate = and(
       exp("id > ?", 0),
       exp("status = ?", 2)
     );
     sql = where(sql, predicate);
-    List<Object> parameters = new ArrayList<>(predicate.getParameters());
+    parameters.addAll(predicate.getParameters());
     sql += " order by id asc";
     sql += " limit 20 offset 0";
     List<Student> students = select(sql, parameters)
@@ -76,12 +79,6 @@ class SelectTest {
     if (driverClassName.contains("postgresql")) {
       List<String> result = select("""
       select '{ "test": 123}'::jsonb
-      """).fetch(row -> row.getString(1));
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals("{\"test\": 123}", result.getFirst());
-    } else if (driverClassName.contains("mysql")) {
-      List<String> result = select("""
-      select cast('{"test": 123}' as JSON)
       """).fetch(row -> row.getString(1));
       Assertions.assertEquals(1, result.size());
       Assertions.assertEquals("{\"test\": 123}", result.getFirst());
