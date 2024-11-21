@@ -1,6 +1,5 @@
 package test.container;
 
-import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.DynamicTest;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,7 +34,6 @@ public final class ContainerUtil {
           .stream()
           .map(test -> dynamicTest(name + " " + test.name(), () -> {
             DataSource dataSource = container.start();
-            JDBC.configuration(dataSource);
             try {
               test.executable().execute(dataSource);
             } finally {

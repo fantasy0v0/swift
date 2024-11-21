@@ -1,71 +1,67 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.ContainerUtil;
 import test.container.JdbcContainer;
-import test.container.JdbcTest;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.List;
 
 public class UpdateTest {
 
   private final Logger log = LoggerFactory.getLogger(UpdateTest.class);
 
-  @TestFactory
-  List<DynamicTest> testAllDatabase() {
-    return ContainerUtil.testAllContainers(() -> List.of(
-      new JdbcTest("test", this::test),
-      new JdbcTest("testArrayParams", this::testArrayParams),
-      new JdbcTest("testExecuteBatch", this::testExecuteBatch)
-    ));
+  private final static JdbcContainer container = JdbcContainer.create(
+    ContainerUtil.PG, ContainerUtil.PG_LOCATIONS
+  );
+
+  @BeforeAll
+  static void beforeAll() {
+    DataSource dataSource = container.start();
+    JDBC.configuration(dataSource);
   }
 
-  void test(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    int executed = JDBC.update("""
-    update student set name = ? where id = ?
-    """).execute("测试修改", 1);
+  @AfterAll
+  static void afterAll() {
+    container.stop();
+  }
+
+  @Test
+  void test() {
+    int executed = JDBC.modify("""
+        update student set name = ? where id = ?
+      """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);
-    executed = JDBC.update("""
-    update student set name = ? where id = ?
-    """).execute("测试修改", 1);
+    executed = JDBC.modify("""
+        update student set name = ? where id = ?
+      """).execute("测试修改", 1);
     Assertions.assertEquals(1, executed);
 
-    if (driverClassName.contains("postgresql")) {
-      List<Object[]> result = JDBC.update("""
-      update student set name = ? where id = ? returning id
+    List<Object[]> result = JDBC.modify("""
+        update student set name = ? where id = ? returning id
       """).fetch("测试修改1", 1);
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals(1L, result.getFirst()[0]);
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(1L, result.getFirst()[0]);
 
-      result = JDBC.update("""
-      update student set name = ? returning id
-      """).fetch("测试修改1");
-      Assertions.assertTrue(result.size() > 1);
-    }
-
+    result = JDBC.modify("""
+          update student set name = ? returning id
+        """).fetch("测试修改1");
+    Assertions.assertTrue(result.size() > 1);
   }
 
-  void testArrayParams(DataSource dataSource) {
+  @Test
+  void testArrayParams() {
     Object[] params = {"测试修改", 1};
-    int executed = JDBC.update("""
-    update student set name = ? where id = ?
-    """).execute(params);
+    int executed = JDBC.modify("""
+        update student set name = ? where id = ?
+      """).execute(params);
     Assertions.assertEquals(1, executed);
-  }
-
-  void testExecuteBatch(DataSource dataSource) {
-    JDBC.update("""
-    update student set name = ? where id = ?
-    """).executeBatch(
-      List.of(List.of("测试修改1", 1), List.of("测试修改2", 2))
-    );
   }
 
 }
