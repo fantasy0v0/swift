@@ -1,5 +1,6 @@
 package test.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
@@ -24,20 +25,22 @@ public class TransactionTest {
   @TestFactory
   List<DynamicTest> testAllDatabase() {
     return ContainerUtil.testAllContainers(() -> List.of(
-      JdbcTest.of("test", this::test),
-      JdbcTest.of("rollback", this::rollback)
+      new JdbcTest("test", this::test),
+      new JdbcTest("rollback", this::rollback)
     ));
   }
 
   void test(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
+
+    JDBC.configuration(dataSource);
     try {
       transaction(() -> {
         select("select * from student").fetch();
         transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
           select("select * from student").fetch();
           transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
-            update("update student set name = ? where id = ?")
+            modify("update student set name = ? where id = ?")
               .execute("修改", 1L);
           });
         });
@@ -54,8 +57,9 @@ public class TransactionTest {
   }
 
   void rollback(DataSource dataSource) {
+    JDBC.configuration(dataSource);
     transaction(() -> {
-      update("update student set name = ? where id = ?")
+      modify("update student set name = ? where id = ?")
         .execute("修改", 1L);
     });
   }

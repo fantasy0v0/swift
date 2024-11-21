@@ -128,7 +128,7 @@ public class ModifyBuilder {
                                 FetchMapper<T> mapper,
                                 List<List<Object>> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), null, sql, params, parameterHandler, mapper);
+      return Utils.executeBatch(ref.unwrap(), sql, params, parameterHandler, mapper);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }

@@ -133,30 +133,27 @@ final class Utils {
     }
   }
 
-  static <T> List<T> executeBatch(Connection conn, StatementConfiguration statementConfiguration,
+  static <T> List<T> executeBatch(Connection conn,
                                   String sql, List<List<Object>> batch,
                                   ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
     LogUtil.performance().info("executeBatch begin");
-    LogUtil.common().warn("This is not real executeBatch");
     long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch: [{}], caller: {}", sql, callerInfo);
-    List<T> list = new ArrayList<>();
-    try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
+    try (PreparedStatement statement = prepareStatement(conn, sql, null)) {
       if (null != batch) {
         for (List<Object> params : batch) {
           fillStatementParams(conn, statement, params, parameterHandler);
-          boolean result = statement.execute();
-          if (!result) {
-            list.add(null);
-            continue;
-          }
-          try (ResultSet resultSet = statement.getResultSet()) {
-            List<T> row = fetchByResultSet(resultSet, mapper, true);
-            if (!row.isEmpty()) {
-              list.add(row.getFirst());
-            }
+          statement.addBatch();
+        }
+      }
+      List<T> list = new ArrayList<>();
+      while (statement.getMoreResults()) {
+        try (ResultSet resultSet = statement.getResultSet()) {
+          List<T> row = fetchByResultSet(resultSet, mapper, true);
+          if (!row.isEmpty()) {
+            list.add(row.getFirst());
           }
         }
       }
