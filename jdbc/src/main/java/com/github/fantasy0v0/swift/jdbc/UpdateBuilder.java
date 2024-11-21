@@ -35,8 +35,8 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   @Override
-  public UpdateBuilder setFetchSize(Integer fetchSize) {
-    getStatementConfiguration().setFetchSize(fetchSize);
+  public UpdateBuilder setMaxFieldSize(Integer maxFieldSize) {
+    getStatementConfiguration().setMaxFieldSize(maxFieldSize);
     return this;
   }
 

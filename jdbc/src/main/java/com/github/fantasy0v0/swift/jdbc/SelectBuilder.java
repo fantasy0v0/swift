@@ -16,8 +16,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   private final List<Object> params;
 
-  SelectBuilder(DataSource dataSource,
-                StatementConfiguration statementConfiguration,
+  SelectBuilder(DataSource dataSource, StatementConfiguration statementConfiguration,
                 String sql, List<Object> params) {
     this.dataSource = dataSource;
     this.statementConfiguration = statementConfiguration;
@@ -39,8 +38,8 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
   }
 
   @Override
-  public SelectBuilder setFetchSize(Integer fetchSize) {
-    getStatementConfiguration().setFetchSize(fetchSize);
+  public SelectBuilder setMaxFieldSize(Integer maxFieldSize) {
+    getStatementConfiguration().setMaxFieldSize(maxFieldSize);
     return this;
   }
 

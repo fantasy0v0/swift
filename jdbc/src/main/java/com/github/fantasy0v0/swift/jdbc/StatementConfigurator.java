@@ -4,7 +4,7 @@ public interface StatementConfigurator<T> {
 
   T setQueryTimeout(Integer queryTimeout);
 
-  T setFetchSize(Integer fetchSize);
+  T setMaxFieldSize(Integer maxFieldSize);
 
   T setMaxRows(Integer maxRows);
 
