@@ -76,18 +76,6 @@ final class Utils {
     return "%s(%s:%d)".formatted(className, fileName, lineNumber);
   }
 
-  /**
-   * 执行查询语句
-   * @param conn 数据库连接
-   * @param sql sql语句
-   * @param params 变量
-   * @param fetchMapper 行映射
-   * @param parameterHandler 参数处理器
-   * @param firstOnly 只取一条
-   * @return 结果
-   * @param <T> 映射后的类型
-   * @throws SQLException 执行失败异常
-   */
   static <T> List<T> executeQuery(Connection conn,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
