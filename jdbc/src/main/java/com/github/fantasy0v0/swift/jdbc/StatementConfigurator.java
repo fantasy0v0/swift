@@ -1,11 +1,11 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-public interface StatementConfigurator<T> {
+public interface StatementConfigurator {
 
-  T setQueryTimeout(Integer queryTimeout);
+  void setQueryTimeout(Integer queryTimeout);
 
-  T setMaxFieldSize(Integer maxFieldSize);
+  void setMaxFieldSize(Integer maxFieldSize);
 
-  T setMaxRows(Integer maxRows);
+  void setMaxRows(Integer maxRows);
 
 }

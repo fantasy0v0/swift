@@ -5,15 +5,13 @@ import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
+import com.github.fantasy0v0.swift.jdbc.type.AbstractTypeHandler;
 import com.github.fantasy0v0.swift.jdbc.type.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -100,7 +98,7 @@ public final class JDBC {
   }
 
   public static SelectBuilder select(String sql, List<Object> params) {
-    return new SelectBuilder(requireNonNull(dataSource), statementConfiguration, sql.trim(), params);
+    return new SelectBuilder(requireNonNull(dataSource), sql.trim(), params);
   }
 
   public static SelectBuilder select(String sql, Object... params) {
