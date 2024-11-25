@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    if: startsWith(github.event.head_commit.message, '[action]')) || (github.event_name == 'pull_request')
+    if: ${{ startsWith(github.event.head_commit.message, '[action]') || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
