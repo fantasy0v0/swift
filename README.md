@@ -4,11 +4,13 @@
 
 # swift-jdbc
 
-配置简单, 使用方便, 在不额外学习其他框架的情况下快速方便的使用jdbc进行CRUD。
+配置简单, 使用方便, 无任何反射操作，在不额外学习的情况下快速方便地使用jdbc进行CRUD。
 
 该项目不是框架, 也不是用来代替任何ORM框架的, 它只能算是一个库, 你可以和任何ORM框架搭配使用。
 
-该项目只是期望能方便、快速地执行SQL并提取出结果。如果你能理解并有更好的想法的话，欢迎你与我分享！
+该项目只是期望能方便、快速地执行SQL并提取出结果。
+
+如果你能理解并有更好的想法的话，欢迎你与我分享！
 
 ## 如何使用
 
@@ -113,11 +115,11 @@ PagingData<Student> data = select("""
 """).paginate(0, 10).fetch(Student::from);
 ```
 
-## modify
+## 修改操作
 
 insert
 ```java
-int executed = JDBC.modify("""
+int executed = JDBC.insert("""
   insert into student(id, name, status)
   values(1000, '测试学生', 0)
 """).execute();
@@ -125,11 +127,18 @@ int executed = JDBC.modify("""
 
 支持postgres的returning
 ```java
-Long result = JDBC.modify("""
+Long result = JDBC.insert("""
   insert into student(id, name, status)
   values(?, ?, ?)
   returning id
 """).fetchOne(row -> row.getLong(1), 1000L, "测试学生", 0);
+```
+
+获取生成的主键
+```java
+long key = JDBC.insert("""
+insert into swift_user(name, status) values('测试学生', 0)
+""").fetchKey(row -> row.getLong(1));
 ```
 
 批量插入
@@ -145,12 +154,12 @@ batchParams.add(List.of(1005, "测试用户6", 5));
 int[] executed = JDBC.modify("""
   insert into student(id, name, status)
   values(?, ?, ?)
-""").executeBatch(batchParams);
+""").batch(batchParams);
 ```
 
 update
 ```java
-int executed = JDBC.modify("""
+int executed = JDBC.update("""
   update student set name = ? where id = ?
 """).execute("测试修改", 1);
 ```
