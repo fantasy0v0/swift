@@ -35,8 +35,8 @@ public class TransactionBuilder<T> {
   }
 
   T execute() throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("transaction begin");
-    long startTime = System.nanoTime() / 1000;
     ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
     try {
       ConnectionTransaction transaction = ref.getTransaction(level);
@@ -56,9 +56,7 @@ public class TransactionBuilder<T> {
       }
     } finally {
       ConnectionPoolUtil.closeReference(ref, dataSource);
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("transaction end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("transaction end, cost: {}", stopWatch);
     }
   }
 

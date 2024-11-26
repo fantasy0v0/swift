@@ -93,8 +93,8 @@ final class Utils {
                                   FetchMapper<T> fetchMapper,
                                   ParameterHandler parameterHandler,
                                   boolean firstOnly) throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("executeQuery begin");
-    long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeQuery: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
@@ -103,9 +103,7 @@ final class Utils {
         return fetchByResultSet(resultSet, fetchMapper, firstOnly);
       }
     } finally {
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("executeQuery end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeQuery end, cost: {}", stopWatch);
     }
   }
 
@@ -113,8 +111,8 @@ final class Utils {
                              String sql, List<Object> params,
                              ParameterHandler parameterHandler,
                              FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("execute begin");
-    long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("execute: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
@@ -127,9 +125,7 @@ final class Utils {
         return fetchByResultSet(resultSet, mapper, firstOnly);
       }
     } finally {
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("execute end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("execute end, cost: {}", stopWatch);
     }
   }
 
@@ -137,8 +133,8 @@ final class Utils {
                                   String sql, List<List<Object>> batch,
                                   ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("executeBatch RETURN_GENERATED_KEYS begin");
-    long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch RETURN_GENERATED_KEYS: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql,
@@ -152,17 +148,15 @@ final class Utils {
       LogUtil.sql().debug("executeBatch: {}", result.length);
       return fetchByResultSet(statement.getGeneratedKeys(), mapper, false);
     } finally {
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("executeBatch RETURN_GENERATED_KEYS end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeBatch RETURN_GENERATED_KEYS end, cost: {}", stopWatch);
     }
   }
 
   static int[] executeBatch(Connection conn, StatementConfiguration statementConfiguration,
                             String sql, List<List<Object>> batch,
                             ParameterHandler parameterHandler) throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("executeBatch begin");
-    long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql,
@@ -174,26 +168,22 @@ final class Utils {
       }
       return statement.executeBatch();
     } finally {
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("executeBatch end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeBatch end, cost: {}", stopWatch);
     }
   }
 
   static int executeUpdate(Connection conn, StatementConfiguration statementConfiguration,
                            String sql, List<Object> params,
                            ParameterHandler parameterHandler) throws SQLException {
+    StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("executeUpdate begin");
-    long startTime = System.nanoTime() / 1000;
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeUpdate: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(conn, statement, params, parameterHandler);
       return statement.executeUpdate();
     } finally {
-      long cost = System.nanoTime() / 1000 - startTime;
-      NumberFormat format = NumberFormat.getNumberInstance();
-      LogUtil.performance().info("executeUpdate end, cost: {} μs", format.format(cost));
+      LogUtil.performance().info("executeUpdate end, cost: {}", stopWatch);
     }
   }
 

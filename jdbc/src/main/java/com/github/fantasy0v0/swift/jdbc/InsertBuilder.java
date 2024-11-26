@@ -38,8 +38,8 @@ public class InsertBuilder extends UpdateBuilder {
                           List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
       Connection conn = ref.unwrap();
+      StopWatch stopWatch = new StopWatch();
       LogUtil.performance().info("fetchKey begin");
-      long startTime = System.nanoTime() / 1000;
       String callerInfo = printCallerInfo();
       LogUtil.sql().debug("fetchKey: [{}], caller: {}", sql, callerInfo);
       try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, statementConfiguration)) {
@@ -49,9 +49,7 @@ public class InsertBuilder extends UpdateBuilder {
         List<T> list = fetchByResultSet(statement.getGeneratedKeys(), mapper, true);
         return list.isEmpty() ? null : list.getFirst();
       } finally {
-        long cost = System.nanoTime() / 1000 - startTime;
-        NumberFormat format = NumberFormat.getNumberInstance();
-        LogUtil.performance().info("fetchKey end, cost: {} μs", format.format(cost));
+        LogUtil.performance().info("fetchKey end, cost: {}", stopWatch);
       }
     } catch (SQLException e) {
       throw new SwiftSQLException(e);

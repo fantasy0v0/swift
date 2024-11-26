@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.transaction;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SwiftJdbcExtension.class)
 public class InsertTest {
@@ -31,21 +32,21 @@ public class InsertTest {
         int executed = JDBC.insert("""
           insert into student(id, name, status)
           values(1000, '测试学生', 0)""").execute();
-        Assertions.assertEquals(1, executed);
+        assertEquals(1, executed);
 
         executed = JDBC.insert("""
           insert into student(id, name, status)
           values(?, ?, ?)""").execute(1001, "测试学生", 0);
-        Assertions.assertEquals(1, executed);
+        assertEquals(1, executed);
 
         // test null
         executed = JDBC.insert("""
           insert into student(id, name, status, ext)
           values(?, ?, ?, ?)""").execute(1002, "测试学生", 0, null);
-        Assertions.assertEquals(1, executed);
+        assertEquals(1, executed);
         Object[] row = JDBC.select("""
           select ext from student where id = ?""", 1002).fetchOne();
-        Assertions.assertEquals(1, row.length);
+        assertEquals(1, row.length);
         Assertions.assertNull(row[0]);
 
         throw new WorkException();
@@ -66,9 +67,9 @@ public class InsertTest {
     int[] executed = JDBC.insert("""
       insert into student(id, name, status)
       values(?, ?, ?)""").batch(batchParams);
-    Assertions.assertEquals(6, executed.length);
+    assertEquals(6, executed.length);
     for (int i : executed) {
-      Assertions.assertEquals(1, i);
+      assertEquals(1, i);
     }
 
     batchParams = new ArrayList<>();
@@ -81,7 +82,7 @@ public class InsertTest {
     List<Long> keys = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
     """).batch(batchParams, row -> row.getLong(1));
-    Assertions.assertEquals(6, executed.length);
+    assertEquals(6, executed.length);
     for (long key : keys) {
       Assertions.assertTrue(key > 0);
     }
@@ -95,8 +96,8 @@ public class InsertTest {
         insert into student(id, name, status)
         values(?, ?, ?)
         returning id""").fetch(1000L, "测试学生", 0);
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals(1000L, result.getFirst()[0]);
+      assertEquals(1, result.size());
+      assertEquals(1000L, result.getFirst()[0]);
     }
   }
 
@@ -104,20 +105,41 @@ public class InsertTest {
   void testDateTime(DataSource dataSource) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     if (driverClassName.contains("postgresql")) {
-      OffsetDateTime offsetDateTime = OffsetDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-      LocalDateTime localDateTime = LocalDateTime.of(1600, 1, 1, 0, 0, 0, 0);
+      OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+      LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
       List<Object[]> objects = JDBC.insert("""
-          insert into datetime_test(id, date)
-          values(?, ?) returning date
-        """).fetch(1, offsetDateTime);
+      insert into datetime_test(id, date) values(?, ?) returning date
+      """).fetch(1, offsetDateTime);
       log.debug("value: {}", objects.getFirst()[0]);
 
       objects = JDBC.insert("""
-          insert into datetime_test(id, date)
-          values(?, ?) returning date
-        """).fetch(1, localDateTime);
+      insert into datetime_test(id, date)
+      values(?, ?) returning date
+      """).fetch(1, localDateTime);
       log.debug("value: {}", objects.getFirst()[0]);
     }
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
+
+    JDBC.insert("""
+    insert into datetime_test(id, date) values(?, ?)
+    """).execute(2, offsetDateTime);
+
+    OffsetDateTime result1 = JDBC.select("""
+    select date from datetime_test where id = ?
+    """, 2).fetchOne(row -> row.getOffsetDateTime(1));
+
+    assertEquals(offsetDateTime, result1.withOffsetSameInstant(ZoneOffset.UTC));
+
+    JDBC.insert("""
+    insert into datetime_test(id, date) values(?, ?)
+    """).execute(3, localDateTime);
+
+    LocalDateTime result2 = JDBC.select("""
+    select date from datetime_test where id = ?
+    """, 3).fetchOne(row -> row.getLocalDateTime(1));
+
+    assertEquals(localDateTime, result2);
   }
 
   @TestTemplate
