@@ -59,6 +59,8 @@ public final class JDBC {
   }
 
   public static void configuration(SQLDialect dialect) {
+    requireNonNull(dataSource);
+    dialect.install(dataSource);
     JDBC.dialect = dialect;
     LogUtil.common().debug("配置方言");
   }

@@ -2,12 +2,18 @@ package com.github.fantasy0v0.swift.jdbc.dialect;
 
 import com.github.fantasy0v0.swift.jdbc.Query;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ANSI implements SQLDialect {
 
   public static final ANSI Instance = new ANSI();
+
+  @Override
+  public void install(DataSource dataSource) {
+
+  }
 
   @Override
   public Query count(String sql, List<Object> params) {
