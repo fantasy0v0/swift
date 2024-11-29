@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
@@ -7,7 +8,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc.junit;
 
 import com.github.fantasy0v0.swift.jdbc.ConnectionPoolUtil;
-import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
-import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;

@@ -1,7 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc.spring;
 
-import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
-import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
