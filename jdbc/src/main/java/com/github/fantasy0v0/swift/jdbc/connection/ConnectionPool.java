@@ -1,4 +1,4 @@
-package com.github.fantasy0v0.swift.jdbc;
+package com.github.fantasy0v0.swift.jdbc.connection;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;

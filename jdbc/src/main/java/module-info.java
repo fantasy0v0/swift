@@ -9,6 +9,7 @@ module swift.jdbc {
   exports com.github.fantasy0v0.swift.jdbc.dialect;
   exports com.github.fantasy0v0.swift.jdbc.type;
   exports com.github.fantasy0v0.swift.jdbc.util;
+  exports com.github.fantasy0v0.swift.jdbc.connection;
 
-  uses com.github.fantasy0v0.swift.jdbc.ConnectionPool;
+  uses com.github.fantasy0v0.swift.jdbc.connection.ConnectionPool;
 }

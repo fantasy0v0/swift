@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.spring;
 
-import com.github.fantasy0v0.swift.jdbc.ConnectionTransaction;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;

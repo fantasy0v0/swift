@@ -1,11 +1,11 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 

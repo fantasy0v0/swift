@@ -1,10 +1,11 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.function.Supplier;
 
 public class TransactionBuilder<T> {

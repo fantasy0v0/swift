@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
 import javax.sql.DataSource;

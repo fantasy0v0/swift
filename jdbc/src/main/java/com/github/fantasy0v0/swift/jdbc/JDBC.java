@@ -1,6 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import com.github.fantasy0v0.swift.jdbc.connection.DefaultConnectionPool;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionPool;
+import com.github.fantasy0v0.swift.jdbc.connection.impl.DefaultConnectionPool;
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
