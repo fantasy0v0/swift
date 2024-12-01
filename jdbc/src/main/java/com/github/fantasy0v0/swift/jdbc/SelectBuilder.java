@@ -2,13 +2,12 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
 public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
-  private final DataSource dataSource;
+  private final Context context;
 
   private StatementConfiguration statementConfiguration;
 
@@ -18,11 +17,8 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   private ParameterHandler parameterHandler;
 
-  SelectBuilder(DataSource dataSource,
-                StatementConfiguration statementConfiguration,
-                String sql, List<Object> params) {
-    this.dataSource = dataSource;
-    this.statementConfiguration = statementConfiguration;
+  SelectBuilder(Context context, String sql, List<Object> params) {
+    this.context = context;
     this.sql = sql;
     this.params = params;
   }
@@ -65,11 +61,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
    * @return PaginateBuilder
    */
   public PaginateBuilder paginate(long number, long size) {
-    return new PaginateBuilder(
-      dataSource,
-      statementConfiguration, parameterHandler,
-      sql, params, number, size
-    );
+    return new PaginateBuilder(context, parameterHandler, sql, params, number, size);
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper) {

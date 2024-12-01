@@ -4,16 +4,13 @@ import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 public class PaginateBuilder {
 
-  private final DataSource dataSource;
-
-  private final StatementConfiguration statementConfiguration;
+  private final Context context;
 
   private final ParameterHandler parameterHandler;
 
@@ -29,11 +26,9 @@ public class PaginateBuilder {
 
   private List<Object> countParams;
 
-  PaginateBuilder(DataSource dataSource,
-                  StatementConfiguration statementConfiguration, ParameterHandler parameterHandler,
+  PaginateBuilder(Context context, ParameterHandler parameterHandler,
                   String sql, List<Object> params, long number, long size) {
-    this.dataSource = dataSource;
-    this.statementConfiguration = statementConfiguration;
+    this.context = context;
     this.sql = sql;
     this.params = params;
     this.parameterHandler = parameterHandler;
