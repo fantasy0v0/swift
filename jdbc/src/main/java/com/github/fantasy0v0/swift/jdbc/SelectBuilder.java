@@ -25,26 +25,33 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   private StatementConfiguration getStatementConfiguration() {
     if (null == statementConfiguration) {
-      statementConfiguration = new StatementConfiguration();
+      return context.getStatementConfiguration();
+    }
+    return statementConfiguration;
+  }
+
+  private StatementConfiguration copyStatementConfiguration() {
+    if (null == statementConfiguration) {
+      statementConfiguration = context.getStatementConfiguration().copy();
     }
     return statementConfiguration;
   }
 
   @Override
   public SelectBuilder setQueryTimeout(Integer queryTimeout) {
-    getStatementConfiguration().setQueryTimeout(queryTimeout);
+    copyStatementConfiguration().setQueryTimeout(queryTimeout);
     return this;
   }
 
   @Override
   public SelectBuilder setFetchSize(Integer fetchSize) {
-    getStatementConfiguration().setFetchSize(fetchSize);
+    copyStatementConfiguration().setFetchSize(fetchSize);
     return this;
   }
 
   @Override
   public SelectBuilder setMaxRows(Integer maxRows) {
-    getStatementConfiguration().setMaxRows(maxRows);
+    copyStatementConfiguration().setMaxRows(maxRows);
     return this;
   }
 
@@ -61,12 +68,17 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
    * @return PaginateBuilder
    */
   public PaginateBuilder paginate(long number, long size) {
-    return new PaginateBuilder(context, parameterHandler, sql, params, number, size);
+    return new PaginateBuilder(
+      context, getStatementConfiguration(), parameterHandler,
+      sql, params, number, size
+    );
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper) {
     try {
-      return Utils.fetch(dataSource, statementConfiguration, sql, params, mapper, parameterHandler);
+      return Utils.fetch(
+        context, getStatementConfiguration(), sql, params, mapper, parameterHandler
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -78,7 +90,10 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   public <T> T fetchOne(FetchMapper<T> mapper) {
     try {
-      return Utils.fetchOne(dataSource, statementConfiguration, sql, params, mapper, parameterHandler);
+      return Utils.fetchOne(
+        context, getStatementConfiguration(), sql, params,
+        mapper, parameterHandler
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }

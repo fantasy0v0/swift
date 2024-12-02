@@ -12,7 +12,7 @@ public class TransactionBuilder<T> {
 
   // private static final ScopedValue<Connection> CONN = ScopedValue.newInstance();
 
-  private final DataSource dataSource;
+  private final Context context;
 
   private final Integer level;
 
@@ -20,26 +20,25 @@ public class TransactionBuilder<T> {
 
   private final Supplier<T> supplier;
 
-  TransactionBuilder(DataSource dataSource, Integer level, Runnable runnable, Supplier<T> supplier) {
-    this.dataSource = dataSource;
+  TransactionBuilder(Context context, Integer level, Runnable runnable, Supplier<T> supplier) {
+    this.context = context;
     this.level = level;
     this.runnable = runnable;
     this.supplier = supplier;
   }
 
-  static TransactionBuilder<Object> create(DataSource dataSource, Integer level, Runnable runnable) {
-    return new TransactionBuilder<>(dataSource, level, runnable, null);
+  static TransactionBuilder<Object> create(Context context, Integer level, Runnable runnable) {
+    return new TransactionBuilder<>(context, level, runnable, null);
   }
 
-  static <T> TransactionBuilder<T> create(DataSource dataSource, Integer level, Supplier<T> supplier) {
-    return new TransactionBuilder<>(dataSource, level, null, supplier);
+  static <T> TransactionBuilder<T> create(Context context, Integer level, Supplier<T> supplier) {
+    return new TransactionBuilder<>(context, level, null, supplier);
   }
 
   T execute() throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("transaction begin");
-    ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource);
-    try {
+    try(ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
       ConnectionTransaction transaction = ref.getTransaction(level);
       try {
         T result;
@@ -56,7 +55,6 @@ public class TransactionBuilder<T> {
         throw e;
       }
     } finally {
-      ConnectionPoolUtil.closeReference(ref, dataSource);
       LogUtil.performance().info("transaction end, cost: {}", stopWatch);
     }
   }

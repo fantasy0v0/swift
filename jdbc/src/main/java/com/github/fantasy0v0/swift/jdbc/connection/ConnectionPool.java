@@ -1,5 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc.connection;
 
+import com.github.fantasy0v0.swift.jdbc.Context;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
@@ -8,8 +10,6 @@ import java.sql.SQLException;
  */
 public interface ConnectionPool {
 
-  ConnectionReference getReference(DataSource dataSource) throws SQLException;
-
-  void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException;
+  ConnectionReference getReference(Context context) throws SQLException;
 
 }

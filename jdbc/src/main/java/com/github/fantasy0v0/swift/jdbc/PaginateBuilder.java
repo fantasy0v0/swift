@@ -12,6 +12,8 @@ public class PaginateBuilder {
 
   private final Context context;
 
+  private final StatementConfiguration statementConfiguration;
+
   private final ParameterHandler parameterHandler;
 
   private final String sql;
@@ -26,9 +28,11 @@ public class PaginateBuilder {
 
   private List<Object> countParams;
 
-  PaginateBuilder(Context context, ParameterHandler parameterHandler,
+  PaginateBuilder(Context context, StatementConfiguration statementConfiguration,
+                  ParameterHandler parameterHandler,
                   String sql, List<Object> params, long number, long size) {
     this.context = context;
+    this.statementConfiguration = statementConfiguration;
     this.sql = sql;
     this.params = params;
     this.parameterHandler = parameterHandler;
@@ -46,7 +50,7 @@ public class PaginateBuilder {
     String _countSql;
     List<Object> _countParams;
     if (null == countSql || countSql.isBlank()) {
-      SQLDialect dialect = JDBC.getSQLDialect();
+      SQLDialect dialect = context.getSQLDialect();
       Query query = dialect.count(sql, params);
       _countSql = query.sql();
       _countParams = query.params();
@@ -54,8 +58,11 @@ public class PaginateBuilder {
       _countSql = countSql;
       _countParams = countParams;
     }
-    Long count = Utils.fetchOne(dataSource, statementConfiguration, _countSql, _countParams,
-      row -> row.getLong(1), null);
+    Long count = Utils.fetchOne(
+      context, statementConfiguration,
+      _countSql, _countParams,
+      row -> row.getLong(1), null
+    );
     if (null == count) {
       throw new SwiftException("没有获取到总记录数, 请检查sql语句是否正确");
     }
@@ -63,9 +70,12 @@ public class PaginateBuilder {
   }
 
   private <T> List<T> getData(FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
-    SQLDialect dialect = JDBC.getSQLDialect();
+    SQLDialect dialect = context.getSQLDialect();
     Query query = dialect.paging(sql, params, pageNumber, pageSize);
-    return Utils.fetch(dataSource, statementConfiguration, query.sql(), query.params(), mapper, parameterHandler);
+    return Utils.fetch(
+      context, statementConfiguration, query.sql(), query.params(),
+      mapper, parameterHandler
+    );
   }
 
   public <T> PageData<T> fetch(FetchMapper<T> mapper) {
