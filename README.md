@@ -61,7 +61,7 @@
 
 ```java
 DataSource dataSource = DataSourceUtil.create();
-JDBC.configuration(dataSource);
+JDBC.initialization(dataSource);
 ```
 
 ## select
@@ -81,11 +81,9 @@ select * from student
 ```java
 select("""
 select id, name, status from student where id = ?
-""",1L).fetchOne(row -> new Student(
-  row.getLong(1),
-  row.getString(2),
-  row.getLong(3)
-));
+""", 1L).fetchOne(
+  row -> new Student(row.getLong(1), row.getString(2), row.getLong(3))
+);
 ```
 
 ### 动态sql条件
@@ -111,7 +109,7 @@ List<Student> students = select(sql, parameters)
 
 ```java
 PagingData<Student> data = select("""
-  select * from student
+select * from student
 """).paginate(0, 10).fetch(Student::from);
 ```
 
@@ -120,17 +118,17 @@ PagingData<Student> data = select("""
 insert
 ```java
 int executed = JDBC.insert("""
-  insert into student(id, name, status)
-  values(1000, '测试学生', 0)
+insert into student(id, name, status)
+values(1000, '测试学生', 0)
 """).execute();
 ```
 
 支持postgres的returning
 ```java
 Long result = JDBC.insert("""
-  insert into student(id, name, status)
-  values(?, ?, ?)
-  returning id
+insert into student(id, name, status)
+values(?, ?, ?)
+returning id
 """).fetchOne(row -> row.getLong(1), 1000L, "测试学生", 0);
 ```
 
@@ -152,15 +150,15 @@ batchParams.add(List.of(1004, "测试用户5", 4));
 batchParams.add(List.of(1005, "测试用户6", 5));
 
 int[] executed = JDBC.modify("""
-  insert into student(id, name, status)
-  values(?, ?, ?)
+insert into student(id, name, status)
+values(?, ?, ?)
 """).batch(batchParams);
 ```
 
 update
 ```java
 int executed = JDBC.update("""
-  update student set name = ? where id = ?
+update student set name = ? where id = ?
 """).execute("测试修改", 1);
 ```
 
@@ -210,8 +208,8 @@ transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
 public Long getId() {
   return transaction(() -> {
     return select("""
-        select id from student limit 1
-      """).fetchOne(row -> row.getLong(1));
+    select id from student limit 1
+    """).fetchOne(row -> row.getLong(1));
   });
 }
 ```
@@ -220,7 +218,7 @@ public Long getId() {
 
 ## 查看SQL执行时间
 
-将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为INFO时, 会在日志中打印执行时间, 时间单位为: μs
+将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为INFO时, 会在日志中打印执行时间
 
 ```text
 10:51:36:846 INFO executeQuery begin

@@ -3,14 +3,13 @@ package com.github.fantasy0v0.swift.jdbc;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
 public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
-  protected final DataSource dataSource;
+  protected final Context context;
 
   protected StatementConfiguration statementConfiguration;
 
@@ -18,34 +17,40 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   protected ParameterHandler parameterHandler;
 
-  UpdateBuilder(DataSource dataSource, StatementConfiguration statementConfiguration, String sql) {
-    this.dataSource = dataSource;
+  UpdateBuilder(Context context, String sql) {
+    this.context = context;
     this.sql = sql;
-    this.statementConfiguration = statementConfiguration;
   }
 
-  protected StatementConfiguration getStatementConfiguration() {
+  private StatementConfiguration getStatementConfiguration() {
     if (null == statementConfiguration) {
-      statementConfiguration = new StatementConfiguration();
+      return context.getStatementConfiguration();
+    }
+    return statementConfiguration;
+  }
+
+  private StatementConfiguration copyStatementConfiguration() {
+    if (null == statementConfiguration) {
+      statementConfiguration = context.getStatementConfiguration().copy();
     }
     return statementConfiguration;
   }
 
   @Override
   public UpdateBuilder setQueryTimeout(Integer queryTimeout) {
-    getStatementConfiguration().setQueryTimeout(queryTimeout);
+    copyStatementConfiguration().setQueryTimeout(queryTimeout);
     return this;
   }
 
   @Override
   public UpdateBuilder setFetchSize(Integer fetchSize) {
-    getStatementConfiguration().setFetchSize(fetchSize);
+    copyStatementConfiguration().setFetchSize(fetchSize);
     return this;
   }
 
   @Override
   public UpdateBuilder setMaxRows(Integer maxRows) {
-    getStatementConfiguration().setMaxRows(maxRows);
+    copyStatementConfiguration().setMaxRows(maxRows);
     return this;
   }
 
@@ -55,8 +60,10 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int execute(List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeUpdate(ref.unwrap(), statementConfiguration, sql, params, parameterHandler);
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+      return Utils.executeUpdate(
+        context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -80,8 +87,10 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int[] batch(List<List<Object>> batchParams) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler);
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+      return Utils.executeBatch(
+        context, ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
@@ -89,8 +98,11 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   private <T> List<T> _fetch(FetchMapper<T> mapper,
                              List<Object> params, boolean firstOnly) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.execute(ref.unwrap(), statementConfiguration, sql, params, parameterHandler, mapper, firstOnly);
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+      return Utils.execute(
+        context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler,
+        mapper, firstOnly
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }

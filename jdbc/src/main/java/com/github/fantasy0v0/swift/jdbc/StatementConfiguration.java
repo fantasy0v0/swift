@@ -41,4 +41,8 @@ public class StatementConfiguration {
   public void setMaxRows(Integer maxRows) {
     this.maxRows = maxRows;
   }
+
+  public StatementConfiguration copy() {
+    return new StatementConfiguration(queryTimeout, fetchSize, maxRows);
+  }
 }

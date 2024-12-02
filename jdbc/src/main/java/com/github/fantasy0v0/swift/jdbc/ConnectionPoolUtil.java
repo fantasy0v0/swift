@@ -10,6 +10,9 @@ public final class ConnectionPoolUtil {
 
   static ConnectionPool pool;
 
+  /**
+   * TODO 需要改成Context
+   */
   public static ConnectionReference getReference(DataSource dataSource) throws SQLException {
     return pool.getReference(dataSource);
   }
