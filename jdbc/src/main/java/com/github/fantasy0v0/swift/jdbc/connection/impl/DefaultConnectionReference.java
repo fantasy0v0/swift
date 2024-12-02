@@ -7,6 +7,7 @@ import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 class DefaultConnectionReference implements ConnectionReference {
 
@@ -16,13 +17,12 @@ class DefaultConnectionReference implements ConnectionReference {
 
   private final DataSource dataSource;
 
-  private final ThreadLocal<ConnectionReference> threadLocal;
+  private final Runnable onClose;
 
-  DefaultConnectionReference(DataSource dataSource, ThreadLocal<ConnectionReference> threadLocal) {
+  DefaultConnectionReference(DataSource dataSource, Runnable onClose) {
     LogUtil.common().debug("connection create rc:{}", referenceCounting);
     this.dataSource = dataSource;
-    this.threadLocal = threadLocal;
-    this.threadLocal.set(this);
+    this.onClose = onClose;
   }
 
   public ConnectionReference reference() {
@@ -39,7 +39,7 @@ class DefaultConnectionReference implements ConnectionReference {
   @Override
   public void close() throws SQLException {
     if (0 == referenceCounting) {
-      threadLocal.remove();
+      this.onClose.run();
       if (null != connection) {
         connection.close();
       }

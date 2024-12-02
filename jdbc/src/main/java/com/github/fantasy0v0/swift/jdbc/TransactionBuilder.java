@@ -4,7 +4,6 @@ import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
@@ -38,7 +37,7 @@ public class TransactionBuilder<T> {
   T execute() throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().info("transaction begin");
-    try(ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try(ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       ConnectionTransaction transaction = ref.getTransaction(level);
       try {
         T result;

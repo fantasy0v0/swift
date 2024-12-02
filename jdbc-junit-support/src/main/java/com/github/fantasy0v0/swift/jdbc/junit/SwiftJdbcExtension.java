@@ -21,13 +21,13 @@ public class SwiftJdbcExtension implements BeforeTestExecutionCallback, AfterTes
     }
     ConnectionReference ref = getConnectionReference(extensionContext);
     if (null != ref) {
-      ConnectionPoolUtil.closeReference(ref, JDBC.getDataSource());
+      ref.close();
     }
   }
 
   @Override
   public void beforeTestExecution(ExtensionContext extensionContext) throws Exception {
-    ConnectionReference ref = ConnectionPoolUtil.getReference(JDBC.getDataSource());
+    ConnectionReference ref = ConnectionPoolUtil.getReference(JDBC.getContext());
     setConnectionReference(extensionContext, ref);
     ConnectionTransaction transaction = ref.getTransaction(null);
     setConnectionTransaction(extensionContext, transaction);

@@ -25,10 +25,29 @@ public final class JDBC {
     LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 
-  private static synchronized Context getContext() {
+  public static Context getContext() {
     if (null == context) {
       throw new SwiftException("请先初始化");
     }
+    return context;
+  }
+
+  public static Context newContext(DataSource dataSource, SQLDialect dialect,
+                                   StatementConfiguration statementConfiguration) {
+    Context context = new Context(dataSource, dialect, statementConfiguration);
+    context.configure(new ByteTypeHandler());
+    context.configure(new ShortTypeHandler());
+    context.configure(new IntegerTypeHandler());
+    context.configure(new FloatTypeHandler());
+    context.configure(new DoubleTypeHandler());
+    context.configure(new LongTypeHandler());
+    context.configure(new BooleanTypeHandler());
+    context.configure(new StringTypeHandler());
+    context.configure(new TimestampTypeHandler());
+    context.configure(new LocalTimeTypeHandler());
+    context.configure(new LocalDateTypeHandler());
+    context.configure(new LocalDateTimeTypeHandler());
+    context.configure(new OffsetDateTimeTypeHandler());
     return context;
   }
 
@@ -45,20 +64,11 @@ public final class JDBC {
       statementConfiguration = new StatementConfiguration();
       LogUtil.common().info("将使用默认StatementConfiguration");
     }
-    context = new Context(dataSource, dialect, statementConfiguration);
-    context.configure(new ByteTypeHandler());
-    context.configure(new ShortTypeHandler());
-    context.configure(new IntegerTypeHandler());
-    context.configure(new FloatTypeHandler());
-    context.configure(new DoubleTypeHandler());
-    context.configure(new LongTypeHandler());
-    context.configure(new BooleanTypeHandler());
-    context.configure(new StringTypeHandler());
-    context.configure(new TimestampTypeHandler());
-    context.configure(new LocalTimeTypeHandler());
-    context.configure(new LocalDateTypeHandler());
-    context.configure(new LocalDateTimeTypeHandler());
-    context.configure(new OffsetDateTimeTypeHandler());
+    context = newContext(dataSource, dialect, statementConfiguration);
+  }
+
+  public static void unInitialization() {
+    context = null;
   }
 
   public static void initialization(DataSource dataSource, SQLDialect dialect) {

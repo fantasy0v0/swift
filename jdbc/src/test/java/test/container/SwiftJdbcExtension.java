@@ -46,13 +46,14 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
 
     @Override
     public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
+      JDBC.unInitialization();
       container.stop();
     }
 
     @Override
     public void beforeTestExecution(ExtensionContext extensionContext) throws Exception {
       dataSource = container.start();
-      JDBC.configuration(dataSource);
+      JDBC.initialization(dataSource);
     }
 
     @Override

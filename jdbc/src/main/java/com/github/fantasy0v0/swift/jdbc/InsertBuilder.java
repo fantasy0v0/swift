@@ -26,7 +26,7 @@ public class InsertBuilder extends UpdateBuilder {
    * @return 返回生成的主键
    */
   public <T> List<T> batch(List<List<Object>> batchParams, FetchMapper<T> keyMapper) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), statementConfiguration, sql, batchParams,
         parameterHandler, keyMapper
@@ -38,7 +38,7 @@ public class InsertBuilder extends UpdateBuilder {
 
   private <T> T _fetchKey(FetchMapper<T> mapper,
                           List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       Connection conn = ref.unwrap();
       StopWatch stopWatch = new StopWatch();
       LogUtil.performance().info("fetchKey begin");
