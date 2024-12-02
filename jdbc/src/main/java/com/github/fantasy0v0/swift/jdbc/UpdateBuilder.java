@@ -60,7 +60,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int execute(List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeUpdate(
         context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler
       );
@@ -87,7 +87,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int[] batch(List<List<Object>> batchParams) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler
       );
@@ -98,7 +98,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   private <T> List<T> _fetch(FetchMapper<T> mapper,
                              List<Object> params, boolean firstOnly) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.execute(
         context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler,
         mapper, firstOnly

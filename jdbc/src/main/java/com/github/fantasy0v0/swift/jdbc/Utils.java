@@ -27,7 +27,7 @@ final class Utils {
                            String sql, List<Object> params,
                            FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
 
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return executeQuery(context,
         ref.unwrap(), statementConfiguration, context.getGetHandlers(), sql, params,
         mapper, parameterHandler, false
@@ -39,7 +39,7 @@ final class Utils {
                         StatementConfiguration statementConfiguration,
                         String sql, List<Object> params,
                         FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context.getDataSource())) {
+    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       List<T> list = executeQuery(
         context, ref.unwrap(), statementConfiguration, context.getGetHandlers(),
         sql, params, mapper, parameterHandler, true

@@ -10,15 +10,8 @@ public final class ConnectionPoolUtil {
 
   static ConnectionPool pool;
 
-  /**
-   * TODO 需要改成Context
-   */
-  public static ConnectionReference getReference(DataSource dataSource) throws SQLException {
-    return pool.getReference(dataSource);
-  }
-
-  public static void closeReference(ConnectionReference reference, DataSource dataSource) throws SQLException {
-    pool.closeReference(reference, dataSource);
+  public static ConnectionReference getReference(Context context) throws SQLException {
+    return pool.getReference(context);
   }
 
 }
