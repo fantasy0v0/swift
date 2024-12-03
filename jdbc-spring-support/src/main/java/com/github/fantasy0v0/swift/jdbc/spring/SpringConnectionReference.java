@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.spring;
 
+import com.github.fantasy0v0.swift.jdbc.Context;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -12,10 +13,10 @@ class SpringConnectionReference implements ConnectionReference {
 
   private Connection connection;
 
-  private final DataSource dataSource;
+  private final Context context;
 
-  SpringConnectionReference(DataSource dataSource) {
-    this.dataSource = dataSource;
+  SpringConnectionReference(Context context) {
+    this.context = context;
   }
 
   @Override
@@ -31,7 +32,7 @@ class SpringConnectionReference implements ConnectionReference {
   @Override
   public Connection unwrap() throws SQLException {
     if (null == connection) {
-      connection = DataSourceUtils.doGetConnection(dataSource);
+      connection = DataSourceUtils.doGetConnection(context.getDataSource());
     }
     return connection;
   }
@@ -39,7 +40,7 @@ class SpringConnectionReference implements ConnectionReference {
   @Override
   public void close() throws SQLException {
     if (null != connection) {
-      DataSourceUtils.doReleaseConnection(connection, dataSource);
+      DataSourceUtils.doReleaseConnection(connection, context.getDataSource());
     }
   }
 }
