@@ -3,6 +3,8 @@ package test.service;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Assertions;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,19 +20,14 @@ public class TestService {
   @Resource
   private DataSource dataSource;
 
-  @Transactional
-  public void test(boolean throwError) throws SQLException {
-    Connection connection = DataSourceUtils.doGetConnection(dataSource);
-    try (PreparedStatement ps = connection.prepareStatement("update student set name = ? where id = ?")) {
-      ps.setString(1, "大明");
-      ps.setInt(2, 1);
-      ps.executeUpdate();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    } finally {
-      DataSourceUtils.doReleaseConnection(connection, dataSource);
-    }
+  @Resource
+  private JdbcTemplate jdbcTemplate;
 
+  @Transactional
+  public void test(boolean throwError) {
+    int result = jdbcTemplate.update(
+      "update student set name = ? where id = ?", "大明", 1);
+    Assertions.assertEquals(1, result);
 //    JDBC.update("""
 //    update student set name = ? where id = ?
 //    """).execute("大明", 1);
