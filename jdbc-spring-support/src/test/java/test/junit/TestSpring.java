@@ -6,14 +6,10 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import test.TestApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import test.service.TestService;
-
-import javax.sql.DataSource;
 
 @Transactional
 @SpringBootTest
@@ -57,6 +53,7 @@ public class TestSpring {
   void test2() {
     try {
       testService.test(true);
+      Assertions.assertFalse(false);
     } catch (SwiftException e) {
       // ignore
     }
