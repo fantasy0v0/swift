@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.boot.test.context.SpringBootTest;
 import test.service.TestService;
 
-@Transactional
+// @Transactional
 @SpringBootTest
 public class TestSpring {
 
@@ -61,6 +61,16 @@ public class TestSpring {
     select name from student where id = ?
     """, 1).fetchOne(row -> row.getString(1));
     Assertions.assertEquals("小明", name);
+
+    try {
+      testService.test(false);
+      name = JDBC.select("""
+    select name from student where id = ?
+    """, 1).fetchOne(row -> row.getString(1));
+      Assertions.assertEquals("大明", name);
+    } catch (SwiftException e) {
+      Assertions.fail();
+    }
   }
 
 }
