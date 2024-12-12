@@ -1,24 +1,35 @@
 package test.service;
 
-import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.sql.DataSource;
 
 @Service
 public class TestService {
 
-  @Transactional
+  @Resource
+  private DataSource dataSource;
+
+  @Resource
+  private JdbcTemplate jdbcTemplate;
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void test(boolean throwError) {
-    int result = JDBC.update("""
-    update student set name = ? where id = ?
-    """).execute("大明", 1);
+    String name = jdbcTemplate.queryForObject(
+      "select name from student where id = ?", String.class, 1);
+    Assertions.assertEquals("小明", name);
+    int result = jdbcTemplate.update(
+      "update student set name = ? where id = ?", "大明", 1);
     Assertions.assertEquals(1, result);
-    String name = JDBC.select("""
-    select name from student where id = ?
-    """, 1).fetchOne(row -> row.getString(1));
-    Assertions.assertEquals("大明", name);
+//    JDBC.update("""
+//    update student set name = ? where id = ?
+//    """).execute("大明", 1);
     if (throwError) {
       throw new SwiftException("测试");
     }

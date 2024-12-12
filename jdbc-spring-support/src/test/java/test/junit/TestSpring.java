@@ -6,12 +6,13 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.boot.test.context.SpringBootTest;
 import test.service.TestService;
 
-// @Transactional
+@Transactional
 @SpringBootTest
 public class TestSpring {
 
@@ -20,6 +21,9 @@ public class TestSpring {
 
   @Autowired
   private PlatformTransactionManager transactionManager;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @Test
   void test() {
@@ -53,24 +57,23 @@ public class TestSpring {
   void test2() {
     try {
       testService.test(true);
-      Assertions.assertFalse(false);
+      Assertions.fail();
     } catch (SwiftException e) {
       // ignore
     }
-    String name = JDBC.select("""
+    String name = jdbcTemplate.queryForObject(
+    "select name from student where id = ?", String.class, 1);
+    Assertions.assertEquals("小明", name);
+    name = JDBC.select("""
     select name from student where id = ?
     """, 1).fetchOne(row -> row.getString(1));
     Assertions.assertEquals("小明", name);
 
-    try {
-      testService.test(false);
-      name = JDBC.select("""
+    testService.test(false);
+    name = JDBC.select("""
     select name from student where id = ?
     """, 1).fetchOne(row -> row.getString(1));
-      Assertions.assertEquals("大明", name);
-    } catch (SwiftException e) {
-      Assertions.fail();
-    }
+    Assertions.assertEquals("大明", name);
   }
 
 }
