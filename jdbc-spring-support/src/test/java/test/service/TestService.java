@@ -19,7 +19,7 @@ public class TestService {
   @Resource
   private JdbcTemplate jdbcTemplate;
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional
   public void test(boolean throwError) {
     String name = jdbcTemplate.queryForObject(
       "select name from student where id = ?", String.class, 1);
@@ -35,4 +35,19 @@ public class TestService {
     }
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void testRequiresNew(boolean throwError) {
+    String name = jdbcTemplate.queryForObject(
+      "select name from student where id = ?", String.class, 1);
+    Assertions.assertEquals("小明", name);
+    int result = jdbcTemplate.update(
+      "update student set name = ? where id = ?", "大明", 1);
+    Assertions.assertEquals(1, result);
+//    JDBC.update("""
+//    update student set name = ? where id = ?
+//    """).execute("大明", 1);
+    if (throwError) {
+      throw new SwiftException("测试");
+    }
+  }
 }
