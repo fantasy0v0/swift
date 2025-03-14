@@ -3,20 +3,15 @@ package test.handler;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.container.ContainerUtil;
-import test.container.JdbcContainer;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -37,7 +32,7 @@ class TypeHandlerTest {
 
   @TestTemplate
   void testCustom() throws SQLException {
-    JDBC.configure(new TypeSetHandler<Student>() {
+    JDBC.getContext().configure(new TypeSetHandler<Student>() {
       @Override
       public Class<Student> support() {
         return Student.class;

@@ -25,15 +25,33 @@ public final class JDBC {
     LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 
-  public static Context getContext() {
+  /**
+   * 获取设置的默认Context
+   */
+  public synchronized static Context getContext() {
     if (null == context) {
-      throw new SwiftException("请先初始化");
+      throw new SwiftException("未设置默认Context");
     }
     return context;
   }
 
+  /**
+   * 设置默认Context
+   */
+  public synchronized static void setContext(Context context) {
+    JDBC.context = context;
+  }
+
   public static Context newContext(DataSource dataSource, SQLDialect dialect,
                                    StatementConfiguration statementConfiguration) {
+    if (null == dialect) {
+      dialect = ANSI.Instance;
+      LogUtil.common().info("将使用默认方言");
+    }
+    if (null == statementConfiguration) {
+      statementConfiguration = new StatementConfiguration();
+      LogUtil.common().info("将使用默认StatementConfiguration");
+    }
     Context context = new Context(dataSource, dialect, statementConfiguration);
     context.configure(new ByteTypeHandler());
     context.configure(new ShortTypeHandler());
@@ -51,49 +69,12 @@ public final class JDBC {
     return context;
   }
 
-  public static synchronized void initialization(DataSource dataSource, SQLDialect dialect,
-                                                 StatementConfiguration statementConfiguration) {
-    if (null != context) {
-      throw new SwiftException("请勿重复初始化");
-    }
-    if (null == dialect) {
-      dialect = ANSI.Instance;
-      LogUtil.common().info("将使用默认方言");
-    }
-    if (null == statementConfiguration) {
-      statementConfiguration = new StatementConfiguration();
-      LogUtil.common().info("将使用默认StatementConfiguration");
-    }
-    context = newContext(dataSource, dialect, statementConfiguration);
+  public static Context newContext(DataSource dataSource, SQLDialect dialect) {
+    return newContext(dataSource, dialect, null);
   }
 
-  public static void unInitialization() {
-    context = null;
-  }
-
-  public static void initialization(DataSource dataSource, SQLDialect dialect) {
-    initialization(dataSource, dialect, null);
-  }
-
-  public static void initialization(DataSource dataSource) {
-    initialization(dataSource, null, null);
-  }
-
-  public static <T> void configure(AbstractTypeHandler<T> typeHandler) {
-    configure((TypeGetHandler<T>)typeHandler);
-    configure((TypeSetHandler<T>)typeHandler);
-  }
-
-  public static <T> void configure(TypeGetHandler<T> handler) {
-    getContext().configure(handler);
-  }
-
-  public static <T> void configure(TypeSetHandler<T> handler) {
-    getContext().configure(handler);
-  }
-
-  public static void configure(StatementConfiguration statementConfiguration) {
-    getContext().configure(statementConfiguration);
+  public static Context newContext(DataSource dataSource) {
+    return newContext(dataSource, null, null);
   }
 
   public static SelectBuilder select(String sql, List<Object> params) {
