@@ -29,7 +29,7 @@
     <dependency>
       <groupId>com.github.fantasy0v0.swift</groupId>
       <artifactId>swift-jdbc</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
   </dependencies>
 </project>
@@ -45,7 +45,7 @@
 <dependency>
   <groupId>com.github.fantasy0v0.swift</groupId>
   <artifactId>swift-jdbc-spring-support</artifactId>
-  <version>1.2.0</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
