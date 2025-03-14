@@ -7,8 +7,6 @@ import org.flywaydb.core.Flyway;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.TransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import javax.sql.DataSource;
@@ -37,7 +35,7 @@ public class TestApplication {
       .load();
     flyway.migrate();
     Runtime.getRuntime().addShutdownHook(new Thread(pg::stop));
-    JDBC.initialization(dataSource);
+    JDBC.setContext(JDBC.newContext(dataSource));
     return dataSource;
   }
 }
