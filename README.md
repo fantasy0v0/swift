@@ -4,13 +4,38 @@
 
 # swift-jdbc
 
-配置简单, 使用方便, 无任何反射操作，在不额外学习的情况下快速方便地使用jdbc进行CRUD。
+[![License](https://img.shields.io/badge/license-GNU-blue.svg)](LICENSE)
+[![JDK 21](https://img.shields.io/badge/JDK-21-green.svg)](https://openjdk.org/projects/jdk/21/)
 
-该项目不是框架, 也不是用来代替任何ORM框架的, 它只能算是一个库, 你可以和任何ORM框架搭配使用。
+专为JDBC操作设计的轻量级工具库，提供以下核心能力：
 
-该项目只是期望能方便、快速地执行SQL并提取出结果。
+✨ **简洁高效**
 
-如果你能理解并有更好的想法的话，欢迎你与我分享！
+▸ 零反射操作
+
+▸ 原生JDBC性能，无复杂抽象层开销
+
+▸ 流畅API设计，链式调用自然直观
+
+🛠️ **功能完备**
+
+▸ 多级事务管理（支持嵌套事务）
+
+▸ 批量操作优化
+
+🔌 **兼容并蓄**
+
+与主流ORM框架（JPA/MyBatis/Jooq等）无缝协作，专注填补以下场景：
+
+✅ 快速执行SQL
+
+✅ SQL in Code
+
+✅ 遗留系统改造过渡
+
+📚 **学习零成本**
+
+API设计遵循JDBC原生语义，开发者无需学习新概念即可快速上手
 
 ## 如何使用
 
@@ -29,7 +54,7 @@
     <dependency>
       <groupId>com.github.fantasy0v0.swift</groupId>
       <artifactId>swift-jdbc</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.1</version>
     </dependency>
   </dependencies>
 </project>
@@ -45,13 +70,9 @@
 <dependency>
   <groupId>com.github.fantasy0v0.swift</groupId>
   <artifactId>swift-jdbc-spring-support</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
 </dependency>
 ```
-
-## 环境要求
-
-由于使用了一些特性, 所以Java版本限制在21或以上
 
 # 样例
 
@@ -218,11 +239,11 @@ public Long getId() {
 
 ## 查看SQL执行时间
 
-将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为INFO时, 会在日志中打印执行时间
+将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为TRACE、DEBUG时, 会在日志中打印执行时间
 
 ```text
-10:51:36:846 INFO executeQuery begin
-10:51:36:846 INFO executeQuery end, cost: 2,413 μs
+10:51:36:846 TRACE executeQuery begin
+10:51:36:846 DEBUG executeQuery cost: 2,413 μs
 ```
 
 ## 打印执行的SQL
@@ -235,10 +256,11 @@ public Long getId() {
 
 ## 打印参数信息
 
-将"com.github.fantasy0v0.swift.jdbc.sql"的日志级别设置为TRACE时, 会在日志中打印参数信息, 日志内容包含参数的数量, 下标, 内容, 以及使用了哪个parameter handler
+将"com.github.fantasy0v0.swift.jdbc.sql"的日志级别设置为TRACE、DEBUG时, 会在日志中打印参数信息,
+日志内容包含参数的数量, 下标, 内容, 以及使用了哪个parameter handler
 
 ```text
-10:51:36:884 TRACE parameter count: 2
+10:51:36:884 DEBUG parameter count: 2
 10:51:36:884 TRACE fill parameter: [1] - [测试修改], use global parameter handler
 10:51:36:884 TRACE fill parameter: [2] - [1], use global parameter handler
 ```
