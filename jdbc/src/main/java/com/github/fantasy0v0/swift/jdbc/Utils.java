@@ -5,7 +5,6 @@ import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +106,7 @@ final class Utils {
                                   ParameterHandler parameterHandler,
                                   boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("executeQuery begin");
+    LogUtil.performance().trace("executeQuery begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeQuery: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
@@ -116,7 +115,7 @@ final class Utils {
         return fetchByResultSet(resultSet, handlerMap, fetchMapper, firstOnly);
       }
     } finally {
-      LogUtil.performance().info("executeQuery end, cost: {}", stopWatch);
+      LogUtil.performance().debug("executeQuery cost: {}", stopWatch);
     }
   }
 
@@ -126,7 +125,7 @@ final class Utils {
                              ParameterHandler parameterHandler,
                              FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("execute begin");
+    LogUtil.performance().trace("execute begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("execute: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
@@ -139,7 +138,7 @@ final class Utils {
         return fetchByResultSet(resultSet, context.getGetHandlers(), mapper, firstOnly);
       }
     } finally {
-      LogUtil.performance().info("execute end, cost: {}", stopWatch);
+      LogUtil.performance().debug("execute cost: {}", stopWatch);
     }
   }
 
@@ -149,7 +148,7 @@ final class Utils {
                                   ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("executeBatch RETURN_GENERATED_KEYS begin");
+    LogUtil.performance().trace("executeBatch RETURN_GENERATED_KEYS begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch RETURN_GENERATED_KEYS: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql,
@@ -165,7 +164,7 @@ final class Utils {
         statement.getGeneratedKeys(), context.getGetHandlers(), mapper, false
       );
     } finally {
-      LogUtil.performance().info("executeBatch RETURN_GENERATED_KEYS end, cost: {}", stopWatch);
+      LogUtil.performance().debug("executeBatch RETURN_GENERATED_KEYS cost: {}", stopWatch);
     }
   }
 
@@ -174,7 +173,7 @@ final class Utils {
                             String sql, List<List<Object>> batch,
                             ParameterHandler parameterHandler) throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("executeBatch begin");
+    LogUtil.performance().trace("executeBatch begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeBatch: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql,
@@ -186,7 +185,7 @@ final class Utils {
       }
       return statement.executeBatch();
     } finally {
-      LogUtil.performance().info("executeBatch end, cost: {}", stopWatch);
+      LogUtil.performance().debug("executeBatch cost: {}", stopWatch);
     }
   }
 
@@ -195,14 +194,14 @@ final class Utils {
                            String sql, List<Object> params,
                            ParameterHandler parameterHandler) throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("executeUpdate begin");
+    LogUtil.performance().trace("executeUpdate begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeUpdate: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(context, conn, statement, params, parameterHandler);
       return statement.executeUpdate();
     } finally {
-      LogUtil.performance().info("executeUpdate end, cost: {}", stopWatch);
+      LogUtil.performance().debug("executeUpdate cost: {}", stopWatch);
     }
   }
 
@@ -214,7 +213,7 @@ final class Utils {
       LogUtil.sql().debug("parameter is null");
       return;
     }
-    LogUtil.sql().trace("parameter count: {}", params.size());
+    LogUtil.sql().debug("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
 
@@ -233,11 +232,11 @@ final class Utils {
             ((TypeSetHandler<Object>) handler).doSet(conn, statement, index + 1, parameter);
             LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
           } else {
-            LogUtil.sql().debug("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
+            LogUtil.sql().trace("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
             statement.setObject(index + 1, parameter);
           }
         } else {
-          LogUtil.sql().debug("fill parameter: [{}] - [null], use setNull", index + 1);
+          LogUtil.sql().trace("fill parameter: [{}] - [null], use setNull", index + 1);
           statement.setNull(index + 1, Types.NULL);
         }
       }

@@ -41,7 +41,7 @@ public class InsertBuilder extends UpdateBuilder {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       Connection conn = ref.unwrap();
       StopWatch stopWatch = new StopWatch();
-      LogUtil.performance().info("fetchKey begin");
+      LogUtil.performance().trace("fetchKey begin");
       String callerInfo = printCallerInfo();
       LogUtil.sql().debug("fetchKey: [{}], caller: {}", sql, callerInfo);
       try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, statementConfiguration)) {
@@ -53,7 +53,7 @@ public class InsertBuilder extends UpdateBuilder {
         );
         return list.isEmpty() ? null : list.getFirst();
       } finally {
-        LogUtil.performance().info("fetchKey end, cost: {}", stopWatch);
+        LogUtil.performance().debug("fetchKey cost: {}", stopWatch);
       }
     } catch (SQLException e) {
       throw new SwiftSQLException(e);

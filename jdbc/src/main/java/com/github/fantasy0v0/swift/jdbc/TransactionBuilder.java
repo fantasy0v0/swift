@@ -36,7 +36,7 @@ public class TransactionBuilder<T> {
 
   T execute() throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().info("transaction begin");
+    LogUtil.performance().trace("transaction begin");
     try(ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       ConnectionTransaction transaction = ref.getTransaction(level);
       try {
@@ -54,7 +54,7 @@ public class TransactionBuilder<T> {
         throw e;
       }
     } finally {
-      LogUtil.performance().info("transaction end, cost: {}", stopWatch);
+      LogUtil.performance().debug("transaction cost: {}", stopWatch);
     }
   }
 
