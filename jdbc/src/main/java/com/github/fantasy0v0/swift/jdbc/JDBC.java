@@ -1,111 +1,108 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import com.github.fantasy0v0.swift.jdbc.connection.DefaultConnectionPool;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionPool;
+import com.github.fantasy0v0.swift.jdbc.connection.impl.DefaultConnectionPool;
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
-import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
-import com.github.fantasy0v0.swift.jdbc.typehandles.*;
+import com.github.fantasy0v0.swift.jdbc.type.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
-import org.intellij.lang.annotations.Language;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 public final class JDBC {
 
-  private static DataSource dataSource;
-
-  private static SQLDialect dialect;
-
-  static final Map<Class<?>, TypeHandler<?>> handlerMap = new HashMap<>();
+  private static Context context;
 
   static {
-    configuration(new ByteTypeHandler());
-    configuration(new ShortTypeHandler());
-    configuration(new IntegerTypeHandler());
-    configuration(new FloatTypeHandler());
-    configuration(new DoubleTypeHandler());
-    configuration(new LongTypeHandler());
-    configuration(new BooleanTypeHandler());
-    configuration(new StringTypeHandler());
-    configuration(new TimestampTypeHandler());
-    configuration(new LocalTimeTypeHandler());
-    configuration(new LocalDateTypeHandler());
-    configuration(new LocalDateTimeTypeHandler());
-    configuration(new OffsetDateTimeTypeHandler());
-  }
-
-  public static void configuration(DataSource dataSource) {
-    JDBC.dataSource = dataSource;
     ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
       .findFirst()
       .orElse(new DefaultConnectionPool());
     LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 
-  public static DataSource getDataSource() {
-    return JDBC.dataSource;
-  }
-
-  public static void configuration(SQLDialect dialect) {
-    JDBC.dialect = dialect;
-    LogUtil.common().debug("配置方言");
-  }
-
-  static SQLDialect getSQLDialect() {
-    return null == dialect ? ANSI.Instance : dialect;
-  }
-
-  public static <T> void configuration(TypeHandler<T> typeHandler) {
-    Class<T> supported = typeHandler.supported();
-    if (handlerMap.containsKey(supported)) {
-      LogUtil.common().debug("原有的 {} handler将被替换", supported);
+  /**
+   * 获取设置的默认Context
+   */
+  public synchronized static Context getContext() {
+    if (null == context) {
+      throw new SwiftException("未设置默认Context");
     }
-    handlerMap.put(typeHandler.supported(), typeHandler);
+    return context;
   }
 
-  private static DataSource requireNonNull(DataSource dataSource) {
-    if (null == dataSource) {
-      throw new SwiftException("未配置DataSource");
+  /**
+   * 设置默认Context
+   */
+  public synchronized static void setContext(Context context) {
+    JDBC.context = context;
+  }
+
+  public static Context newContext(DataSource dataSource, SQLDialect dialect,
+                                   StatementConfiguration statementConfiguration) {
+    if (null == dialect) {
+      dialect = ANSI.Instance;
+      LogUtil.common().info("将使用默认方言");
     }
-    return dataSource;
+    if (null == statementConfiguration) {
+      statementConfiguration = new StatementConfiguration();
+      LogUtil.common().info("将使用默认StatementConfiguration");
+    }
+    Context context = new Context(dataSource, dialect, statementConfiguration);
+    context.configure(new ByteTypeHandler());
+    context.configure(new ShortTypeHandler());
+    context.configure(new IntegerTypeHandler());
+    context.configure(new FloatTypeHandler());
+    context.configure(new DoubleTypeHandler());
+    context.configure(new LongTypeHandler());
+    context.configure(new BooleanTypeHandler());
+    context.configure(new StringTypeHandler());
+    context.configure(new TimestampTypeHandler());
+    context.configure(new LocalTimeTypeHandler());
+    context.configure(new LocalDateTypeHandler());
+    context.configure(new LocalDateTimeTypeHandler());
+    context.configure(new OffsetDateTimeTypeHandler());
+    return context;
   }
 
-  public static SelectBuilder select(@Language("SQL") String sql, List<Object> params) {
-    return new SelectBuilder(requireNonNull(dataSource), sql.trim(), params);
+  public static Context newContext(DataSource dataSource, SQLDialect dialect) {
+    return newContext(dataSource, dialect, null);
   }
 
-  public static SelectBuilder select(@Language("SQL") String sql, Object... params) {
-    return select(sql, Arrays.stream(params).toList());
+  public static Context newContext(DataSource dataSource) {
+    return newContext(dataSource, null, null);
   }
 
-  public static ModifyBuilder modify(@Language("SQL") String sql) {
-    return new ModifyBuilder(requireNonNull(dataSource), sql.trim());
+  public static SelectBuilder select(String sql, List<Object> params) {
+    return getContext().select(sql.trim(), params);
+  }
+
+  public static SelectBuilder select(String sql, Object... params) {
+    return getContext().select(sql, Arrays.stream(params).toList());
+  }
+
+  public static InsertBuilder insert(String sql) {
+    return getContext().insert(sql);
+  }
+
+  public static UpdateBuilder update(String sql) {
+    return getContext().update(sql);
   }
 
   public static void transaction(Integer level, Runnable runnable) {
-    TransactionBuilder<?> builder = TransactionBuilder.create(dataSource, level, runnable);
-    try {
-      builder.execute();
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
+    getContext().transaction(level, runnable);
   }
 
   public static void transaction(Runnable runnable) {
-    transaction(null, runnable);
+    getContext().transaction(null, runnable);
   }
 
   public static <T> T transaction(Integer level, Supplier<T> supplier) {
-    TransactionBuilder<T> builder = TransactionBuilder.create(dataSource, level, supplier);
-    try {
-      return builder.execute();
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
+    return getContext().transaction(level, supplier);
   }
 
   public static <T> T transaction(Supplier<T> supplier) {

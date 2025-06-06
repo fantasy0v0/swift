@@ -1,6 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc.spring;
 
-import com.github.fantasy0v0.swift.jdbc.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.Context;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.connection.ConnectionTransaction;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -9,13 +11,12 @@ import java.sql.SQLException;
 
 class SpringConnectionReference implements ConnectionReference {
 
-  private final Connection connection;
+  private Connection connection;
 
-  private final DataSource dataSource;
+  private final Context context;
 
-  SpringConnectionReference(Connection connection, DataSource dataSource) {
-    this.connection = connection;
-    this.dataSource = dataSource;
+  SpringConnectionReference(Context context) {
+    this.context = context;
   }
 
   @Override
@@ -24,17 +25,22 @@ class SpringConnectionReference implements ConnectionReference {
   }
 
   @Override
-  public boolean isInner() {
-    return DataSourceUtils.isConnectionTransactional(connection, dataSource);
+  public ConnectionTransaction getTransaction(Integer level) {
+    return new SpringConnectionTransaction(level);
   }
 
   @Override
-  public Connection unwrap() {
+  public Connection unwrap() throws SQLException {
+    if (null == connection) {
+      connection = DataSourceUtils.doGetConnection(context.getDataSource());
+    }
     return connection;
   }
 
   @Override
   public void close() throws SQLException {
-    DataSourceUtils.doReleaseConnection(connection, dataSource);
+    if (null != connection) {
+      DataSourceUtils.doReleaseConnection(connection, context.getDataSource());
+    }
   }
 }

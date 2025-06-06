@@ -2,22 +2,62 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-public class SelectBuilder {
+public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
-  private final DataSource dataSource;
+  private final Context context;
+
+  private StatementConfiguration statementConfiguration;
 
   private final String sql;
 
   private final List<Object> params;
 
-  SelectBuilder(DataSource dataSource, String sql, List<Object> params) {
-    this.dataSource = dataSource;
+  private ParameterHandler parameterHandler;
+
+  SelectBuilder(Context context, String sql, List<Object> params) {
+    this.context = context;
     this.sql = sql;
     this.params = params;
+  }
+
+  private StatementConfiguration getStatementConfiguration() {
+    if (null == statementConfiguration) {
+      return context.getStatementConfiguration();
+    }
+    return statementConfiguration;
+  }
+
+  private StatementConfiguration copyStatementConfiguration() {
+    if (null == statementConfiguration) {
+      statementConfiguration = context.getStatementConfiguration().copy();
+    }
+    return statementConfiguration;
+  }
+
+  @Override
+  public SelectBuilder setQueryTimeout(Integer queryTimeout) {
+    copyStatementConfiguration().setQueryTimeout(queryTimeout);
+    return this;
+  }
+
+  @Override
+  public SelectBuilder setFetchSize(Integer fetchSize) {
+    copyStatementConfiguration().setFetchSize(fetchSize);
+    return this;
+  }
+
+  @Override
+  public SelectBuilder setMaxRows(Integer maxRows) {
+    copyStatementConfiguration().setMaxRows(maxRows);
+    return this;
+  }
+
+  public SelectBuilder setParameterHandler(ParameterHandler parameterHandler) {
+    this.parameterHandler = parameterHandler;
+    return this;
   }
 
   /**
@@ -25,38 +65,38 @@ public class SelectBuilder {
    *
    * @param number 页码从0开始
    * @param size   每页大小
-   * @return PagingBuilder
+   * @return PaginateBuilder
    */
-  public PagingBuilder paging(long number, long size) {
-    return new PagingBuilder(dataSource, sql, params, number, size);
-  }
-
-  public <T> List<T> fetch(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
-    try {
-      return Utils.fetch(dataSource, sql, params, mapper, parameterHandler);
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
+  public PaginateBuilder paginate(long number, long size) {
+    return new PaginateBuilder(
+      context, getStatementConfiguration(), parameterHandler,
+      sql, params, number, size
+    );
   }
 
   public <T> List<T> fetch(FetchMapper<T> mapper) {
-    return fetch(mapper, null);
+    try {
+      return Utils.fetch(
+        context, getStatementConfiguration(), sql, params, mapper, parameterHandler
+      );
+    } catch (SQLException e) {
+      throw new SwiftSQLException(e);
+    }
   }
 
   public List<Object[]> fetch() {
     return fetch(Utils::fetchByRow);
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper, ParameterHandler parameterHandler) {
+  public <T> T fetchOne(FetchMapper<T> mapper) {
     try {
-      return Utils.fetchOne(dataSource, sql, params, mapper, parameterHandler);
+      return Utils.fetchOne(
+        context, getStatementConfiguration(), sql, params,
+        mapper, parameterHandler
+      );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
     }
-  }
-
-  public <T> T fetchOne(FetchMapper<T> mapper) {
-    return fetchOne(mapper, null);
   }
 
   public Object[] fetchOne() {

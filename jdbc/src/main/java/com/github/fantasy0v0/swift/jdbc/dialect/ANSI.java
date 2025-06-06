@@ -2,6 +2,7 @@ package com.github.fantasy0v0.swift.jdbc.dialect;
 
 import com.github.fantasy0v0.swift.jdbc.Query;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +11,18 @@ public class ANSI implements SQLDialect {
   public static final ANSI Instance = new ANSI();
 
   @Override
+  public void install(DataSource dataSource) {
+
+  }
+
+  @Override
   public Query count(String sql, List<Object> params) {
     List<Object> countParams = new ArrayList<>();
     if (null != params && !params.isEmpty()) {
       countParams.addAll(params);
     }
     return new Query(
-      "select count(1) from (%s)".formatted(sql),
+      "select count(1) from (%s) t".formatted(sql),
       countParams
     );
   }
@@ -28,10 +34,10 @@ public class ANSI implements SQLDialect {
       pagingParams.addAll(params);
     }
     long offset = pageNumber * pageSize;
-    pagingParams.add(offset);
     pagingParams.add(pageSize);
+    pagingParams.add(offset);
     return new Query(
-      "select * from (%s) offset ? row fetch first ? row only".formatted(sql),
+      "select * from (%s) t limit ? offset ?".formatted(sql),
       pagingParams
     );
   }

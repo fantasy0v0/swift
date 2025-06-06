@@ -28,6 +28,9 @@ class RowTest {
       if (!method.getName().startsWith("get")) {
         continue;
       }
+      if (method.getName().equals("getObject")) {
+        continue;
+      }
       Deprecated annotation = method.getAnnotation(Deprecated.class);
       if (null != annotation) {
         continue;
@@ -47,79 +50,42 @@ class RowTest {
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
+      public %s %s(int columnIndex, TypeGetHandler<%s> handler) throws SQLException {
+        handler = getHandler(%s.class, handler);
+        if (null != handler) {
+          return handler.doGet(resultSet, columnIndex);
+        }
+        return extract(resultSet, columnIndex, resultSet::%s);
+      }""".formatted(resultType, methodName, resultType, resultType, methodName));
+
+      methodsBuffer.append(System.lineSeparator());
+      methodsBuffer.append(System.lineSeparator());
+      methodsBuffer.append("""
+      public %s %s(String columnLabel, TypeGetHandler<%s> handler) throws SQLException {
+        return %s(resultSet.findColumn(columnLabel), handler);
+      }""".formatted(resultType, methodName, resultType, methodName));
+
+      methodsBuffer.append(System.lineSeparator());
+      methodsBuffer.append(System.lineSeparator());
+      methodsBuffer.append("""
       public %s %s(int columnIndex) throws SQLException {
-        return extract(resultSet -> resultSet.%s(columnIndex));
+        return %s(columnIndex, null);
       }""".formatted(resultType, methodName, methodName));
+
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
       public %s %s(String columnLabel) throws SQLException {
-        return extract(resultSet -> resultSet.%s(columnLabel));
+        return %s(resultSet.findColumn(columnLabel), null);
       }""".formatted(resultType, methodName, methodName));
     }
     methodsBuffer.append(System.lineSeparator());
     methodsBuffer.append(System.lineSeparator());
-    methodsBuffer.append("""
-      public LocalTime getLocalTime(int columnIndex) throws SQLException {
-        Time value = extract(resultSet -> resultSet.getTime(columnIndex));
-        return null != value ? value.toLocalTime() : null;
-      }
-
-      public LocalTime getLocalTime(String columnLabel) throws SQLException {
-        Time value = extract(resultSet -> resultSet.getTime(columnLabel));
-        return null != value ? value.toLocalTime() : null;
-      }
-
-      public LocalDate getLocalDate(int columnIndex) throws SQLException {
-        Date value = extract(resultSet -> resultSet.getDate(columnIndex));
-        return null != value ? value.toLocalDate() : null;
-      }
-
-      public LocalDate getLocalDate(String columnLabel) throws SQLException {
-        Date value = extract(resultSet -> resultSet.getDate(columnLabel));
-        return null != value ? value.toLocalDate() : null;
-      }
-
-      public LocalDateTime getLocalDateTime(int columnIndex) throws SQLException {
-        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-        return null != value ? value.toLocalDateTime() : null;
-      }
-
-      public LocalDateTime getLocalDateTime(String columnLabel) throws SQLException {
-        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
-        return null != value ? value.toLocalDateTime() : null;
-      }
-
-      public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
-        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-        if (null != value) {
-          return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
-        }
-        return null;
-      }
-
-      public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
-        Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnLabel));
-        if (null != value) {
-          return OffsetDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
-        }
-        return null;
-      }
-
-      public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        return extract(resultSet -> resultSet.getObject(columnIndex, type));
-      }
-
-      public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-        return extract(resultSet -> resultSet.getObject(columnLabel, type));
-      }""");
     addPackages(packages, LocalTime.class);
     addPackages(packages, LocalDate.class);
     addPackages(packages, LocalDateTime.class);
     addPackages(packages, OffsetDateTime.class);
     StringBuilder classBuffer = new StringBuilder();
-    classBuffer.append(System.lineSeparator());
-    classBuffer.append("package com.github.fantasy0v0.swift.jdbc;");
     classBuffer.append(System.lineSeparator());
     for (String pkg : packages) {
       classBuffer.append(System.lineSeparator());
@@ -127,22 +93,10 @@ class RowTest {
     }
     classBuffer.append(System.lineSeparator());
     classBuffer.append(System.lineSeparator());
-    classBuffer.append("""
-      public class Row {
-
-        private final ResultSet resultSet;
-
-        Row(ResultSet resultSet) {
-          this.resultSet = resultSet;
-        }""");
-    classBuffer.append(System.lineSeparator());
     classBuffer.append(methodsBuffer);
     classBuffer.append(System.lineSeparator());
     classBuffer.append(System.lineSeparator());
-    classBuffer.append("""
-      }
-      """);
-    log.info("class: {}", classBuffer);
+    log.info("{}", classBuffer);
   }
 
   private static Map<String, String> getPrimitiveTypeMap() {
