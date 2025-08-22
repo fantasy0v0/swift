@@ -1,9 +1,11 @@
 package test;
 
 
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,10 @@ class SelectTest {
   void testFetchOne(DataSource dataSource) {
     Object[] row = select("select * from student limit 1").fetchOne();
     Assertions.assertNotNull(row);
+    SwiftException exception = Assertions.assertThrowsExactly(SwiftException.class, () -> {
+      select("select * from student").fetchOne();
+    });
+    Assertions.assertEquals("Expected one result, but found more than one", exception.getMessage());
   }
 
   @TestTemplate

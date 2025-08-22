@@ -67,10 +67,10 @@ public class UpdateTest {
       Assertions.assertEquals("测试修改3", actualName);
 
       Object[] fetchOne4 = JDBC.update("""
-        update student set name = '测试修改4' returning id, name
-        """).fetchOne();
+        update student set name = '测试修改4' where id = ? returning id, name
+        """).fetchOne(1L);
       Assertions.assertEquals(2, fetchOne4.length);
-      Assertions.assertTrue((long) fetchOne4[0] > 1L);
+      Assertions.assertEquals(1L, (long) fetchOne4[0]);
       Assertions.assertEquals("测试修改4", fetchOne4[1]);
 
       List<Object> fetchOne5Params = new ArrayList<>();
