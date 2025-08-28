@@ -1,15 +1,9 @@
 package test;
 
-import com.github.fantasy0v0.swift.jdbc.JDBC;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.container.ContainerUtil;
-import test.container.JdbcContainer;
 import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
@@ -33,7 +27,7 @@ class JDBCTest {
     assertTrue(data.size() > 2);
 
     data = select("""
-        select * from student
+      select * from student
       """).setQueryTimeout(3).setFetchSize(1).setMaxRows(2).fetch();
     log.debug("data size: {}", data.size());
     assertEquals(2, data.size());

@@ -2,16 +2,15 @@ package test.handler;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.Db;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -51,9 +50,7 @@ class TypeHandlerTest {
   }
 
   @TestTemplate
-  void testDefault(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-
+  void testDefault(Db db) throws SQLException {
     Boolean p1 = false;
     Byte p2 = (byte) 2;
     Double p3 = (double) 3;
@@ -95,7 +92,7 @@ class TypeHandlerTest {
       row.getLocalDateTime(16),
       row.getOffsetDateTime(17)
     });
-    if (driverClassName.contains("postgresql")) {
+    if (Db.Postgres == db) {
       assertEquals(p1, result[0]);
       assertEquals(p2, result[1]);
       assertEquals(p3, result[2]);
@@ -135,7 +132,7 @@ class TypeHandlerTest {
       log.debug("current_timestamp: {}", result[14]);
       log.debug("now(): {}", result[15]);
       log.debug("current_timestamp: {}", result[16]);
-    } else if (driverClassName.contains("mysql")) {
+    } else if (Db.MySQL == db) {
       assertEquals(p1, result[0]);
       assertEquals(p2, result[1]);
       assertEquals(p3, result[2]);

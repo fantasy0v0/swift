@@ -47,8 +47,8 @@ public class JdbcContainer {
     container.stop();
   }
 
-  public String getDriverClassName() {
-    return container.getDriverClassName();
+  public String getDockerImageName() {
+    return container.getDockerImageName();
   }
 
 }

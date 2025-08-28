@@ -1,16 +1,16 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.Allowed;
+import test.container.Db;
 import test.container.SwiftJdbcExtension;
 import test.exception.WorkException;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -89,22 +89,19 @@ public class InsertTest {
   }
 
   @TestTemplate
-  void fetch(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
-      List<Object[]> result = JDBC.insert("""
-        insert into student(id, name, status)
-        values(?, ?, ?)
-        returning id""").fetch(1000L, "测试学生", 0);
-      assertEquals(1, result.size());
-      assertEquals(1000L, result.getFirst()[0]);
-    }
+  @Allowed(Db.Postgres)
+  void fetchWithReturning() {
+    List<Object[]> result = JDBC.insert("""
+      insert into student(id, name, status)
+      values(?, ?, ?)
+      returning id""").fetch(1000L, "测试学生", 0);
+    assertEquals(1, result.size());
+    assertEquals(1000L, result.getFirst()[0]);
   }
 
   @TestTemplate
-  void testDateTime(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
+  void testDateTime(Db db) {
+    if (Db.Postgres == db) {
       OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
       LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
       List<Object[]> objects = JDBC.insert("""
@@ -143,7 +140,7 @@ public class InsertTest {
   }
 
   @TestTemplate
-  void testFetchKey(DataSource dataSource) {
+  void testFetchKey() {
     long key = JDBC.insert("""
     insert into swift_user(name, status) values('测试学生', 0)
     """).fetchKey(row -> row.getLong(1));

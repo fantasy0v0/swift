@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.Db;
 import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
@@ -20,9 +21,8 @@ public class TransactionTest {
 
   private final Logger log = LoggerFactory.getLogger(TransactionTest.class);
 
-
   @TestTemplate
-  void test(DataSource dataSource) throws SQLException {
+  void test(DataSource dataSource, Db db) throws SQLException {
     String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     try {
       transaction(() -> {
@@ -36,7 +36,7 @@ public class TransactionTest {
         });
       });
     } catch (Exception e) {
-      if (driverClassName.contains("postgresql")) {
+      if (Db.Postgres == db) {
         Assertions.assertEquals(SwiftSQLException.class, e.getClass());
       } else {
         Assertions.fail("错误的分支");
@@ -47,7 +47,7 @@ public class TransactionTest {
   }
 
   @TestTemplate
-  void rollback(DataSource dataSource) {
+  void rollback() {
     transaction(() -> {
       update("update student set name = ? where id = ?")
         .execute("修改", 1L);

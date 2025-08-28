@@ -1,16 +1,16 @@
 package test;
 
 import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.Allowed;
+import test.container.Db;
 import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,57 +37,55 @@ public class UpdateTest {
   }
 
   @TestTemplate
-  void testFetch(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
-      List<Object[]> result = JDBC.update("""
-        update student set name = ? where id = ? returning id
-        """).fetch("测试修改0", 1);
-      Assertions.assertEquals(1, result.size());
-      Assertions.assertEquals(1L, result.getFirst()[0]);
+  @Allowed(Db.Postgres)
+  void testFetch() {
+    List<Object[]> result = JDBC.update("""
+      update student set name = ? where id = ? returning id
+      """).fetch("测试修改0", 1);
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(1L, result.getFirst()[0]);
 
-      result = JDBC.update("""
-        update student set name = ? returning id
-        """).fetch("测试修改1");
-      Assertions.assertTrue(result.size() > 1);
+    result = JDBC.update("""
+      update student set name = ? returning id
+      """).fetch("测试修改1");
+    Assertions.assertTrue(result.size() > 1);
 
-      Object[] fetchOne2 = JDBC.update("""
-        update student set name = ? where id = ? returning id, name
-        """).fetchOne("测试修改2", 1L);
-      Assertions.assertEquals(2, fetchOne2.length);
-      Assertions.assertEquals(1L, fetchOne2[0]);
-      Assertions.assertEquals("测试修改2", fetchOne2[1]);
+    Object[] fetchOne2 = JDBC.update("""
+      update student set name = ? where id = ? returning id, name
+      """).fetchOne("测试修改2", 1L);
+    Assertions.assertEquals(2, fetchOne2.length);
+    Assertions.assertEquals(1L, fetchOne2[0]);
+    Assertions.assertEquals("测试修改2", fetchOne2[1]);
 
-      long fetchOne3 = JDBC.update("""
-        update student set name = ? where id = ? returning id
-        """).fetchOne(row -> row.getLong(1), "测试修改3", 1L);
-      Assertions.assertEquals(1L, fetchOne3);
-      String actualName = JDBC.select("select name from student where id = ?", 1L)
-        .fetchOne(row -> row.getString(1));
-      Assertions.assertEquals("测试修改3", actualName);
+    long fetchOne3 = JDBC.update("""
+      update student set name = ? where id = ? returning id
+      """).fetchOne(row -> row.getLong(1), "测试修改3", 1L);
+    Assertions.assertEquals(1L, fetchOne3);
+    String actualName = JDBC.select("select name from student where id = ?", 1L)
+      .fetchOne(row -> row.getString(1));
+    Assertions.assertEquals("测试修改3", actualName);
 
-      Object[] fetchOne4 = JDBC.update("""
-        update student set name = '测试修改4' returning id, name
-        """).fetchOne();
-      Assertions.assertEquals(2, fetchOne4.length);
-      Assertions.assertTrue((long) fetchOne4[0] > 1L);
-      Assertions.assertEquals("测试修改4", fetchOne4[1]);
+    Object[] fetchOne4 = JDBC.update("""
+      update student set name = '测试修改4' returning id, name
+      """).fetchOne();
+    Assertions.assertEquals(2, fetchOne4.length);
+    Assertions.assertTrue((long) fetchOne4[0] > 1L);
+    Assertions.assertEquals("测试修改4", fetchOne4[1]);
 
-      List<Object> fetchOne5Params = new ArrayList<>();
-      fetchOne5Params.add("测试修改5");
-      fetchOne5Params.add(1L);
-      Object[] fetchOne5 = JDBC.update("""
-        update student set name = ? where id = ? returning id, name
-        """).fetchOne(fetchOne5Params);
-      Assertions.assertEquals(2, fetchOne5.length);
-      Assertions.assertEquals(1L, fetchOne5[0]);
-      Assertions.assertEquals("测试修改5", fetchOne5[1]);
+    List<Object> fetchOne5Params = new ArrayList<>();
+    fetchOne5Params.add("测试修改5");
+    fetchOne5Params.add(1L);
+    Object[] fetchOne5 = JDBC.update("""
+      update student set name = ? where id = ? returning id, name
+      """).fetchOne(fetchOne5Params);
+    Assertions.assertEquals(2, fetchOne5.length);
+    Assertions.assertEquals(1L, fetchOne5[0]);
+    Assertions.assertEquals("测试修改5", fetchOne5[1]);
 
-      long fetchOne6 = JDBC.update("""
-        update student set name = '测试修改6' where id = 1 returning id
-        """).fetchOne(row -> row.getLong(1));
-      Assertions.assertEquals(1L, fetchOne6);
-    }
+    long fetchOne6 = JDBC.update("""
+      update student set name = '测试修改6' where id = 1 returning id
+      """).fetchOne(row -> row.getLong(1));
+    Assertions.assertEquals(1L, fetchOne6);
   }
 
   @TestTemplate
