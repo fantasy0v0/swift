@@ -7,7 +7,7 @@ import java.util.List;
 
 public final class ContainerUtil {
 
-  public static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:16-alpine");
+  public static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:17-alpine");
 
   public static final String PG_LOCATIONS = "classpath:db/pg";
 
