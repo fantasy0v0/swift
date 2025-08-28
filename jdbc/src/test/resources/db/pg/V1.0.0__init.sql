@@ -22,6 +22,11 @@ CREATE TABLE swift_user (
   is_del      boolean,
   description text                     null,
   ext         json                     null,
+  tags text[]                   null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+insert into swift_user(name, status, tags)
+values ('小明', 0, '{"Java", "JDBC"}'),
+       ('小王', 1, '{"Swift", "JDBC"}'),
+       ('小李', 2, '{"Github", "PostgreSQL"}');
