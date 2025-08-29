@@ -5,7 +5,6 @@ import com.github.fantasy0v0.swift.jdbc.connection.impl.DefaultConnectionPool;
 import com.github.fantasy0v0.swift.jdbc.dialect.ANSI;
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
-import com.github.fantasy0v0.swift.jdbc.type.*;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
@@ -52,21 +51,7 @@ public final class JDBC {
       statementConfiguration = new StatementConfiguration();
       LogUtil.common().info("将使用默认StatementConfiguration");
     }
-    Context context = new Context(dataSource, dialect, statementConfiguration);
-    context.configure(new ByteTypeHandler());
-    context.configure(new ShortTypeHandler());
-    context.configure(new IntegerTypeHandler());
-    context.configure(new FloatTypeHandler());
-    context.configure(new DoubleTypeHandler());
-    context.configure(new LongTypeHandler());
-    context.configure(new BooleanTypeHandler());
-    context.configure(new StringTypeHandler());
-    context.configure(new TimestampTypeHandler());
-    context.configure(new LocalTimeTypeHandler());
-    context.configure(new LocalDateTypeHandler());
-    context.configure(new LocalDateTimeTypeHandler());
-    context.configure(new OffsetDateTimeTypeHandler());
-    return context;
+    return new Context(dataSource, dialect, statementConfiguration);
   }
 
   public static Context newContext(DataSource dataSource, SQLDialect dialect) {

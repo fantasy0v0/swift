@@ -3,6 +3,7 @@ package com.github.fantasy0v0.swift.jdbc.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Deprecated
 public interface TypeGetHandler<T> {
 
   Class<T> support();
