@@ -86,6 +86,20 @@ final class Utils {
     return "%s(%s:%d)".formatted(className, fileName, lineNumber);
   }
 
+  private static void performanceLog(String name, StopWatch stopWatch, String sql) {
+    double elapsed = stopWatch.stop() / 1_000_000d;
+    long slowExecuteThreshold = JDBC.getSlowExecuteThreshold();
+    if (elapsed > slowExecuteThreshold) {
+      if (LogUtil.performance().isWarnEnabled()) {
+        LogUtil.performance().warn("slow {} elapsed: {}, sql: {}", name, stopWatch, sql);
+      }
+    } else {
+      if (LogUtil.performance().isDebugEnabled()) {
+        LogUtil.performance().debug("{} elapsed: {}", name, stopWatch);
+      }
+    }
+  }
+
   /**
    * 执行查询语句
    * @param conn 数据库连接
@@ -115,7 +129,7 @@ final class Utils {
         return fetchByResultSet(resultSet, handlerMap, fetchMapper, firstOnly);
       }
     } finally {
-      LogUtil.performance().debug("executeQuery cost: {}", stopWatch);
+      performanceLog("executeQuery", stopWatch, sql);
     }
   }
 
@@ -138,7 +152,7 @@ final class Utils {
         return fetchByResultSet(resultSet, context.getGetHandlers(), mapper, firstOnly);
       }
     } finally {
-      LogUtil.performance().debug("execute cost: {}", stopWatch);
+      performanceLog("execute", stopWatch, sql);
     }
   }
 
@@ -164,7 +178,7 @@ final class Utils {
         statement.getGeneratedKeys(), context.getGetHandlers(), mapper, false
       );
     } finally {
-      LogUtil.performance().debug("executeBatch RETURN_GENERATED_KEYS cost: {}", stopWatch);
+      performanceLog("executeBatch RETURN_GENERATED_KEYS", stopWatch, sql);
     }
   }
 
@@ -185,7 +199,7 @@ final class Utils {
       }
       return statement.executeBatch();
     } finally {
-      LogUtil.performance().debug("executeBatch cost: {}", stopWatch);
+      performanceLog("executeBatch", stopWatch, sql);
     }
   }
 
@@ -201,7 +215,7 @@ final class Utils {
       fillStatementParams(context, conn, statement, params, parameterHandler);
       return statement.executeUpdate();
     } finally {
-      LogUtil.performance().debug("executeUpdate cost: {}", stopWatch);
+      performanceLog("executeUpdate", stopWatch, sql);
     }
   }
 

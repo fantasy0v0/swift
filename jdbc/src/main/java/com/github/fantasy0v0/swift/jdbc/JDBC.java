@@ -25,6 +25,11 @@ public final class JDBC {
   }
 
   /**
+   * 慢执行阈值, 单位毫秒
+   */
+  private static long slowExecuteThreshold = 5000;
+
+  /**
    * 获取设置的默认Context
    */
   public synchronized static Context getContext() {
@@ -94,4 +99,12 @@ public final class JDBC {
     return transaction(null, supplier);
   }
 
+  public static void setSlowExecuteThreshold(long slowExecuteThreshold) {
+    LogUtil.common().debug("set slowExecuteThreshold to {}", slowExecuteThreshold);
+    JDBC.slowExecuteThreshold = slowExecuteThreshold;
+  }
+
+  public static long getSlowExecuteThreshold() {
+    return slowExecuteThreshold;
+  }
 }
