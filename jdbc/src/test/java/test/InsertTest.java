@@ -101,8 +101,9 @@ public class InsertTest {
 
   @TestTemplate
   void testDateTime(Db db) {
+    ZoneOffset CST = ZoneOffset.ofHours(8);
     if (Db.Postgres == db) {
-      OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+      OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, CST);
       LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
       List<Object[]> objects = JDBC.insert("""
       insert into datetime_test(id, date) values(?, ?) returning date
@@ -115,7 +116,7 @@ public class InsertTest {
       """).fetch(1, localDateTime);
       log.debug("value: {}", objects.getFirst()[0]);
     }
-    OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, CST);
     LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
 
     JDBC.insert("""
@@ -126,7 +127,7 @@ public class InsertTest {
     select date from datetime_test where id = ?
     """, 2).fetchOne(row -> row.getOffsetDateTime(1));
 
-    assertEquals(offsetDateTime, result1.withOffsetSameInstant(ZoneOffset.UTC));
+    assertEquals(offsetDateTime, result1.withOffsetSameInstant(CST));
 
     JDBC.insert("""
     insert into datetime_test(id, date) values(?, ?)
