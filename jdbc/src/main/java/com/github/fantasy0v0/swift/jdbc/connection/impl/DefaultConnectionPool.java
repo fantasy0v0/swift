@@ -4,18 +4,13 @@ import com.github.fantasy0v0.swift.jdbc.Context;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionPool;
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultConnectionPool implements ConnectionPool {
 
-  private static final ThreadLocal<Map<Context, ConnectionReference>> threadLocal = new ThreadLocal<>();
-
-  static {
-    threadLocal.set(new HashMap<>());
-  }
+  private static final ThreadLocal<Map<Context, ConnectionReference>> threadLocal =
+    ThreadLocal.withInitial(HashMap::new);
 
   @Override
   public ConnectionReference getReference(Context context) {
