@@ -2,6 +2,8 @@ package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterSetter;
 import com.github.fantasy0v0.swift.jdbc.type.AbstractTypeHandler;
 import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
 import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
@@ -10,11 +12,15 @@ import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+/**
+ * 非线程安全 no thread safe
+ */
 public class Context {
 
   private final DataSource dataSource;
@@ -24,6 +30,10 @@ public class Context {
   private final Map<Class<?>, TypeGetHandler<?>> getHandlerMap = new ConcurrentHashMap<>();
 
   private final Map<Class<?>, TypeSetHandler<?>> setHandlerMap = new ConcurrentHashMap<>();
+
+  private final Map<Class<?>, ParameterGetter<?>> getterMap = new HashMap<>();
+
+  private final Map<Class<?>, ParameterSetter<?>> setterMap = new HashMap<>();
 
   private StatementConfiguration statementConfiguration;
 
