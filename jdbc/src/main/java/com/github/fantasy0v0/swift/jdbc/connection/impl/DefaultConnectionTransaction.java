@@ -16,6 +16,8 @@ class DefaultConnectionTransaction implements ConnectionTransaction {
 
   private Boolean oldAutoCommit;
 
+  private int oldLevel;
+
   Savepoint savepoint = null;
 
   DefaultConnectionTransaction(ConnectionReference connectionReference, Integer level) throws SQLException {
@@ -27,13 +29,13 @@ class DefaultConnectionTransaction implements ConnectionTransaction {
   private void init() throws SQLException {
     Connection connection = connectionReference.unwrap();
     if (connection.getAutoCommit()) {
-      LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
       oldAutoCommit = true;
+      LogUtil.common().debug("save AutoCommit: {}", oldAutoCommit);
     }
     connection.setAutoCommit(false);
-    if (null != level) {
-      LogUtil.common()
-        .debug("set TransactionIsolation: {}", level);
+    oldLevel = connection.getTransactionIsolation();
+    if (null != level && level != oldLevel) {
+      LogUtil.common().debug("set TransactionIsolation: {}", level);
       connection.setTransactionIsolation(level);
     }
     LogUtil.common().debug("savepoint");
@@ -45,6 +47,10 @@ class DefaultConnectionTransaction implements ConnectionTransaction {
     if (null != oldAutoCommit) {
       LogUtil.common().debug("restore AutoCommit: {}", oldAutoCommit);
       connection.setAutoCommit(oldAutoCommit);
+    }
+    if (null != level && level != oldLevel) {
+      LogUtil.common().debug("restore TransactionIsolation: {}", oldLevel);
+      connection.setTransactionIsolation(oldLevel);
     }
   }
 
