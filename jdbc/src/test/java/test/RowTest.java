@@ -26,7 +26,7 @@ class RowTest {
   @Allowed(Db.Postgres)
   void testArray(Db db) throws SQLException {
     log.info("仅支持PostgreSQL: {}", db);
-    List<Array> arrays = select("select tags from swift_user").fetch(row -> row.getArray(1));
+    List<Array> arrays = select("select tags from swift_user where tags is not null").fetch(row -> row.getArray(1));
     for (Array array : arrays) {
       log.debug("{}, BaseType: {} BaseTypeName: {} getArray: {}", array, array.getBaseType(), array.getBaseTypeName(), array.getArray());
     }

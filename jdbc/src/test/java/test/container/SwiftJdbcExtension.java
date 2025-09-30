@@ -6,10 +6,15 @@ import org.junit.jupiter.api.extension.*;
 import javax.sql.DataSource;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
-public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider {
+public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider,
+  BeforeAllCallback {
+
+  private final static Map<JdbcContainer, DataSource> containerMap = new HashMap<>();
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext extensionContext) {
@@ -23,10 +28,10 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       .map(Allowed::value)
       .orElse(new Db[0]);
     if (0 == dbs.length) {
-      return ContainerUtil.containers.stream().map(this::invocationContext);
+      return containerMap.entrySet().stream().map(this::invocationContext);
     }
-    return ContainerUtil.containers.stream()
-      .filter(container -> contains(dbs, container.getDockerImageName()))
+    return containerMap.entrySet().stream()
+      .filter(entry -> contains(dbs, entry.getKey().getDockerImageName()))
       .map(this::invocationContext);
   }
 
@@ -39,39 +44,56 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
     return false;
   }
 
-  private TestTemplateInvocationContext invocationContext(JdbcContainer container) {
+  private TestTemplateInvocationContext invocationContext(Map.Entry<JdbcContainer, DataSource> entry) {
+    final String dockerImageName = entry.getKey().getDockerImageName();
+    final DataSource dataSource = entry.getValue();
     return new TestTemplateInvocationContext() {
       @Override
       public String getDisplayName(int invocationIndex) {
-        return container.getDockerImageName();
+        return dockerImageName;
       }
 
       @Override
       public List<Extension> getAdditionalExtensions() {
-        return Collections.singletonList(new InnerExtension(container));
+        return Collections.singletonList(new InnerExtension(dockerImageName, dataSource));
       }
     };
   }
 
+  @Override
+  public void beforeAll(ExtensionContext context) {
+    if (containerMap.isEmpty()) {
+      for (JdbcContainer container : ContainerUtil.containers) {
+        containerMap.put(container, container.start());
+      }
+    }
+    ExtensionContext.Store store = context.getRoot().getStore(ExtensionContext.Namespace.GLOBAL);
+    store.getOrComputeIfAbsent("GLOBAL_RESOURCE", key -> (ExtensionContext.Store.CloseableResource) () -> {
+      for (JdbcContainer container : containerMap.keySet()) {
+        container.stop();
+      }
+      containerMap.clear();
+    });
+  }
+
   static class InnerExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback, ParameterResolver {
 
-    private final JdbcContainer container;
+    private final String dockerImageName;
 
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
-    InnerExtension(JdbcContainer container) {
-      this.container = container;
+    InnerExtension(String dockerImageName, DataSource dataSource) {
+      this.dockerImageName = dockerImageName;
+      this.dataSource = dataSource;
     }
 
     @Override
     public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
       JDBC.setContext(null);
-      container.stop();
     }
 
     @Override
     public void beforeTestExecution(ExtensionContext extensionContext) {
-      dataSource = container.start();
       JDBC.setContext(JDBC.newContext(dataSource));
     }
 
@@ -90,7 +112,6 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       if (parameter.getType().equals(DataSource.class)) {
         return dataSource;
       }
-      String dockerImageName = container.getDockerImageName();
       if (dockerImageName.contains(Db.Postgres.name)) {
         return Db.Postgres;
       } else if (dockerImageName.contains(Db.MySQL.name)) {
