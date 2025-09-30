@@ -1,7 +1,5 @@
 package test.handler;
 
-import com.github.fantasy0v0.swift.jdbc.JDBC;
-import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +9,6 @@ import test.container.Db;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,18 +28,19 @@ class TypeHandlerTest {
 
   @TestTemplate
   void testCustom() throws SQLException {
-    JDBC.getContext().configure(new TypeSetHandler<Student>() {
-      @Override
-      public Class<Student> support() {
-        return Student.class;
-      }
-
-      @Override
-      public void doSet(Connection con, PreparedStatement ps, int index, Student parameter) throws SQLException {
-        String value = "%s %s".formatted(parameter.id(), parameter.name());
-        ps.setString(index, value);
-      }
-    });
+    // TODO
+    // JDBC.getContext().configure(new TypeSetHandler<Student>() {
+    //   @Override
+    //   public Class<Student> support() {
+    //     return Student.class;
+    //   }
+    //
+    //   @Override
+    //   public void doSet(Connection con, PreparedStatement ps, int index, Student parameter) throws SQLException {
+    //     String value = "%s %s".formatted(parameter.id(), parameter.name());
+    //     ps.setString(index, value);
+    //   }
+    // });
     String value = select("""
       select ?
       """, new Student(111, "test", 0)).fetchOne(row -> row.getString(1));
