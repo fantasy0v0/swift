@@ -19,6 +19,7 @@ import java.util.List;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SwiftJdbcExtension.class)
 public class InsertTest {
@@ -84,7 +85,7 @@ public class InsertTest {
     """).batch(batchParams, row -> row.getLong(1));
     assertEquals(6, executed.length);
     for (long key : keys) {
-      Assertions.assertTrue(key > 0);
+      assertTrue(key > 0);
     }
   }
 
@@ -100,44 +101,36 @@ public class InsertTest {
   }
 
   @TestTemplate
-  void testDateTime(Db db) {
-    ZoneOffset CST = ZoneOffset.ofHours(8);
-    if (Db.Postgres == db) {
-      OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, CST);
-      LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
-      List<Object[]> objects = JDBC.insert("""
-      insert into datetime_test(id, date) values(?, ?) returning date
-      """).fetch(1, offsetDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
-
-      objects = JDBC.insert("""
-      insert into datetime_test(id, date)
-      values(?, ?) returning date
-      """).fetch(1, localDateTime);
-      log.debug("value: {}", objects.getFirst()[0]);
-    }
-    OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, CST);
+  void testLocalDateTime() {
     LocalDateTime localDateTime = LocalDateTime.of(2022, 1, 1, 0, 0, 0, 0);
-
     JDBC.insert("""
-    insert into datetime_test(id, date) values(?, ?)
+      insert into datetime_test(id, date) values(?, ?)
+      """).execute(1, localDateTime);
+
+    LocalDateTime result = JDBC.select("""
+      select date from datetime_test where id = ?
+      """, 1).fetchOne(row -> row.getLocalDateTime(1));
+    log.debug("result: {}", result);
+    assertEquals(localDateTime, result);
+  }
+
+  /**
+   * MySQL没有像PostgreSQL的timestamptz, 所以只对PostgreSQL执行
+   */
+  @TestTemplate
+  @Allowed(Db.Postgres)
+  void testOffsetDateTime() {
+    ZoneOffset CST = ZoneOffset.ofHours(8);
+    OffsetDateTime offsetDateTime = OffsetDateTime.of(2008, 1, 1, 0, 0, 0, 0, CST);
+    JDBC.insert("""
+      insert into datetime_test(id, date_tz) values(?, ?)
     """).execute(2, offsetDateTime);
 
-    OffsetDateTime result1 = JDBC.select("""
-    select date from datetime_test where id = ?
+    OffsetDateTime result = JDBC.select("""
+      select date_tz from datetime_test where id = ?
     """, 2).fetchOne(row -> row.getOffsetDateTime(1));
-
-    assertEquals(offsetDateTime, result1.withOffsetSameInstant(CST));
-
-    JDBC.insert("""
-    insert into datetime_test(id, date) values(?, ?)
-    """).execute(3, localDateTime);
-
-    LocalDateTime result2 = JDBC.select("""
-    select date from datetime_test where id = ?
-    """, 3).fetchOne(row -> row.getLocalDateTime(1));
-
-    assertEquals(localDateTime, result2);
+    log.debug("result: {}", result);
+    assertTrue(offsetDateTime.isEqual(result));
   }
 
   @TestTemplate
@@ -146,25 +139,25 @@ public class InsertTest {
     insert into swift_user(name, status) values('测试学生', 0)
     """).fetchKey(row -> row.getLong(1));
     log.debug("key: {}", key);
-    Assertions.assertTrue(key > 0);
+    assertTrue(key > 0);
 
     key = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
     """).fetchKey(row -> row.getLong(1), "测试学生1", 1);
-    Assertions.assertTrue(key > 0);
+    assertTrue(key > 0);
 
     Object[] row = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
     """).fetchKey( "测试学生2", 2);
     // pg会返回整行数据
-    Assertions.assertTrue(row.length > 0);
-    Assertions.assertTrue(((Number)row[0]).longValue() > 0);
+    assertTrue(row.length > 0);
+    assertTrue(((Number) row[0]).longValue() > 0);
 
     row = JDBC.insert("""
     insert into swift_user(name, status) values('测试学生3', 2)
     """).fetchKey();
     // pg会返回整行数据
-    Assertions.assertTrue(row.length > 0);
-    Assertions.assertTrue(((Number)row[0]).longValue() > 0);
+    assertTrue(row.length > 0);
+    assertTrue(((Number) row[0]).longValue() > 0);
   }
 }

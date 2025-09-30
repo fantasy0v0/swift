@@ -6,7 +6,7 @@ CREATE TABLE student (
 );
 CREATE TABLE datetime_test (
   id     bigint    NOT NULL,
-  date   timestamp NOT NULL
+  date timestamp
 );
 insert into student(id, name, status) values
 (1, '小明', 0), (2, '张三', 1),

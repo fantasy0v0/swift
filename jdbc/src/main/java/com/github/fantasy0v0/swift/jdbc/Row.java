@@ -7,7 +7,10 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 public class Row {
@@ -66,8 +69,16 @@ public class Row {
     return extract(resultSet -> resultSet.getObject(columnLabel));
   }
 
-  public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+  public <T> T getObject(int columnIndex, Class<T> type, TypeGetHandler<T> handler) throws SQLException {
+    handler = getHandler(type, handler);
+    if (null != handler) {
+      return handler.doGet(resultSet, columnIndex);
+    }
     return extract(resultSet -> resultSet.getObject(columnIndex, type));
+  }
+
+  public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+    return getObject(columnIndex, type, null);
   }
 
   public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
@@ -82,12 +93,7 @@ public class Row {
   }
 
   public LocalTime getLocalTime(int columnIndex, TypeGetHandler<LocalTime> handler) throws SQLException {
-    handler = getHandler(LocalTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Time value = extract(resultSet -> resultSet.getTime(columnIndex));
-    return null != value ? value.toLocalTime() : null;
+    return getObject(columnIndex, LocalTime.class);
   }
 
   public LocalTime getLocalTime(String columnLabel, TypeGetHandler<LocalTime> handler) throws SQLException {
@@ -103,12 +109,7 @@ public class Row {
   }
 
   public LocalDate getLocalDate(int columnIndex, TypeGetHandler<LocalDate> handler) throws SQLException {
-    handler = getHandler(LocalDate.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Date value = extract(resultSet -> resultSet.getDate(columnIndex));
-    return null != value ? value.toLocalDate() : null;
+    return getObject(columnIndex, LocalDate.class);
   }
 
   public LocalDate getLocalDate(String columnLabel, TypeGetHandler<LocalDate> handler) throws SQLException {
@@ -124,12 +125,7 @@ public class Row {
   }
 
   public LocalDateTime getLocalDateTime(int columnIndex, TypeGetHandler<LocalDateTime> handler) throws SQLException {
-    handler = getHandler(LocalDateTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-    return null != value ? value.toLocalDateTime() : null;
+    return getObject(columnIndex, LocalDateTime.class);
   }
 
   public LocalDateTime getLocalDateTime(String columnLabel, TypeGetHandler<LocalDateTime> handler) throws SQLException {
@@ -144,19 +140,8 @@ public class Row {
     return getLocalDateTime(resultSet.findColumn(columnLabel), null);
   }
 
-  private OffsetDateTime timestampToOffsetDateTime(Timestamp value) {
-    ZoneId systemZoneId = ZoneId.systemDefault();
-    ZoneOffset systemZoneOffset = systemZoneId.getRules().getOffset(value.toInstant());
-    return value.toInstant().atOffset(systemZoneOffset);
-  }
-
   public OffsetDateTime getOffsetDateTime(int columnIndex, TypeGetHandler<OffsetDateTime> handler) throws SQLException {
-    handler = getHandler(OffsetDateTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-    return null != value ? timestampToOffsetDateTime(value) : null;
+    return getObject(columnIndex, OffsetDateTime.class);
   }
 
   public OffsetDateTime getOffsetDateTime(String columnLabel, TypeGetHandler<OffsetDateTime> handler) throws SQLException {
