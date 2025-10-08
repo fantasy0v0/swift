@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
-import test.vo.Student;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -41,14 +40,14 @@ class TypeHandlerTest {
     //     ps.setString(index, value);
     //   }
     // });
-    String value = select("""
-      select ?
-      """, new Student(111, "test", 0)).fetchOne(row -> row.getString(1));
-    assertEquals("111 test", value);
+    // String value = select("""
+    //   select ?
+    //   """, new Student(111, "test", 0)).fetchOne(row -> row.getString(1));
+    // assertEquals("111 test", value);
   }
 
   @TestTemplate
-  void testDefault(Db db) throws SQLException {
+  void testDefault(Db db) {
     Boolean p1 = false;
     Byte p2 = (byte) 2;
     Double p3 = (double) 3;

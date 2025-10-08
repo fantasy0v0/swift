@@ -24,12 +24,12 @@ final class Utils {
   static <T> List<T> fetch(Context context,
                            StatementConfiguration statementConfiguration,
                            String sql, List<Object> params,
-                           FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
+                           FetchMapper<T> mapper) throws SQLException {
 
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return executeQuery(context,
         ref.unwrap(), statementConfiguration, context.getGetHandlers(), sql, params,
-        mapper, parameterHandler, false
+        mapper, false
       );
     }
   }
@@ -37,11 +37,11 @@ final class Utils {
   static <T> T fetchOne(Context context,
                         StatementConfiguration statementConfiguration,
                         String sql, List<Object> params,
-                        FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
+                        FetchMapper<T> mapper) throws SQLException {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       List<T> list = executeQuery(
         context, ref.unwrap(), statementConfiguration, context.getGetHandlers(),
-        sql, params, mapper, parameterHandler, true
+        sql, params, mapper, true
       );
       return list.isEmpty() ? null : list.getFirst();
     }
@@ -106,7 +106,6 @@ final class Utils {
    * @param sql sql语句
    * @param params 变量
    * @param fetchMapper 行映射
-   * @param parameterHandler 参数处理器
    * @param firstOnly 只取一条
    * @return 结果
    * @param <T> 映射后的类型
@@ -117,14 +116,13 @@ final class Utils {
                                   Map<Class<?>, TypeGetHandler<?>> handlerMap,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
-                                  ParameterHandler parameterHandler,
                                   boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeQuery begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeQuery: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
-      fillStatementParams(context, conn, statement, params, parameterHandler);
+      fillStatementParams(context, conn, statement, params);
       try (ResultSet resultSet = statement.executeQuery()) {
         return fetchByResultSet(resultSet, handlerMap, fetchMapper, firstOnly);
       }
@@ -136,14 +134,13 @@ final class Utils {
   static <T> List<T> execute(Context context, Connection conn,
                              StatementConfiguration statementConfiguration,
                              String sql, List<Object> params,
-                             ParameterHandler parameterHandler,
                              FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("execute begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("execute: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
-      fillStatementParams(context, conn, statement, params, parameterHandler);
+      fillStatementParams(context, conn, statement, params);
       boolean result = statement.execute();
       if (!result) {
         return null;
@@ -159,7 +156,6 @@ final class Utils {
   static <T> List<T> executeBatch(Context context, Connection conn,
                                   StatementConfiguration statementConfiguration,
                                   String sql, List<List<Object>> batch,
-                                  ParameterHandler parameterHandler,
                                   FetchMapper<T> mapper) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeBatch RETURN_GENERATED_KEYS begin");
@@ -169,7 +165,7 @@ final class Utils {
       Statement.RETURN_GENERATED_KEYS, statementConfiguration)
     ) {
       for (List<Object> params : batch) {
-        fillStatementParams(context, conn, statement, params, parameterHandler);
+        fillStatementParams(context, conn, statement, params);
         statement.addBatch();
       }
       int[] result = statement.executeBatch();
@@ -184,8 +180,7 @@ final class Utils {
 
   static int[] executeBatch(Context context, Connection conn,
                             StatementConfiguration statementConfiguration,
-                            String sql, List<List<Object>> batch,
-                            ParameterHandler parameterHandler) throws SQLException {
+                            String sql, List<List<Object>> batch) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeBatch begin");
     String callerInfo = printCallerInfo();
@@ -194,7 +189,7 @@ final class Utils {
       Statement.NO_GENERATED_KEYS, statementConfiguration)
     ) {
       for (List<Object> params : batch) {
-        fillStatementParams(context, conn, statement, params, parameterHandler);
+        fillStatementParams(context, conn, statement, params);
         statement.addBatch();
       }
       return statement.executeBatch();
@@ -205,14 +200,13 @@ final class Utils {
 
   static int executeUpdate(Context context, Connection conn,
                            StatementConfiguration statementConfiguration,
-                           String sql, List<Object> params,
-                           ParameterHandler parameterHandler) throws SQLException {
+                           String sql, List<Object> params) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeUpdate begin");
     String callerInfo = printCallerInfo();
     LogUtil.sql().debug("executeUpdate: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
-      fillStatementParams(context, conn, statement, params, parameterHandler);
+      fillStatementParams(context, conn, statement, params);
       return statement.executeUpdate();
     } finally {
       performanceLog("executeUpdate", stopWatch, sql);
@@ -221,8 +215,7 @@ final class Utils {
 
   @SuppressWarnings("unchecked")
   static void fillStatementParams(Context context, Connection conn,
-                                  PreparedStatement statement, List<Object> params,
-                                  ParameterHandler parameterHandler) throws SQLException {
+                                  PreparedStatement statement, List<Object> params) throws SQLException {
     if (null == params) {
       LogUtil.sql().debug("parameter is null");
       return;
@@ -230,29 +223,18 @@ final class Utils {
     LogUtil.sql().debug("parameter count: {}", params.size());
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
-
-      // 优先使用参数中的parameterHandler
-      boolean result = false;
-      if (null != parameterHandler) {
-        result = parameterHandler.handle(conn, statement, index + 1, parameter);
-      }
-
-      if (result) {
-        LogUtil.sql().trace("fill parameter: [{}] - [{}], use method parameter handler", index + 1, parameter);
-      } else {
-        if (null != parameter) {
-          TypeSetHandler<?> handler = context.getSetHandlers().get(parameter.getClass());
-          if (null != handler) {
-            ((TypeSetHandler<Object>) handler).doSet(conn, statement, index + 1, parameter);
-            LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
-          } else {
-            LogUtil.sql().trace("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
-            statement.setObject(index + 1, parameter);
-          }
+      if (null != parameter) {
+        TypeSetHandler<?> handler = context.getSetHandlers().get(parameter.getClass());
+        if (null != handler) {
+          ((TypeSetHandler<Object>) handler).doSet(conn, statement, index + 1, parameter);
+          LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
         } else {
-          LogUtil.sql().trace("fill parameter: [{}] - [null], use setNull", index + 1);
-          statement.setNull(index + 1, Types.NULL);
+          LogUtil.sql().trace("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
+          statement.setObject(index + 1, parameter);
         }
+      } else {
+        LogUtil.sql().trace("fill parameter: [{}] - [null], use setNull", index + 1);
+        statement.setNull(index + 1, Types.NULL);
       }
     }
   }

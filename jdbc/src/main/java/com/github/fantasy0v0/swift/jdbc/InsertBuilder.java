@@ -29,7 +29,7 @@ public class InsertBuilder extends UpdateBuilder {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), statementConfiguration, sql, batchParams,
-        parameterHandler, keyMapper
+        keyMapper
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -45,7 +45,7 @@ public class InsertBuilder extends UpdateBuilder {
       String callerInfo = printCallerInfo();
       LogUtil.sql().debug("fetchKey: [{}], caller: {}", sql, callerInfo);
       try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, statementConfiguration)) {
-        fillStatementParams(context, conn, statement, params, parameterHandler);
+        fillStatementParams(context, conn, statement, params);
         int updated = statement.executeUpdate();
         LogUtil.sql().debug("executeUpdate: {}", updated);
         List<T> list = fetchByResultSet(
