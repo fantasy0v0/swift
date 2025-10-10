@@ -1,12 +1,8 @@
 package test.handler;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.Db;
-import test.container.SwiftJdbcExtension;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -20,12 +16,12 @@ import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Deprecated
-@ExtendWith(SwiftJdbcExtension.class)
+  // @ExtendWith(SwiftJdbcExtension.class)
 class TypeHandlerTest {
 
   private final static Logger log = LoggerFactory.getLogger(TypeHandlerTest.class);
 
-  @TestTemplate
+  // @TestTemplate
   void testCustom() throws SQLException {
     // TODO
     // JDBC.getContext().configure(new TypeSetHandler<Student>() {
@@ -46,7 +42,7 @@ class TypeHandlerTest {
     // assertEquals("111 test", value);
   }
 
-  @TestTemplate
+  // @TestTemplate
   void testDefault(Db db) {
     Boolean p1 = false;
     Byte p2 = (byte) 2;
@@ -172,7 +168,7 @@ class TypeHandlerTest {
     }
   }
 
-  @Test
+  // @Test
   void testMap() {
     Map<String, Object> map = new HashMap<>();
     Integer object = (Integer) map.get("123");

@@ -2,22 +2,23 @@ package test.parameter;
 
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author fan 2025/9/30
  */
 @ExtendWith(SwiftJdbcExtension.class)
 public class ParameterTest {
+
+  private static final Logger log = LoggerFactory.getLogger(ParameterTest.class);
 
   @TestTemplate
   void testBoolean() {
@@ -86,21 +87,12 @@ public class ParameterTest {
   void testLocalDateTime() {
     LocalDateTime p = LocalDateTime.now();
     LocalDateTime db = select("select ?", p).fetchOne(row -> row.getLocalDateTime(1));
-    assertEquals(p.getSecond(), db.getSecond());
-    assertEquals(p.getMinute(), db.getMinute());
-    assertEquals(p.getHour(), db.getHour());
-    assertEquals(p.getDayOfMonth(), db.getDayOfMonth());
-    assertEquals(p.getMonth(), db.getMonth());
-    assertEquals(p.getYear(), db.getYear());
+    Duration duration = Duration.between(p, db);
+    assertTrue(Math.abs(duration.getSeconds()) <= 1);
 
     db = select("select localtimestamp").fetchOne(row -> row.getLocalDateTime(1));
-    assertNotNull(db);
-    assertEquals(p.getSecond(), db.getSecond());
-    assertEquals(p.getMinute(), db.getMinute());
-    // assertEquals(p.getHour(), db.getHour());
-    assertEquals(p.getDayOfMonth(), db.getDayOfMonth());
-    assertEquals(p.getMonth(), db.getMonth());
-    assertEquals(p.getYear(), db.getYear());
+    duration = Duration.between(p, db);
+    assertTrue(Math.abs(duration.getSeconds()) <= 1);
   }
 
   @TestTemplate
@@ -123,20 +115,12 @@ public class ParameterTest {
   void testOffsetDateTime() {
     OffsetDateTime p = OffsetDateTime.now();
     OffsetDateTime db = select("select ?", p).fetchOne(row -> row.getOffsetDateTime(1));
-    assertEquals(p.getSecond(), db.getSecond());
-    assertEquals(p.getMinute(), db.getMinute());
-    // assertEquals(p.getHour(), db.getHour());
-    assertEquals(p.getDayOfMonth(), db.getDayOfMonth());
-    assertEquals(p.getMonth(), db.getMonth());
-    assertEquals(p.getYear(), db.getYear());
+    Duration duration = Duration.between(p, db);
+    assertTrue(Math.abs(duration.getSeconds()) <= 1);
 
     db = select("select current_timestamp").fetchOne(row -> row.getOffsetDateTime(1));
-    assertEquals(p.getSecond(), db.getSecond());
-    assertEquals(p.getMinute(), db.getMinute());
-    // assertEquals(p.getHour(), db.getHour());
-    assertEquals(p.getDayOfMonth(), db.getDayOfMonth());
-    assertEquals(p.getMonth(), db.getMonth());
-    assertEquals(p.getYear(), db.getYear());
+    duration = Duration.between(p, db);
+    assertTrue(Math.abs(duration.getSeconds()) <= 1);
   }
 
 }
