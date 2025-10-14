@@ -227,7 +227,7 @@ final class Utils {
         ParameterSetter<?> setter = context.getSetterMap().get(parameter.getClass());
         if (null != setter) {
           ((ParameterSetter<Object>) setter).set(conn, parameter, statement, index + 1);
-          LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter setter", index + 1, parameter);
+          LogUtil.sql().trace("fill parameter: [{}] - [{}], use context parameter setter", index + 1, parameter);
         } else {
           LogUtil.sql().trace("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
           statement.setObject(index + 1, parameter);

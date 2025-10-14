@@ -17,6 +17,24 @@ public class ParameterMetaData {
     this.columnIndex = columnIndex;
   }
 
+  /**
+   * 当现有方法无法满足时, 可以使用该方法代替
+   *
+   * @return ResultSetMetaData
+   */
+  public ResultSetMetaData metaData() {
+    return metaData;
+  }
+
+  /**
+   * 当现有方法无法满足时, 可以使用该方法代替
+   *
+   * @return column index
+   */
+  public int columnIndex() {
+    return columnIndex;
+  }
+
   public int columnType() throws SQLException {
     return metaData.getColumnType(columnIndex);
   }

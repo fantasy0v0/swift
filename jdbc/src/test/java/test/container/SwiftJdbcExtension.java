@@ -1,5 +1,6 @@
 package test.container;
 
+import com.github.fantasy0v0.swift.jdbc.Context;
 import com.github.fantasy0v0.swift.jdbc.JDBC;
 import org.junit.jupiter.api.extension.*;
 
@@ -82,6 +83,8 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
 
     private final DataSource dataSource;
 
+    private Context context;
+
     InnerExtension(String dockerImageName, DataSource dataSource) {
       this.dockerImageName = dockerImageName;
       this.dataSource = dataSource;
@@ -90,11 +93,13 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
     @Override
     public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
       JDBC.setContext(null);
+      context = null;
     }
 
     @Override
     public void beforeTestExecution(ExtensionContext extensionContext) {
-      JDBC.setContext(JDBC.newContext(dataSource));
+      context = JDBC.newContext(dataSource);
+      JDBC.setContext(context);
     }
 
     @Override
@@ -102,8 +107,10 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       Parameter parameter = parameterContext.getParameter();
       if (parameter.getType().equals(DataSource.class)) {
         return true;
+      } else if (parameter.getType().equals(Db.class)) {
+        return true;
       }
-      return parameter.getType().equals(Db.class);
+      return parameter.getType().equals(Context.class);
     }
 
     @Override
@@ -111,11 +118,14 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       Parameter parameter = parameterContext.getParameter();
       if (parameter.getType().equals(DataSource.class)) {
         return dataSource;
-      }
-      if (dockerImageName.contains(Db.Postgres.name)) {
-        return Db.Postgres;
-      } else if (dockerImageName.contains(Db.MySQL.name)) {
-        return Db.MySQL;
+      } else if (parameter.getType().equals(Db.class)) {
+        if (dockerImageName.contains(Db.Postgres.name)) {
+          return Db.Postgres;
+        } else if (dockerImageName.contains(Db.MySQL.name)) {
+          return Db.MySQL;
+        }
+      } else if (parameter.getType().equals(Context.class)) {
+        return context;
       }
       return null;
     }

@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author fan 2025/9/30
  */
 @ExtendWith(SwiftJdbcExtension.class)
-public class ParameterTest {
+public class GetterTest {
 
-  private static final Logger log = LoggerFactory.getLogger(ParameterTest.class);
+  private static final Logger log = LoggerFactory.getLogger(GetterTest.class);
 
   @TestTemplate
   void testBoolean() {

@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public interface ParameterSetter<T> {
 
-  Set<Class<T>> support();
+  Set<Class<? extends T>> support();
 
   void set(Connection connection, T parameter, PreparedStatement statement, int columnIndex) throws SQLException;
 

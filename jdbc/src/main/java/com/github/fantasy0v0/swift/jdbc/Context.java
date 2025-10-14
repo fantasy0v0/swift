@@ -53,8 +53,8 @@ public class Context {
   }
 
   public <T> void configure(ParameterGetter<T> getter) {
-    Set<Class<T>> support = getter.support();
-    for (Class<T> clazz : support) {
+    Set<Class<? extends T>> support = getter.support();
+    for (Class<? extends T> clazz : support) {
       if (getterMap.containsKey(clazz)) {
         LogUtil.common().warn("{} 原有的Getter将被替换", clazz);
       }
@@ -63,8 +63,8 @@ public class Context {
   }
 
   public <T> void configure(ParameterSetter<T> setter) {
-    Set<Class<T>> support = setter.support();
-    for (Class<T> clazz : support) {
+    Set<Class<? extends T>> support = setter.support();
+    for (Class<? extends T> clazz : support) {
       if (setterMap.containsKey(clazz)) {
         LogUtil.common().warn("{} 原有的Setter将被替换", clazz);
       }

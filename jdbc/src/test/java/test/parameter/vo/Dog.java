@@ -1,0 +1,13 @@
+package test.parameter.vo;
+
+/**
+ * @author fan 2025/10/14
+ */
+public class Dog extends Animal {
+
+  public String name;
+
+  public Dog(String name) {
+    this.name = name;
+  }
+}

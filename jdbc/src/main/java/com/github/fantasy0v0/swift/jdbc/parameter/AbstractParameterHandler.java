@@ -12,13 +12,13 @@ import java.util.Set;
  */
 public abstract class AbstractParameterHandler<T> implements ParameterGetter<T>, ParameterSetter<T> {
 
-  protected final Map<Class<T>, Integer> parameterMap;
+  protected final Map<Class<? extends T>, Integer> parameterMap;
 
   protected AbstractParameterHandler(Class<T> parameterClass, int sqlType) {
     this.parameterMap = Map.of(parameterClass, sqlType);
   }
 
-  protected AbstractParameterHandler(Map<Class<T>, Integer> parameterMap) {
+  protected AbstractParameterHandler(Map<Class<? extends T>, Integer> parameterMap) {
     this.parameterMap = parameterMap;
   }
 
@@ -26,7 +26,7 @@ public abstract class AbstractParameterHandler<T> implements ParameterGetter<T>,
    * @return 返回可处理的参数类型
    */
   @Override
-  public Set<Class<T>> support() {
+  public Set<Class<? extends T>> support() {
     return parameterMap.keySet();
   }
 

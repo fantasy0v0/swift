@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public interface ParameterGetter<T> {
 
-  Set<Class<T>> support();
+  Set<Class<? extends T>> support();
 
   T get(ParameterMetaData metaData, Object parameter) throws SQLException;
 
