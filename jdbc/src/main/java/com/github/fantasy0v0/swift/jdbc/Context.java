@@ -6,7 +6,6 @@ import com.github.fantasy0v0.swift.jdbc.parameter.AbstractParameterHandler;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterSetter;
 import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
-import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import javax.sql.DataSource;
@@ -26,9 +25,6 @@ public class Context {
 
   @Deprecated
   private final Map<Class<?>, TypeGetHandler<?>> getHandlerMap = new ConcurrentHashMap<>();
-
-  @Deprecated
-  private final Map<Class<?>, TypeSetHandler<?>> setHandlerMap = new ConcurrentHashMap<>();
 
   private final Map<Class<?>, ParameterGetter<?>> getterMap = new HashMap<>();
 
@@ -88,15 +84,6 @@ public class Context {
   @Deprecated
   public Map<Class<?>, TypeGetHandler<?>> getGetHandlers() {
     return getHandlerMap;
-  }
-
-  @Deprecated
-  public Map<Class<?>, TypeSetHandler<?>> getSetHandlers() {
-    return setHandlerMap;
-  }
-
-  public Map<Class<?>, ParameterGetter<?>> getGetterMap() {
-    return getterMap;
   }
 
   public Map<Class<?>, ParameterSetter<?>> getSetterMap() {

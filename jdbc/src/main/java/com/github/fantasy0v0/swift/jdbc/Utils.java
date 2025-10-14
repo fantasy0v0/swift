@@ -1,8 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterSetter;
 import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
-import com.github.fantasy0v0.swift.jdbc.type.TypeSetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import java.sql.*;
@@ -224,10 +224,10 @@ final class Utils {
     for (int index = 0; index < params.size(); index++) {
       Object parameter = params.get(index);
       if (null != parameter) {
-        TypeSetHandler<?> handler = context.getSetHandlers().get(parameter.getClass());
-        if (null != handler) {
-          ((TypeSetHandler<Object>) handler).doSet(conn, statement, index + 1, parameter);
-          LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter handler", index + 1, parameter);
+        ParameterSetter<?> setter = context.getSetterMap().get(parameter.getClass());
+        if (null != setter) {
+          ((ParameterSetter<Object>) setter).set(conn, parameter, statement, index + 1);
+          LogUtil.sql().trace("fill parameter: [{}] - [{}], use global parameter setter", index + 1, parameter);
         } else {
           LogUtil.sql().trace("fill parameter: [{}] - [{}], use setObject", index + 1, parameter.getClass());
           statement.setObject(index + 1, parameter);
