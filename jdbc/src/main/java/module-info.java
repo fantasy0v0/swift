@@ -7,7 +7,6 @@ module swift.jdbc {
   exports com.github.fantasy0v0.swift.jdbc.predicate;
   exports com.github.fantasy0v0.swift.jdbc.clauses;
   exports com.github.fantasy0v0.swift.jdbc.dialect;
-  exports com.github.fantasy0v0.swift.jdbc.type;
   exports com.github.fantasy0v0.swift.jdbc.parameter;
   exports com.github.fantasy0v0.swift.jdbc.util;
   exports com.github.fantasy0v0.swift.jdbc.connection;

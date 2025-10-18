@@ -1,5 +1,8 @@
 package test.parameter;
 
+import com.github.fantasy0v0.swift.jdbc.Context;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -7,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 
 import java.time.*;
+import java.util.Set;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -121,6 +125,29 @@ public class GetterTest {
     db = select("select current_timestamp").fetchOne(row -> row.getOffsetDateTime(1));
     duration = Duration.between(p, db);
     assertTrue(Math.abs(duration.getSeconds()) <= 1);
+  }
+
+  @TestTemplate
+  void testCustom(Context context) {
+    context.configure(new ParameterGetter<String>() {
+
+      @Override
+      public Set<Class<? extends String>> support() {
+        return Set.of(String.class);
+      }
+
+      @Override
+      public String get(ParameterMetaData metaData, Object parameter) {
+        if (parameter instanceof String value) {
+          return value + " by Custom";
+        }
+        return "Error";
+      }
+    });
+    String value = select("""
+    select ?
+    """, "test").fetchOne(row -> row.getString(1));
+    assertEquals("test by Custom", value);
   }
 
 }

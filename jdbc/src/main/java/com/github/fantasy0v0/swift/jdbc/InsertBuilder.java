@@ -49,7 +49,7 @@ public class InsertBuilder extends UpdateBuilder {
         int updated = statement.executeUpdate();
         LogUtil.sql().debug("executeUpdate: {}", updated);
         List<T> list = fetchByResultSet(
-          statement.getGeneratedKeys(), context.getGetHandlers(), mapper, true
+          statement.getGeneratedKeys(), context.getGetterMap(), mapper, true
         );
         return list.isEmpty() ? null : list.getFirst();
       } finally {

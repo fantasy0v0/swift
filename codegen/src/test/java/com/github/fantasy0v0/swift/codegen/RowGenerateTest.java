@@ -1,4 +1,4 @@
-package test;
+package com.github.fantasy0v0.swift.codegen;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,34 +50,20 @@ class RowGenerateTest {
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
-        public %s %s(int columnIndex, TypeGetHandler<%s> handler) throws SQLException {
-          handler = getHandler(%s.class, handler);
-          if (null != handler) {
-            return handler.doGet(resultSet, columnIndex);
-          }
-          return extract(resultSet, columnIndex, resultSet::%s);
-        }""".formatted(resultType, methodName, resultType, resultType, methodName));
+      public %s %s(int columnIndex) throws SQLException {
+        ParameterGetter<%s> getter = getGetter(%s.class);
+        if (null != getter) {
+          return getByGetter(getter, columnIndex);
+        }
+        return extract(columnIndex, resultSet::%s);
+      }""".formatted(resultType, methodName, resultType, resultType, methodName));
 
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append(System.lineSeparator());
       methodsBuffer.append("""
-        public %s %s(String columnLabel, TypeGetHandler<%s> handler) throws SQLException {
-          return %s(resultSet.findColumn(columnLabel), handler);
-        }""".formatted(resultType, methodName, resultType, methodName));
-
-      methodsBuffer.append(System.lineSeparator());
-      methodsBuffer.append(System.lineSeparator());
-      methodsBuffer.append("""
-        public %s %s(int columnIndex) throws SQLException {
-          return %s(columnIndex, null);
-        }""".formatted(resultType, methodName, methodName));
-
-      methodsBuffer.append(System.lineSeparator());
-      methodsBuffer.append(System.lineSeparator());
-      methodsBuffer.append("""
-        public %s %s(String columnLabel) throws SQLException {
-          return %s(resultSet.findColumn(columnLabel), null);
-        }""".formatted(resultType, methodName, methodName));
+      public %s %s(String columnLabel) throws SQLException {
+        return %s(resultSet.findColumn(columnLabel));
+      }""".formatted(resultType, methodName, methodName));
     }
     methodsBuffer.append(System.lineSeparator());
     methodsBuffer.append(System.lineSeparator());

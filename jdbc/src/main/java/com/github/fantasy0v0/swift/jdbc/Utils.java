@@ -1,8 +1,8 @@
 package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterSetter;
-import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import java.sql.*;
@@ -28,7 +28,7 @@ final class Utils {
 
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return executeQuery(context,
-        ref.unwrap(), statementConfiguration, context.getGetHandlers(), sql, params,
+        ref.unwrap(), statementConfiguration, context.getGetterMap(), sql, params,
         mapper, false
       );
     }
@@ -40,7 +40,7 @@ final class Utils {
                         FetchMapper<T> mapper) throws SQLException {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       List<T> list = executeQuery(
-        context, ref.unwrap(), statementConfiguration, context.getGetHandlers(),
+        context, ref.unwrap(), statementConfiguration, context.getGetterMap(),
         sql, params, mapper, true
       );
       return list.isEmpty() ? null : list.getFirst();
@@ -48,13 +48,13 @@ final class Utils {
   }
 
   static <T> List<T> fetchByResultSet(ResultSet resultSet,
-                                      Map<Class<?>, TypeGetHandler<?>> handlerMap,
+                                      Map<Class<?>, ParameterGetter<?>> getterMap,
                                       FetchMapper<T> fetchMapper,
                                       boolean firstOnly) throws SQLException {
     List<T> array = new ArrayList<>();
     boolean first = true;
     while (resultSet.next()) {
-      T row = fetchMapper.apply(new Row(resultSet, handlerMap));
+      T row = fetchMapper.apply(new Row(resultSet, getterMap));
       array.add(row);
       if (first && firstOnly) {
         break;
@@ -113,7 +113,7 @@ final class Utils {
    */
   static <T> List<T> executeQuery(Context context, Connection conn,
                                   StatementConfiguration statementConfiguration,
-                                  Map<Class<?>, TypeGetHandler<?>> handlerMap,
+                                  Map<Class<?>, ParameterGetter<?>> getterMap,
                                   String sql, List<Object> params,
                                   FetchMapper<T> fetchMapper,
                                   boolean firstOnly) throws SQLException {
@@ -124,7 +124,7 @@ final class Utils {
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(context, conn, statement, params);
       try (ResultSet resultSet = statement.executeQuery()) {
-        return fetchByResultSet(resultSet, handlerMap, fetchMapper, firstOnly);
+        return fetchByResultSet(resultSet, getterMap, fetchMapper, firstOnly);
       }
     } finally {
       performanceLog("executeQuery", stopWatch, sql);
@@ -146,7 +146,7 @@ final class Utils {
         return null;
       }
       try (ResultSet resultSet = statement.getResultSet()) {
-        return fetchByResultSet(resultSet, context.getGetHandlers(), mapper, firstOnly);
+        return fetchByResultSet(resultSet, context.getGetterMap(), mapper, firstOnly);
       }
     } finally {
       performanceLog("execute", stopWatch, sql);
@@ -171,7 +171,7 @@ final class Utils {
       int[] result = statement.executeBatch();
       LogUtil.sql().debug("executeBatch: {}", result.length);
       return fetchByResultSet(
-        statement.getGeneratedKeys(), context.getGetHandlers(), mapper, false
+        statement.getGeneratedKeys(), context.getGetterMap(), mapper, false
       );
     } finally {
       performanceLog("executeBatch RETURN_GENERATED_KEYS", stopWatch, sql);
