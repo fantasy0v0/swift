@@ -1,7 +1,6 @@
 package test.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.exception.SwiftSQLException;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,6 @@ public class TransactionTest {
 
   @TestTemplate
   void test(DataSource dataSource, Db db) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     try {
       transaction(() -> {
         select("select * from student").fetch();

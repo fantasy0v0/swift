@@ -141,7 +141,6 @@ public class StatementTest {
 
   @TestTemplate
   void executeBatch(DataSource dataSource, Db db) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
     List<Object[]> params = List.of(
       new Object[]{"fantasy1", 1},
       new Object[]{"fantasy2", 2}
