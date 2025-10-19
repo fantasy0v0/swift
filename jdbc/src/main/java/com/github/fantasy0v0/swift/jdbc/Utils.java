@@ -53,9 +53,10 @@ final class Utils {
                                       boolean firstOnly) throws SQLException {
     List<T> array = new ArrayList<>();
     boolean first = true;
+    var row = new Row(resultSet, getterMap);
     while (resultSet.next()) {
-      T row = fetchMapper.apply(new Row(resultSet, getterMap));
-      array.add(row);
+      T data = fetchMapper.apply(row);
+      array.add(data);
       if (first && firstOnly) {
         break;
       }
