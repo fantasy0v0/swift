@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Row {
@@ -67,10 +69,14 @@ public class Row {
     return extract(resultSet -> resultSet.getObject(columnLabel));
   }
 
-  private <T> T getByGetter(ParameterGetter<T> getter, int columnIndex) throws SQLException {
+  private <T> T getByGetter(ResultSet resultSet, ParameterGetter<T> getter, int columnIndex) throws SQLException {
     var metaData = new ParameterMetaData(resultSet.getMetaData(), columnIndex);
     Object parameter = resultSet.getObject(columnIndex);
     return getter.get(metaData, parameter);
+  }
+
+  private <T> T getByGetter(ParameterGetter<T> getter, int columnIndex) throws SQLException {
+    return getByGetter(resultSet, getter, columnIndex);
   }
 
   public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
@@ -123,6 +129,34 @@ public class Row {
   public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
     return getOffsetDateTime(resultSet.findColumn(columnLabel));
   }
+
+  @SuppressWarnings("unchecked")
+  public <T> List<T> getArray(int columnIndex, Class<T> type) throws SQLException {
+    Array array = getArray(columnIndex);
+    ParameterGetter<T> getter = getGetter(type);
+    try (ResultSet arrayResultSet = array.getResultSet()) {
+      // columnIndex: 1 代表在数组中的索引
+      // columnIndex: 2 代表数组中的元素
+      ParameterMetaData metaData = null;
+      if (null != getter) {
+        metaData = new ParameterMetaData(arrayResultSet.getMetaData(), 2);
+      }
+      List<T> list = new ArrayList<>();
+      while (arrayResultSet.next()) {
+        if (null != getter) {
+          Object parameter = arrayResultSet.getObject(2);
+          list.add(getter.get(metaData, parameter));
+        } else {
+          T parameter = arrayResultSet.getObject(2, type);
+          list.add(parameter);
+        }
+      }
+      return list;
+    }
+  }
+
+  // 以下均为自动生成的代码
+  // 如需修改请到RowGenerateTest类中进行修改
 
   public Array getArray(int columnIndex) throws SQLException {
     ParameterGetter<Array> getter = getGetter(Array.class);

@@ -32,4 +32,15 @@ class RowTest {
     }
   }
 
+  @TestTemplate
+  @Allowed(Db.Postgres)
+  void testStringArray() {
+    List<List<String>> arrays = select("""
+      select tags from swift_user where tags is not null
+      """).fetch(row -> row.getArray(1, String.class));
+    for (List<String> array : arrays) {
+      log.debug("{}", array);
+    }
+  }
+
 }
