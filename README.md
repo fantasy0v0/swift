@@ -134,6 +134,14 @@ select * from student
 """).paginate(0, 10).fetch(Student::from);
 ```
 
+### 支持获取PostgreSQL数组
+
+```java
+List<List<String>> arrays = select("""
+  select tags from swift_user where tags is not null
+  """).fetch(row -> row.getArray(1, String.class));
+```
+
 ## 修改操作
 
 insert
