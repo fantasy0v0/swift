@@ -81,7 +81,7 @@ public class PaginateBuilder {
       long total = getTotal();
       long totalPages = 0;
       if (this.pageSize > 0) {
-        totalPages = (total - 1) / this.pageSize + 1;
+        totalPages = (total + this.pageSize - 1) / this.pageSize;
       }
       List<T> data = getData(mapper);
       return new PageData<>(total, totalPages, data);
