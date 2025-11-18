@@ -30,4 +30,6 @@ CREATE TABLE swift_user (
 insert into swift_user(name, status, tags)
 values ('小明', 0, '{"Java", "JDBC"}'),
        ('小王', 1, '{"Swift", "JDBC"}'),
-       ('小李', 2, '{"Github", "PostgreSQL"}');
+       ('小李', 2, '{"Github", "PostgreSQL"}'),
+       ('小赵', 2, null),
+       ('小钱', 0, '{}');

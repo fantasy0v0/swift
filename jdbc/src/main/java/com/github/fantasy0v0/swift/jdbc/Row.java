@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -133,6 +134,9 @@ public class Row {
   @SuppressWarnings("unchecked")
   public <T> List<T> getArray(int columnIndex, Class<T> type) throws SQLException {
     Array array = getArray(columnIndex);
+    if (null == array) {
+      return Collections.emptyList();
+    }
     ParameterGetter<T> getter = getGetter(type);
     try (ResultSet arrayResultSet = array.getResultSet()) {
       // columnIndex: 1 代表在数组中的索引
