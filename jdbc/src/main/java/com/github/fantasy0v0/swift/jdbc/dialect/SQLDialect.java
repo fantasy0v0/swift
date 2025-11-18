@@ -1,7 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc.dialect;
 
 import com.github.fantasy0v0.swift.jdbc.Query;
-import com.github.fantasy0v0.swift.jdbc.predicate.Predicate;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -12,6 +11,13 @@ public interface SQLDialect {
 
   Query count(String sql, List<Object> params);
 
+  /**
+   * @param sql        要分页的sql
+   * @param params     参数
+   * @param pageNumber 页码, 从0开始
+   * @param pageSize   每页大小
+   * @return Query
+   */
   Query paging(String sql, List<Object> params, long pageNumber, long pageSize);
 
 }

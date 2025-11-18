@@ -18,6 +18,9 @@ public class PaginateBuilder {
 
   private final List<Object> params;
 
+  /**
+   * 页码从0开始
+   */
   private final long pageNumber;
 
   private final long pageSize;
