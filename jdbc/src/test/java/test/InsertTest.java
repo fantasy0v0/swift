@@ -58,12 +58,12 @@ public class InsertTest {
   @TestTemplate
   void testBatch() {
     List<List<Object>> batchParams = new ArrayList<>();
-    batchParams.add(List.of(1000, "测试用户1", 0));
-    batchParams.add(List.of(1001, "测试用户2", 1));
-    batchParams.add(List.of(1002, "测试用户3", 2));
-    batchParams.add(List.of(1003, "测试用户4", 3));
-    batchParams.add(List.of(1004, "测试用户5", 4));
-    batchParams.add(List.of(1005, "测试用户6", 5));
+    batchParams.add(List.of(2000, "测试用户1", 0));
+    batchParams.add(List.of(2001, "测试用户2", 1));
+    batchParams.add(List.of(2002, "测试用户3", 2));
+    batchParams.add(List.of(2003, "测试用户4", 3));
+    batchParams.add(List.of(2004, "测试用户5", 4));
+    batchParams.add(List.of(2005, "测试用户6", 5));
 
     int[] executed = JDBC.insert("""
       insert into student(id, name, status)
@@ -74,12 +74,12 @@ public class InsertTest {
     }
 
     batchParams = new ArrayList<>();
-    batchParams.add(List.of("测试用户1", 0));
-    batchParams.add(List.of("测试用户2", 1));
-    batchParams.add(List.of("测试用户3", 2));
-    batchParams.add(List.of("测试用户4", 3));
-    batchParams.add(List.of("测试用户5", 4));
-    batchParams.add(List.of("测试用户6", 5));
+    batchParams.add(List.of("测试用户11", 0));
+    batchParams.add(List.of("测试用户12", 1));
+    batchParams.add(List.of("测试用户13", 2));
+    batchParams.add(List.of("测试用户14", 3));
+    batchParams.add(List.of("测试用户15", 4));
+    batchParams.add(List.of("测试用户16", 5));
     List<Long> keys = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
     """).batch(batchParams, row -> row.getLong(1));
@@ -95,9 +95,9 @@ public class InsertTest {
     List<Object[]> result = JDBC.insert("""
       insert into student(id, name, status)
       values(?, ?, ?)
-      returning id""").fetch(1000L, "测试学生", 0);
+      returning id""").fetch(2000L, "测试学生", 0);
     assertEquals(1, result.size());
-    assertEquals(1000L, result.getFirst()[0]);
+    assertEquals(2000L, result.getFirst()[0]);
   }
 
   @TestTemplate
@@ -136,25 +136,25 @@ public class InsertTest {
   @TestTemplate
   void testFetchKey() {
     long key = JDBC.insert("""
-    insert into swift_user(name, status) values('测试学生', 0)
+      insert into swift_user(name, status) values('测试学生31', 0)
     """).fetchKey(row -> row.getLong(1));
     log.debug("key: {}", key);
     assertTrue(key > 0);
 
     key = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
-    """).fetchKey(row -> row.getLong(1), "测试学生1", 1);
+      """).fetchKey(row -> row.getLong(1), "测试学生32", 1);
     assertTrue(key > 0);
 
     Object[] row = JDBC.insert("""
     insert into swift_user(name, status) values(?, ?)
-    """).fetchKey( "测试学生2", 2);
+      """).fetchKey("测试学生33", 2);
     // pg会返回整行数据
     assertTrue(row.length > 0);
     assertTrue(((Number) row[0]).longValue() > 0);
 
     row = JDBC.insert("""
-    insert into swift_user(name, status) values('测试学生3', 2)
+      insert into swift_user(name, status) values('测试学生34', 2)
     """).fetchKey();
     // pg会返回整行数据
     assertTrue(row.length > 0);

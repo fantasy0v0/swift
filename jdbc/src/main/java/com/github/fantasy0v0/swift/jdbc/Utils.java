@@ -1,6 +1,7 @@
 package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.jdbc.exception.SwiftException;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterSetter;
 import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
@@ -58,6 +59,10 @@ final class Utils {
       T data = fetchMapper.apply(row);
       array.add(data);
       if (first && firstOnly) {
+        // isLast不一定所有jdbc驱动都支持, 所以这里只能用next
+        if (resultSet.next()) {
+          throw new SwiftException("Expected one result, but found more than one");
+        }
         break;
       }
       first = false;

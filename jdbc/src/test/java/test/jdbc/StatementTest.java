@@ -190,4 +190,21 @@ public class StatementTest {
     }
   }
 
+  /**
+   * 确保isLast不会抛出异常
+   *
+   * @param dataSource dataSource
+   * @throws SQLException SQLException
+   */
+  @TestTemplate
+  void isLast(DataSource dataSource) throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      PreparedStatement stmt = connection.prepareStatement("SELECT * FROM student");
+      ResultSet rs = stmt.executeQuery();
+      while (rs.next()) {
+        boolean last = rs.isLast();
+        log.debug("isLast: {}", last);
+      }
+    }
+  }
 }
