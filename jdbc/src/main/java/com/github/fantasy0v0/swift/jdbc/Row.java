@@ -156,6 +156,8 @@ public class Row {
         }
       }
       return list;
+    } finally {
+      array.free();
     }
   }
 
