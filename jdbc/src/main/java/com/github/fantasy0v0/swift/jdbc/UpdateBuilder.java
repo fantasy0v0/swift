@@ -15,8 +15,6 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   protected final String sql;
 
-  protected ParameterHandler parameterHandler;
-
   UpdateBuilder(Context context, String sql) {
     this.context = context;
     this.sql = sql;
@@ -54,15 +52,10 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     return this;
   }
 
-  public UpdateBuilder setParameterHandler(ParameterHandler parameterHandler) {
-    this.parameterHandler = parameterHandler;
-    return this;
-  }
-
   public int execute(List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeUpdate(
-        context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler
+        context, ref.unwrap(), statementConfiguration, sql, params
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -89,7 +82,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   public int[] batch(List<List<Object>> batchParams) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
-        context, ref.unwrap(), statementConfiguration, sql, batchParams, parameterHandler
+        context, ref.unwrap(), statementConfiguration, sql, batchParams
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -100,7 +93,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
                              List<Object> params, boolean firstOnly) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.execute(
-        context, ref.unwrap(), statementConfiguration, sql, params, parameterHandler,
+        context, ref.unwrap(), statementConfiguration, sql, params,
         mapper, firstOnly
       );
     } catch (SQLException e) {

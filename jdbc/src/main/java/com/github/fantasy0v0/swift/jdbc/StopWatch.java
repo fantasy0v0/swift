@@ -7,6 +7,8 @@ class StopWatch {
 
   private final long startTime;
 
+  private long stopTime = -1;
+
   StopWatch() {
     startTime = System.nanoTime();
   }
@@ -23,16 +25,25 @@ class StopWatch {
   }
 
   private String summary() {
-    long cost = System.nanoTime() - startTime;
-    if (cost > 1_000_000_000) {
-      return format(cost / 1_000_000_000d, "s");
-    } else if(cost > 1_000_000) {
-      return format(cost / 1_000_000d, "ms");
-    } else if(cost > 1_000) {
-      return format(cost / 1_000d, "μs");
+    long elapsed = elapsed();
+    if (elapsed > 1_000_000_000) {
+      return format(elapsed / 1_000_000_000d, "s");
+    } else if (elapsed > 1_000_000) {
+      return format(elapsed / 1_000_000d, "ms");
+    } else if (elapsed > 1_000) {
+      return format(elapsed / 1_000d, "μs");
     } else {
-      return cost + " ns";
+      return elapsed + " ns";
     }
+  }
+
+  public long stop() {
+    stopTime = System.nanoTime();
+    return elapsed();
+  }
+
+  public long elapsed() {
+    return stopTime == -1 ? System.nanoTime() - startTime : stopTime - startTime;
   }
 
   @Override

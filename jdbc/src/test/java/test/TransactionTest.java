@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 
 import static com.github.fantasy0v0.swift.jdbc.JDBC.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SwiftJdbcExtension.class)
 public class TransactionTest {
@@ -27,24 +28,58 @@ public class TransactionTest {
 //      });
 //    });
 
-    transaction(() -> {
-      select("select * from student").fetch();
-      transaction(() -> {
-        select("select * from student").fetch();
-        transaction(() -> {
-          update("update student set name = ? where id = ?")
-            .execute("修改", 1L);
-        });
-      });
-    });
-  }
-
-  @TestTemplate
-  void rollback() {
+    long testId = 1L;
+    String oldName = select("select name from student where id = ?", testId)
+      .fetchOne(row -> row.getString(1));
+    log.debug("name: {}", oldName);
     transaction(() -> {
       update("update student set name = ? where id = ?")
         .execute("修改", 1L);
     });
+    String name = select("select name from student where id = ?", testId)
+      .fetchOne(row -> row.getString(1));
+    assertEquals("修改", name);
+  }
+
+  @TestTemplate
+  void rollback() {
+    long testId = 1L;
+    String oldName = select("select name from student where id = ?", testId)
+      .fetchOne(row -> row.getString(1));
+    log.debug("name: {}", oldName);
+    try {
+      transaction(() -> {
+        update("update student set name = ? where id = ?")
+          .execute("修改", 1L);
+        String newName = select("select name from student where id = ?", testId)
+          .fetchOne(row -> row.getString(1));
+        assertEquals("修改", newName);
+        throw new RuntimeException("rollback");
+      });
+    } catch (RuntimeException e) {
+      assertEquals("rollback", e.getMessage());
+    }
+    String name = select("select name from student where id = ?", testId)
+      .fetchOne(row -> row.getString(1));
+    assertEquals(oldName, name);
+
+    try {
+      transaction(() -> {
+        transaction(() -> {
+          update("update student set name = ? where id = ?")
+            .execute("修改", 1L);
+        });
+        String newName = select("select name from student where id = ?", testId)
+          .fetchOne(row -> row.getString(1));
+        assertEquals("修改", newName);
+        throw new RuntimeException("rollback");
+      });
+    } catch (RuntimeException e) {
+      assertEquals("rollback", e.getMessage());
+    }
+    name = select("select name from student where id = ?", testId)
+      .fetchOne(row -> row.getString(1));
+    assertEquals(oldName, name);
   }
 
 }

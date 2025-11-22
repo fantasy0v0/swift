@@ -14,12 +14,13 @@ public class PaginateBuilder {
 
   private final StatementConfiguration statementConfiguration;
 
-  private final ParameterHandler parameterHandler;
-
   private final String sql;
 
   private final List<Object> params;
 
+  /**
+   * 页码从0开始
+   */
   private final long pageNumber;
 
   private final long pageSize;
@@ -29,13 +30,11 @@ public class PaginateBuilder {
   private List<Object> countParams;
 
   PaginateBuilder(Context context, StatementConfiguration statementConfiguration,
-                  ParameterHandler parameterHandler,
                   String sql, List<Object> params, long number, long size) {
     this.context = context;
     this.statementConfiguration = statementConfiguration;
     this.sql = sql;
     this.params = params;
-    this.parameterHandler = parameterHandler;
     this.pageNumber = number;
     this.pageSize = size;
   }
@@ -61,7 +60,7 @@ public class PaginateBuilder {
     Long count = Utils.fetchOne(
       context, statementConfiguration,
       _countSql, _countParams,
-      row -> row.getLong(1), null
+      row -> row.getLong(1)
     );
     if (null == count) {
       throw new SwiftException("没有获取到总记录数, 请检查sql语句是否正确");
@@ -69,12 +68,11 @@ public class PaginateBuilder {
     return count;
   }
 
-  private <T> List<T> getData(FetchMapper<T> mapper, ParameterHandler parameterHandler) throws SQLException {
+  private <T> List<T> getData(FetchMapper<T> mapper) throws SQLException {
     SQLDialect dialect = context.getSQLDialect();
     Query query = dialect.paging(sql, params, pageNumber, pageSize);
     return Utils.fetch(
-      context, statementConfiguration, query.sql(), query.params(),
-      mapper, parameterHandler
+      context, statementConfiguration, query.sql(), query.params(), mapper
     );
   }
 
@@ -83,9 +81,9 @@ public class PaginateBuilder {
       long total = getTotal();
       long totalPages = 0;
       if (this.pageSize > 0) {
-        totalPages = (total - 1) / this.pageSize + 1;
+        totalPages = (total + this.pageSize - 1) / this.pageSize;
       }
-      List<T> data = getData(mapper, parameterHandler);
+      List<T> data = getData(mapper);
       return new PageData<>(total, totalPages, data);
     } catch (SQLException e) {
       throw new SwiftSQLException(e);

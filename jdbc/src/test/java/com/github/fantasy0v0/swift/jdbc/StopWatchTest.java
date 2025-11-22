@@ -11,7 +11,7 @@ class StopWatchTest {
   @Test
   void summary() throws InterruptedException {
     StopWatch stopWatch = new StopWatch();
-    Thread.sleep(3000);
+    Thread.sleep(10);
     log.debug("cost: {}", stopWatch);
   }
 }

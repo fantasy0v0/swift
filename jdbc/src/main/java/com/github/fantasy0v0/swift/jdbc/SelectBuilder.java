@@ -15,8 +15,6 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
 
   private final List<Object> params;
 
-  private ParameterHandler parameterHandler;
-
   SelectBuilder(Context context, String sql, List<Object> params) {
     this.context = context;
     this.sql = sql;
@@ -55,11 +53,6 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
     return this;
   }
 
-  public SelectBuilder setParameterHandler(ParameterHandler parameterHandler) {
-    this.parameterHandler = parameterHandler;
-    return this;
-  }
-
   /**
    * 进行分页
    *
@@ -69,7 +62,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
    */
   public PaginateBuilder paginate(long number, long size) {
     return new PaginateBuilder(
-      context, getStatementConfiguration(), parameterHandler,
+      context, getStatementConfiguration(),
       sql, params, number, size
     );
   }
@@ -77,7 +70,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
   public <T> List<T> fetch(FetchMapper<T> mapper) {
     try {
       return Utils.fetch(
-        context, getStatementConfiguration(), sql, params, mapper, parameterHandler
+        context, getStatementConfiguration(), sql, params, mapper
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -91,8 +84,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
   public <T> T fetchOne(FetchMapper<T> mapper) {
     try {
       return Utils.fetchOne(
-        context, getStatementConfiguration(), sql, params,
-        mapper, parameterHandler
+        context, getStatementConfiguration(), sql, params, mapper
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);

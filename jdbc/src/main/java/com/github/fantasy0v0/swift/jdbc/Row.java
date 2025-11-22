@@ -1,24 +1,31 @@
 package com.github.fantasy0v0.swift.jdbc;
 
-import com.github.fantasy0v0.swift.jdbc.type.TypeGetHandler;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
+import com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData;
 
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class Row {
 
   private final ResultSet resultSet;
 
-  private final Map<Class<?>, TypeGetHandler<?>> handlerMap;
+  private final Map<Class<?>, ParameterGetter<?>> getterMap;
 
-  Row(ResultSet resultSet, Map<Class<?>, TypeGetHandler<?>> handlerMap) {
+  Row(ResultSet resultSet, Map<Class<?>, ParameterGetter<?>> getterMap) {
     this.resultSet = resultSet;
-    this.handlerMap = handlerMap;
+    this.getterMap = getterMap;
   }
 
   public int getColumnCount() throws SQLException {
@@ -42,20 +49,17 @@ public class Row {
     return resultSet.wasNull() ? null : value;
   }
 
-  private <P> P extract(ResultSet resultSet, int columnIndex, ResultSetExtractFunction<P> function) throws SQLException {
+  private <P> P extract(int columnIndex, ResultSetExtractFunction<P> function) throws SQLException {
     P value = function.apply(columnIndex);
     return resultSet.wasNull() ? null : value;
   }
 
   @SuppressWarnings("unchecked")
-  private <T> TypeGetHandler<T> getHandler(Class<T> type, TypeGetHandler<T> handler) {
-    if (null != handler) {
-      return handler;
-    }
-    if (null == handlerMap || handlerMap.isEmpty()) {
+  private <T> ParameterGetter<T> getGetter(Class<T> type) {
+    if (null == getterMap || getterMap.isEmpty()) {
       return null;
     }
-    return (TypeGetHandler<T>)handlerMap.get(type);
+    return (ParameterGetter<T>)getterMap.get(type);
   }
 
   public Object getObject(int columnIndex) throws SQLException {
@@ -66,12 +70,26 @@ public class Row {
     return extract(resultSet -> resultSet.getObject(columnLabel));
   }
 
+  private <T> T getByGetter(ResultSet resultSet, ParameterGetter<T> getter, int columnIndex) throws SQLException {
+    var metaData = new ParameterMetaData(resultSet.getMetaData(), columnIndex);
+    Object parameter = resultSet.getObject(columnIndex);
+    return getter.get(metaData, parameter);
+  }
+
+  private <T> T getByGetter(ParameterGetter<T> getter, int columnIndex) throws SQLException {
+    return getByGetter(resultSet, getter, columnIndex);
+  }
+
   public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+    ParameterGetter<T> getter = getGetter(type);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
     return extract(resultSet -> resultSet.getObject(columnIndex, type));
   }
 
   public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-    return extract(resultSet -> resultSet.getObject(columnLabel, type));
+    return getObject(resultSet.findColumn(columnLabel), type);
   }
 
   public <T> T getByFunction(FunctionWithException<T> function) throws SQLException {
@@ -81,613 +99,380 @@ public class Row {
     return function.apply(resultSet);
   }
 
-  public LocalTime getLocalTime(int columnIndex, TypeGetHandler<LocalTime> handler) throws SQLException {
-    handler = getHandler(LocalTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Time value = extract(resultSet -> resultSet.getTime(columnIndex));
-    return null != value ? value.toLocalTime() : null;
-  }
-
-  public LocalTime getLocalTime(String columnLabel, TypeGetHandler<LocalTime> handler) throws SQLException {
-    return getLocalTime(resultSet.findColumn(columnLabel), handler);
-  }
-
   public LocalTime getLocalTime(int columnIndex) throws SQLException {
-    return getLocalTime(columnIndex, null);
+    return getObject(columnIndex, LocalTime.class);
   }
 
   public LocalTime getLocalTime(String columnLabel) throws SQLException {
-    return getLocalTime(resultSet.findColumn(columnLabel), null);
-  }
-
-  public LocalDate getLocalDate(int columnIndex, TypeGetHandler<LocalDate> handler) throws SQLException {
-    handler = getHandler(LocalDate.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Date value = extract(resultSet -> resultSet.getDate(columnIndex));
-    return null != value ? value.toLocalDate() : null;
-  }
-
-  public LocalDate getLocalDate(String columnLabel, TypeGetHandler<LocalDate> handler) throws SQLException {
-    return getLocalDate(resultSet.findColumn(columnLabel), handler);
+    return getLocalTime(resultSet.findColumn(columnLabel));
   }
 
   public LocalDate getLocalDate(int columnIndex) throws SQLException {
-    return getLocalDate(columnIndex, null);
+    return getObject(columnIndex, LocalDate.class);
   }
 
   public LocalDate getLocalDate(String columnLabel) throws SQLException {
-    return getLocalDate(resultSet.findColumn(columnLabel), null);
-  }
-
-  public LocalDateTime getLocalDateTime(int columnIndex, TypeGetHandler<LocalDateTime> handler) throws SQLException {
-    handler = getHandler(LocalDateTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-    return null != value ? value.toLocalDateTime() : null;
-  }
-
-  public LocalDateTime getLocalDateTime(String columnLabel, TypeGetHandler<LocalDateTime> handler) throws SQLException {
-    return getLocalDateTime(resultSet.findColumn(columnLabel), handler);
+    return getLocalDate(resultSet.findColumn(columnLabel));
   }
 
   public LocalDateTime getLocalDateTime(int columnIndex) throws SQLException {
-    return getLocalDateTime(columnIndex, null);
+    return getObject(columnIndex, LocalDateTime.class);
   }
 
   public LocalDateTime getLocalDateTime(String columnLabel) throws SQLException {
-    return getLocalDateTime(resultSet.findColumn(columnLabel), null);
-  }
-
-  private OffsetDateTime timestampToOffsetDateTime(Timestamp value) {
-    ZoneId systemZoneId = ZoneId.systemDefault();
-    ZoneOffset systemZoneOffset = systemZoneId.getRules().getOffset(value.toInstant());
-    return value.toInstant().atOffset(systemZoneOffset);
-  }
-
-  public OffsetDateTime getOffsetDateTime(int columnIndex, TypeGetHandler<OffsetDateTime> handler) throws SQLException {
-    handler = getHandler(OffsetDateTime.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    Timestamp value = extract(resultSet -> resultSet.getTimestamp(columnIndex));
-    return null != value ? timestampToOffsetDateTime(value) : null;
-  }
-
-  public OffsetDateTime getOffsetDateTime(String columnLabel, TypeGetHandler<OffsetDateTime> handler) throws SQLException {
-    return getOffsetDateTime(resultSet.findColumn(columnLabel), handler);
+    return getLocalDateTime(resultSet.findColumn(columnLabel));
   }
 
   public OffsetDateTime getOffsetDateTime(int columnIndex) throws SQLException {
-    return getOffsetDateTime(columnIndex, null);
+    return getObject(columnIndex, OffsetDateTime.class);
   }
 
   public OffsetDateTime getOffsetDateTime(String columnLabel) throws SQLException {
-    return getOffsetDateTime(resultSet.findColumn(columnLabel), null);
+    return getOffsetDateTime(resultSet.findColumn(columnLabel));
   }
 
-  public Array getArray(int columnIndex, TypeGetHandler<Array> handler) throws SQLException {
-    handler = getHandler(Array.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
+  @SuppressWarnings("unchecked")
+  public <T> List<T> getArray(int columnIndex, Class<T> type) throws SQLException {
+    Array array = getArray(columnIndex);
+    if (null == array) {
+      return Collections.emptyList();
     }
-    return extract(resultSet, columnIndex, resultSet::getArray);
+    ParameterGetter<T> getter = getGetter(type);
+    try (ResultSet arrayResultSet = array.getResultSet()) {
+      // columnIndex: 1 代表在数组中的索引
+      // columnIndex: 2 代表数组中的元素
+      ParameterMetaData metaData = null;
+      if (null != getter) {
+        metaData = new ParameterMetaData(arrayResultSet.getMetaData(), 2);
+      }
+      List<T> list = new ArrayList<>();
+      while (arrayResultSet.next()) {
+        if (null != getter) {
+          Object parameter = arrayResultSet.getObject(2);
+          list.add(getter.get(metaData, parameter));
+        } else {
+          T parameter = arrayResultSet.getObject(2, type);
+          list.add(parameter);
+        }
+      }
+      return list;
+    } finally {
+      array.free();
+    }
   }
 
-  public Array getArray(String columnLabel, TypeGetHandler<Array> handler) throws SQLException {
-    return getArray(resultSet.findColumn(columnLabel), handler);
-  }
+  // 以下均为自动生成的代码
+  // 如需修改请到RowGenerateTest类中进行修改
 
   public Array getArray(int columnIndex) throws SQLException {
-    return getArray(columnIndex, null);
+    ParameterGetter<Array> getter = getGetter(Array.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getArray);
   }
 
   public Array getArray(String columnLabel) throws SQLException {
-    return getArray(resultSet.findColumn(columnLabel), null);
-  }
-
-  public InputStream getAsciiStream(int columnIndex, TypeGetHandler<InputStream> handler) throws SQLException {
-    handler = getHandler(InputStream.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getAsciiStream);
-  }
-
-  public InputStream getAsciiStream(String columnLabel, TypeGetHandler<InputStream> handler) throws SQLException {
-    return getAsciiStream(resultSet.findColumn(columnLabel), handler);
+    return getArray(resultSet.findColumn(columnLabel));
   }
 
   public InputStream getAsciiStream(int columnIndex) throws SQLException {
-    return getAsciiStream(columnIndex, null);
+    ParameterGetter<InputStream> getter = getGetter(InputStream.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getAsciiStream);
   }
 
   public InputStream getAsciiStream(String columnLabel) throws SQLException {
-    return getAsciiStream(resultSet.findColumn(columnLabel), null);
-  }
-
-  public BigDecimal getBigDecimal(int columnIndex, TypeGetHandler<BigDecimal> handler) throws SQLException {
-    handler = getHandler(BigDecimal.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getBigDecimal);
-  }
-
-  public BigDecimal getBigDecimal(String columnLabel, TypeGetHandler<BigDecimal> handler) throws SQLException {
-    return getBigDecimal(resultSet.findColumn(columnLabel), handler);
+    return getAsciiStream(resultSet.findColumn(columnLabel));
   }
 
   public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-    return getBigDecimal(columnIndex, null);
+    ParameterGetter<BigDecimal> getter = getGetter(BigDecimal.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getBigDecimal);
   }
 
   public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
-    return getBigDecimal(resultSet.findColumn(columnLabel), null);
-  }
-
-  public InputStream getBinaryStream(int columnIndex, TypeGetHandler<InputStream> handler) throws SQLException {
-    handler = getHandler(InputStream.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getBinaryStream);
-  }
-
-  public InputStream getBinaryStream(String columnLabel, TypeGetHandler<InputStream> handler) throws SQLException {
-    return getBinaryStream(resultSet.findColumn(columnLabel), handler);
+    return getBigDecimal(resultSet.findColumn(columnLabel));
   }
 
   public InputStream getBinaryStream(int columnIndex) throws SQLException {
-    return getBinaryStream(columnIndex, null);
+    ParameterGetter<InputStream> getter = getGetter(InputStream.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getBinaryStream);
   }
 
   public InputStream getBinaryStream(String columnLabel) throws SQLException {
-    return getBinaryStream(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Blob getBlob(int columnIndex, TypeGetHandler<Blob> handler) throws SQLException {
-    handler = getHandler(Blob.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getBlob);
-  }
-
-  public Blob getBlob(String columnLabel, TypeGetHandler<Blob> handler) throws SQLException {
-    return getBlob(resultSet.findColumn(columnLabel), handler);
+    return getBinaryStream(resultSet.findColumn(columnLabel));
   }
 
   public Blob getBlob(int columnIndex) throws SQLException {
-    return getBlob(columnIndex, null);
+    ParameterGetter<Blob> getter = getGetter(Blob.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getBlob);
   }
 
   public Blob getBlob(String columnLabel) throws SQLException {
-    return getBlob(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Boolean getBoolean(int columnIndex, TypeGetHandler<Boolean> handler) throws SQLException {
-    handler = getHandler(Boolean.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getBoolean);
-  }
-
-  public Boolean getBoolean(String columnLabel, TypeGetHandler<Boolean> handler) throws SQLException {
-    return getBoolean(resultSet.findColumn(columnLabel), handler);
+    return getBlob(resultSet.findColumn(columnLabel));
   }
 
   public Boolean getBoolean(int columnIndex) throws SQLException {
-    return getBoolean(columnIndex, null);
+    ParameterGetter<Boolean> getter = getGetter(Boolean.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getBoolean);
   }
 
   public Boolean getBoolean(String columnLabel) throws SQLException {
-    return getBoolean(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Byte getByte(int columnIndex, TypeGetHandler<Byte> handler) throws SQLException {
-    handler = getHandler(Byte.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getByte);
-  }
-
-  public Byte getByte(String columnLabel, TypeGetHandler<Byte> handler) throws SQLException {
-    return getByte(resultSet.findColumn(columnLabel), handler);
+    return getBoolean(resultSet.findColumn(columnLabel));
   }
 
   public Byte getByte(int columnIndex) throws SQLException {
-    return getByte(columnIndex, null);
+    ParameterGetter<Byte> getter = getGetter(Byte.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getByte);
   }
 
   public Byte getByte(String columnLabel) throws SQLException {
-    return getByte(resultSet.findColumn(columnLabel), null);
-  }
-
-  public byte[] getBytes(int columnIndex, TypeGetHandler<byte[]> handler) throws SQLException {
-    handler = getHandler(byte[].class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getBytes);
-  }
-
-  public byte[] getBytes(String columnLabel, TypeGetHandler<byte[]> handler) throws SQLException {
-    return getBytes(resultSet.findColumn(columnLabel), handler);
+    return getByte(resultSet.findColumn(columnLabel));
   }
 
   public byte[] getBytes(int columnIndex) throws SQLException {
-    return getBytes(columnIndex, null);
+    ParameterGetter<byte[]> getter = getGetter(byte[].class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getBytes);
   }
 
   public byte[] getBytes(String columnLabel) throws SQLException {
-    return getBytes(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Reader getCharacterStream(int columnIndex, TypeGetHandler<Reader> handler) throws SQLException {
-    handler = getHandler(Reader.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getCharacterStream);
-  }
-
-  public Reader getCharacterStream(String columnLabel, TypeGetHandler<Reader> handler) throws SQLException {
-    return getCharacterStream(resultSet.findColumn(columnLabel), handler);
+    return getBytes(resultSet.findColumn(columnLabel));
   }
 
   public Reader getCharacterStream(int columnIndex) throws SQLException {
-    return getCharacterStream(columnIndex, null);
+    ParameterGetter<Reader> getter = getGetter(Reader.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getCharacterStream);
   }
 
   public Reader getCharacterStream(String columnLabel) throws SQLException {
-    return getCharacterStream(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Clob getClob(int columnIndex, TypeGetHandler<Clob> handler) throws SQLException {
-    handler = getHandler(Clob.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getClob);
-  }
-
-  public Clob getClob(String columnLabel, TypeGetHandler<Clob> handler) throws SQLException {
-    return getClob(resultSet.findColumn(columnLabel), handler);
+    return getCharacterStream(resultSet.findColumn(columnLabel));
   }
 
   public Clob getClob(int columnIndex) throws SQLException {
-    return getClob(columnIndex, null);
+    ParameterGetter<Clob> getter = getGetter(Clob.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getClob);
   }
 
   public Clob getClob(String columnLabel) throws SQLException {
-    return getClob(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Date getDate(int columnIndex, TypeGetHandler<Date> handler) throws SQLException {
-    handler = getHandler(Date.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getDate);
-  }
-
-  public Date getDate(String columnLabel, TypeGetHandler<Date> handler) throws SQLException {
-    return getDate(resultSet.findColumn(columnLabel), handler);
+    return getClob(resultSet.findColumn(columnLabel));
   }
 
   public Date getDate(int columnIndex) throws SQLException {
-    return getDate(columnIndex, null);
+    ParameterGetter<Date> getter = getGetter(Date.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getDate);
   }
 
   public Date getDate(String columnLabel) throws SQLException {
-    return getDate(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Double getDouble(int columnIndex, TypeGetHandler<Double> handler) throws SQLException {
-    handler = getHandler(Double.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getDouble);
-  }
-
-  public Double getDouble(String columnLabel, TypeGetHandler<Double> handler) throws SQLException {
-    return getDouble(resultSet.findColumn(columnLabel), handler);
+    return getDate(resultSet.findColumn(columnLabel));
   }
 
   public Double getDouble(int columnIndex) throws SQLException {
-    return getDouble(columnIndex, null);
+    ParameterGetter<Double> getter = getGetter(Double.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getDouble);
   }
 
   public Double getDouble(String columnLabel) throws SQLException {
-    return getDouble(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Float getFloat(int columnIndex, TypeGetHandler<Float> handler) throws SQLException {
-    handler = getHandler(Float.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getFloat);
-  }
-
-  public Float getFloat(String columnLabel, TypeGetHandler<Float> handler) throws SQLException {
-    return getFloat(resultSet.findColumn(columnLabel), handler);
+    return getDouble(resultSet.findColumn(columnLabel));
   }
 
   public Float getFloat(int columnIndex) throws SQLException {
-    return getFloat(columnIndex, null);
+    ParameterGetter<Float> getter = getGetter(Float.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getFloat);
   }
 
   public Float getFloat(String columnLabel) throws SQLException {
-    return getFloat(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Integer getInt(int columnIndex, TypeGetHandler<Integer> handler) throws SQLException {
-    handler = getHandler(Integer.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getInt);
-  }
-
-  public Integer getInt(String columnLabel, TypeGetHandler<Integer> handler) throws SQLException {
-    return getInt(resultSet.findColumn(columnLabel), handler);
+    return getFloat(resultSet.findColumn(columnLabel));
   }
 
   public Integer getInt(int columnIndex) throws SQLException {
-    return getInt(columnIndex, null);
+    ParameterGetter<Integer> getter = getGetter(Integer.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getInt);
   }
 
   public Integer getInt(String columnLabel) throws SQLException {
-    return getInt(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Long getLong(int columnIndex, TypeGetHandler<Long> handler) throws SQLException {
-    handler = getHandler(Long.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getLong);
-  }
-
-  public Long getLong(String columnLabel, TypeGetHandler<Long> handler) throws SQLException {
-    return getLong(resultSet.findColumn(columnLabel), handler);
+    return getInt(resultSet.findColumn(columnLabel));
   }
 
   public Long getLong(int columnIndex) throws SQLException {
-    return getLong(columnIndex, null);
+    ParameterGetter<Long> getter = getGetter(Long.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getLong);
   }
 
   public Long getLong(String columnLabel) throws SQLException {
-    return getLong(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Reader getNCharacterStream(int columnIndex, TypeGetHandler<Reader> handler) throws SQLException {
-    handler = getHandler(Reader.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getNCharacterStream);
-  }
-
-  public Reader getNCharacterStream(String columnLabel, TypeGetHandler<Reader> handler) throws SQLException {
-    return getNCharacterStream(resultSet.findColumn(columnLabel), handler);
+    return getLong(resultSet.findColumn(columnLabel));
   }
 
   public Reader getNCharacterStream(int columnIndex) throws SQLException {
-    return getNCharacterStream(columnIndex, null);
+    ParameterGetter<Reader> getter = getGetter(Reader.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getNCharacterStream);
   }
 
   public Reader getNCharacterStream(String columnLabel) throws SQLException {
-    return getNCharacterStream(resultSet.findColumn(columnLabel), null);
-  }
-
-  public NClob getNClob(int columnIndex, TypeGetHandler<NClob> handler) throws SQLException {
-    handler = getHandler(NClob.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getNClob);
-  }
-
-  public NClob getNClob(String columnLabel, TypeGetHandler<NClob> handler) throws SQLException {
-    return getNClob(resultSet.findColumn(columnLabel), handler);
+    return getNCharacterStream(resultSet.findColumn(columnLabel));
   }
 
   public NClob getNClob(int columnIndex) throws SQLException {
-    return getNClob(columnIndex, null);
+    ParameterGetter<NClob> getter = getGetter(NClob.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getNClob);
   }
 
   public NClob getNClob(String columnLabel) throws SQLException {
-    return getNClob(resultSet.findColumn(columnLabel), null);
-  }
-
-  public String getNString(int columnIndex, TypeGetHandler<String> handler) throws SQLException {
-    handler = getHandler(String.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getNString);
-  }
-
-  public String getNString(String columnLabel, TypeGetHandler<String> handler) throws SQLException {
-    return getNString(resultSet.findColumn(columnLabel), handler);
+    return getNClob(resultSet.findColumn(columnLabel));
   }
 
   public String getNString(int columnIndex) throws SQLException {
-    return getNString(columnIndex, null);
+    ParameterGetter<String> getter = getGetter(String.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getNString);
   }
 
   public String getNString(String columnLabel) throws SQLException {
-    return getNString(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Ref getRef(int columnIndex, TypeGetHandler<Ref> handler) throws SQLException {
-    handler = getHandler(Ref.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getRef);
-  }
-
-  public Ref getRef(String columnLabel, TypeGetHandler<Ref> handler) throws SQLException {
-    return getRef(resultSet.findColumn(columnLabel), handler);
+    return getNString(resultSet.findColumn(columnLabel));
   }
 
   public Ref getRef(int columnIndex) throws SQLException {
-    return getRef(columnIndex, null);
+    ParameterGetter<Ref> getter = getGetter(Ref.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getRef);
   }
 
   public Ref getRef(String columnLabel) throws SQLException {
-    return getRef(resultSet.findColumn(columnLabel), null);
-  }
-
-  public RowId getRowId(int columnIndex, TypeGetHandler<RowId> handler) throws SQLException {
-    handler = getHandler(RowId.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getRowId);
-  }
-
-  public RowId getRowId(String columnLabel, TypeGetHandler<RowId> handler) throws SQLException {
-    return getRowId(resultSet.findColumn(columnLabel), handler);
+    return getRef(resultSet.findColumn(columnLabel));
   }
 
   public RowId getRowId(int columnIndex) throws SQLException {
-    return getRowId(columnIndex, null);
+    ParameterGetter<RowId> getter = getGetter(RowId.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getRowId);
   }
 
   public RowId getRowId(String columnLabel) throws SQLException {
-    return getRowId(resultSet.findColumn(columnLabel), null);
-  }
-
-  public SQLXML getSQLXML(int columnIndex, TypeGetHandler<SQLXML> handler) throws SQLException {
-    handler = getHandler(SQLXML.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getSQLXML);
-  }
-
-  public SQLXML getSQLXML(String columnLabel, TypeGetHandler<SQLXML> handler) throws SQLException {
-    return getSQLXML(resultSet.findColumn(columnLabel), handler);
+    return getRowId(resultSet.findColumn(columnLabel));
   }
 
   public SQLXML getSQLXML(int columnIndex) throws SQLException {
-    return getSQLXML(columnIndex, null);
+    ParameterGetter<SQLXML> getter = getGetter(SQLXML.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getSQLXML);
   }
 
   public SQLXML getSQLXML(String columnLabel) throws SQLException {
-    return getSQLXML(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Short getShort(int columnIndex, TypeGetHandler<Short> handler) throws SQLException {
-    handler = getHandler(Short.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getShort);
-  }
-
-  public Short getShort(String columnLabel, TypeGetHandler<Short> handler) throws SQLException {
-    return getShort(resultSet.findColumn(columnLabel), handler);
+    return getSQLXML(resultSet.findColumn(columnLabel));
   }
 
   public Short getShort(int columnIndex) throws SQLException {
-    return getShort(columnIndex, null);
+    ParameterGetter<Short> getter = getGetter(Short.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getShort);
   }
 
   public Short getShort(String columnLabel) throws SQLException {
-    return getShort(resultSet.findColumn(columnLabel), null);
-  }
-
-  public String getString(int columnIndex, TypeGetHandler<String> handler) throws SQLException {
-    handler = getHandler(String.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getString);
-  }
-
-  public String getString(String columnLabel, TypeGetHandler<String> handler) throws SQLException {
-    return getString(resultSet.findColumn(columnLabel), handler);
+    return getShort(resultSet.findColumn(columnLabel));
   }
 
   public String getString(int columnIndex) throws SQLException {
-    return getString(columnIndex, null);
+    ParameterGetter<String> getter = getGetter(String.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getString);
   }
 
   public String getString(String columnLabel) throws SQLException {
-    return getString(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Time getTime(int columnIndex, TypeGetHandler<Time> handler) throws SQLException {
-    handler = getHandler(Time.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getTime);
-  }
-
-  public Time getTime(String columnLabel, TypeGetHandler<Time> handler) throws SQLException {
-    return getTime(resultSet.findColumn(columnLabel), handler);
+    return getString(resultSet.findColumn(columnLabel));
   }
 
   public Time getTime(int columnIndex) throws SQLException {
-    return getTime(columnIndex, null);
+    ParameterGetter<Time> getter = getGetter(Time.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getTime);
   }
 
   public Time getTime(String columnLabel) throws SQLException {
-    return getTime(resultSet.findColumn(columnLabel), null);
-  }
-
-  public Timestamp getTimestamp(int columnIndex, TypeGetHandler<Timestamp> handler) throws SQLException {
-    handler = getHandler(Timestamp.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getTimestamp);
-  }
-
-  public Timestamp getTimestamp(String columnLabel, TypeGetHandler<Timestamp> handler) throws SQLException {
-    return getTimestamp(resultSet.findColumn(columnLabel), handler);
+    return getTime(resultSet.findColumn(columnLabel));
   }
 
   public Timestamp getTimestamp(int columnIndex) throws SQLException {
-    return getTimestamp(columnIndex, null);
+    ParameterGetter<Timestamp> getter = getGetter(Timestamp.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getTimestamp);
   }
 
   public Timestamp getTimestamp(String columnLabel) throws SQLException {
-    return getTimestamp(resultSet.findColumn(columnLabel), null);
-  }
-
-  public URL getURL(int columnIndex, TypeGetHandler<URL> handler) throws SQLException {
-    handler = getHandler(URL.class, handler);
-    if (null != handler) {
-      return handler.doGet(resultSet, columnIndex);
-    }
-    return extract(resultSet, columnIndex, resultSet::getURL);
-  }
-
-  public URL getURL(String columnLabel, TypeGetHandler<URL> handler) throws SQLException {
-    return getURL(resultSet.findColumn(columnLabel), handler);
+    return getTimestamp(resultSet.findColumn(columnLabel));
   }
 
   public URL getURL(int columnIndex) throws SQLException {
-    return getURL(columnIndex, null);
+    ParameterGetter<URL> getter = getGetter(URL.class);
+    if (null != getter) {
+      return getByGetter(getter, columnIndex);
+    }
+    return extract(columnIndex, resultSet::getURL);
   }
 
   public URL getURL(String columnLabel) throws SQLException {
-    return getURL(resultSet.findColumn(columnLabel), null);
+    return getURL(resultSet.findColumn(columnLabel));
   }
 }
