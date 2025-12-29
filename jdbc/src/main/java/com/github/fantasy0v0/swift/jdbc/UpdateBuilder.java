@@ -55,7 +55,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   public int execute(List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeUpdate(
-        context, ref.unwrap(), statementConfiguration, sql, params
+        context, ref.unwrap(), getStatementConfiguration(), sql, params
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -82,7 +82,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   public int[] batch(List<List<Object>> batchParams) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
-        context, ref.unwrap(), statementConfiguration, sql, batchParams
+        context, ref.unwrap(), getStatementConfiguration(), sql, batchParams
       );
     } catch (SQLException e) {
       throw new SwiftSQLException(e);
@@ -93,7 +93,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
                              List<Object> params, boolean firstOnly) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.execute(
-        context, ref.unwrap(), statementConfiguration, sql, params,
+        context, ref.unwrap(), getStatementConfiguration(), sql, params,
         mapper, firstOnly
       );
     } catch (SQLException e) {
@@ -129,7 +129,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   public <T> T fetchOne(FetchMapper<T> mapper,
                         List<Object> params) {
     List<T> list = _fetch(mapper, params, true);
-    return (list == null || list.isEmpty()) ? null : list.getFirst();
+    return list.isEmpty() ? null : list.getFirst();
   }
 
   public <T> T fetchOne(FetchMapper<T> mapper, Object... params) {
