@@ -8,6 +8,7 @@ import com.github.fantasy0v0.swift.jdbc.util.LogUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -149,7 +150,7 @@ final class Utils {
       fillStatementParams(context, conn, statement, params);
       boolean result = statement.execute();
       if (!result) {
-        return null;
+        return Collections.emptyList();
       }
       try (ResultSet resultSet = statement.getResultSet()) {
         return fetchByResultSet(resultSet, context.getGetterMap(), mapper, firstOnly);
