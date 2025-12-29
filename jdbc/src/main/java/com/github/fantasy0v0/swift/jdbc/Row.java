@@ -73,7 +73,7 @@ public class Row {
   private <T> T getByGetter(ResultSet resultSet, ParameterGetter<T> getter, int columnIndex) throws SQLException {
     var metaData = new ParameterMetaData(resultSet.getMetaData(), columnIndex);
     Object parameter = resultSet.getObject(columnIndex);
-    return getter.get(metaData, parameter);
+    return getter.get(metaData, resultSet.wasNull() ? null : parameter);
   }
 
   private <T> T getByGetter(ParameterGetter<T> getter, int columnIndex) throws SQLException {
@@ -94,7 +94,7 @@ public class Row {
 
   public <T> T getByFunction(FunctionWithException<T> function) throws SQLException {
     if (null == function) {
-      return null;
+      throw new IllegalArgumentException("function cannot be null");
     }
     return function.apply(resultSet);
   }
@@ -139,8 +139,7 @@ public class Row {
     }
     ParameterGetter<T> getter = getGetter(type);
     try (ResultSet arrayResultSet = array.getResultSet()) {
-      // columnIndex: 1 代表在数组中的索引
-      // columnIndex: 2 代表数组中的元素
+      // ResultSet 的第一列是元素索引，第二列是元素值
       ParameterMetaData metaData = null;
       if (null != getter) {
         metaData = new ParameterMetaData(arrayResultSet.getMetaData(), 2);
@@ -149,10 +148,10 @@ public class Row {
       while (arrayResultSet.next()) {
         if (null != getter) {
           Object parameter = arrayResultSet.getObject(2);
-          list.add(getter.get(metaData, parameter));
+          list.add(getter.get(metaData, arrayResultSet.wasNull() ? null : parameter));
         } else {
           T parameter = arrayResultSet.getObject(2, type);
-          list.add(parameter);
+          list.add(arrayResultSet.wasNull() ? null : parameter);
         }
       }
       return list;
