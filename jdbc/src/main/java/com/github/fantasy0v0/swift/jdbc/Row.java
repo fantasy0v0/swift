@@ -1,7 +1,6 @@
 package com.github.fantasy0v0.swift.jdbc;
 
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
-import com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -71,9 +70,8 @@ public class Row {
   }
 
   private <T> T getByGetter(ResultSet resultSet, ParameterGetter<T> getter, int columnIndex) throws SQLException {
-    var metaData = new ParameterMetaData(resultSet.getMetaData(), columnIndex);
     Object parameter = resultSet.getObject(columnIndex);
-    return getter.get(metaData, resultSet.wasNull() ? null : parameter);
+    return getter.get(resultSet.getMetaData(), columnIndex, resultSet.wasNull() ? null : parameter);
   }
 
   private <T> T getByGetter(ParameterGetter<T> getter, int columnIndex) throws SQLException {
@@ -140,15 +138,11 @@ public class Row {
     ParameterGetter<T> getter = getGetter(type);
     try (ResultSet arrayResultSet = array.getResultSet()) {
       // ResultSet 的第一列是元素索引，第二列是元素值
-      ParameterMetaData metaData = null;
-      if (null != getter) {
-        metaData = new ParameterMetaData(arrayResultSet.getMetaData(), 2);
-      }
       List<T> list = new ArrayList<>();
       while (arrayResultSet.next()) {
         if (null != getter) {
           Object parameter = arrayResultSet.getObject(2);
-          list.add(getter.get(metaData, arrayResultSet.wasNull() ? null : parameter));
+          list.add(getter.get(arrayResultSet.getMetaData(), 2, arrayResultSet.wasNull() ? null : parameter));
         } else {
           T parameter = arrayResultSet.getObject(2, type);
           list.add(arrayResultSet.wasNull() ? null : parameter);

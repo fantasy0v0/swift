@@ -40,11 +40,14 @@ public class ArrayTest {
               while (arrayResultSet.next()) {
                 // columnIndex: 1 代表在数组中的索引
                 // columnIndex: 2 代表数组中的元素
-                var metaData = new com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData(
-                  arrayResultSet.getMetaData(), 2);
+                var metaData = arrayResultSet.getMetaData();
                 Object _object = arrayResultSet.getObject(2);
-                log.debug("index: {}, type: {}, typeName: {}, object: {}",
-                  index, metaData.columnType(), metaData.columnTypeName(), _object);
+                int columnType = metaData.getColumnType(2);
+                String columnTypeName = metaData.getColumnTypeName(2);
+                log.debug(
+                  "index: {}, type: {}, typeName: {}, object: {}",
+                  index, columnType, columnTypeName, _object
+                );
                 index++;
               }
             }

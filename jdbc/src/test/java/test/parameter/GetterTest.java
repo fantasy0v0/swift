@@ -2,13 +2,13 @@ package test.parameter;
 
 import com.github.fantasy0v0.swift.jdbc.Context;
 import com.github.fantasy0v0.swift.jdbc.parameter.ParameterGetter;
-import com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 
+import java.sql.ResultSetMetaData;
 import java.time.*;
 import java.util.Set;
 
@@ -137,7 +137,7 @@ public class GetterTest {
       }
 
       @Override
-      public String get(ParameterMetaData metaData, Object parameter) {
+      public String get(ResultSetMetaData metaData, int columnIndex, Object parameter) {
         if (parameter instanceof String value) {
           return value + " by Custom";
         }

@@ -1,7 +1,6 @@
 package test.parameter.handler;
 
 import com.github.fantasy0v0.swift.jdbc.parameter.AbstractParameterHandler;
-import com.github.fantasy0v0.swift.jdbc.parameter.ParameterMetaData;
 
 import java.sql.*;
 import java.time.OffsetDateTime;
@@ -20,7 +19,7 @@ public class OffsetDateTimeHandler extends AbstractParameterHandler<OffsetDateTi
   }
 
   @Override
-  public OffsetDateTime get(ParameterMetaData metaData, Object parameter) throws SQLException {
+  public OffsetDateTime get(ResultSetMetaData resultSetMetaData, int columnIndex, Object parameter) throws SQLException {
     if (parameter instanceof Timestamp value) {
       ZoneId systemZoneId = ZoneId.systemDefault();
       ZoneOffset systemZoneOffset = systemZoneId.getRules().getOffset(value.toInstant());
