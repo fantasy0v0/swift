@@ -1,29 +1,11 @@
 <p align="center">
-  <img width="256" height="256" src="jdbc/logo.webp">
+  <img width="256" height="256" src="core/logo.webp">
 </p>
 
-# swift-jdbc
+# swift
 
 [![License](https://img.shields.io/badge/license-GNU-blue.svg)](LICENSE)
 [![JDK 21](https://img.shields.io/badge/JDK-21-green.svg)](https://openjdk.org/projects/jdk/21/)
-
-专为JDBC操作设计的轻量级工具库，提供以下核心能力：
-
-✨ **简洁高效**
-
-▸ 零反射操作
-
-▸ 原生JDBC性能，无复杂抽象层开销
-
-▸ 流畅API设计，链式调用自然直观
-
-🛠️ **功能完备**
-
-▸ 多级事务管理（支持嵌套事务）
-
-▸ 批量操作优化
-
-🔌 **兼容并蓄**
 
 与主流ORM框架（JPA/MyBatis/Jooq等）无缝协作，专注填补以下场景：
 
@@ -53,8 +35,8 @@ API设计遵循JDBC原生语义，开发者无需学习新概念即可快速上�
   <dependencies>
     <dependency>
       <groupId>com.github.fantasy0v0.swift</groupId>
-      <artifactId>swift-jdbc</artifactId>
-      <version>1.3.1</version>
+      <artifactId>swift-core</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
@@ -69,8 +51,8 @@ API设计遵循JDBC原生语义，开发者无需学习新概念即可快速上�
 ```xml
 <dependency>
   <groupId>com.github.fantasy0v0.swift</groupId>
-  <artifactId>swift-jdbc-spring-support</artifactId>
-  <version>1.3.1</version>
+  <artifactId>swift-spring</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -81,8 +63,10 @@ API设计遵循JDBC原生语义，开发者无需学习新概念即可快速上�
 在使用前进行如下配置即可
 
 ```java
+import com.github.fantasy0v0.swift.Swift;
+
 DataSource dataSource = DataSourceUtil.create();
-JDBC.initialization(dataSource);
+Swift.setContext(Swift.newContext(dataSource));
 ```
 
 ## select
@@ -146,7 +130,7 @@ List<List<String>> arrays = select("""
 
 insert
 ```java
-int executed = JDBC.insert("""
+int executed = Swift.insert("""
 insert into student(id, name, status)
 values(1000, '测试学生', 0)
 """).execute();
@@ -154,7 +138,7 @@ values(1000, '测试学生', 0)
 
 支持postgres的returning
 ```java
-Long result = JDBC.insert("""
+Long result = Swift.insert("""
 insert into student(id, name, status)
 values(?, ?, ?)
 returning id
@@ -163,7 +147,7 @@ returning id
 
 获取生成的主键
 ```java
-long key = JDBC.insert("""
+long key = Swift.insert("""
 insert into swift_user(name, status) values('测试学生', 0)
 """).fetchKey(row -> row.getLong(1));
 ```
@@ -178,7 +162,7 @@ batchParams.add(List.of(1003, "测试用户4", 3));
 batchParams.add(List.of(1004, "测试用户5", 4));
 batchParams.add(List.of(1005, "测试用户6", 5));
 
-int[] executed = JDBC.modify("""
+int[] executed = Swift.modify("""
 insert into student(id, name, status)
 values(?, ?, ?)
 """).batch(batchParams);
@@ -186,7 +170,7 @@ values(?, ?, ?)
 
 update
 ```java
-int executed = JDBC.update("""
+int executed = Swift.update("""
 update student set name = ? where id = ?
 """).execute("测试修改", 1);
 ```
@@ -247,7 +231,7 @@ public Long getId() {
 
 ## 查看SQL执行时间
 
-将"com.github.fantasy0v0.swift.jdbc.performance"的日志级别设置为TRACE、DEBUG时, 会在日志中打印执行时间
+将"com.github.fantasy0v0.swift.performance"的日志级别设置为TRACE、DEBUG时, 会在日志中打印执行时间
 
 ```text
 10:51:36:846 TRACE executeQuery begin

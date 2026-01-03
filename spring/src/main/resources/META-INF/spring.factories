@@ -1,0 +1,1 @@
+org.springframework.context.ApplicationContextInitializer=com.github.fantasy0v0.swift.spring.SwiftApplicationContextInitializer

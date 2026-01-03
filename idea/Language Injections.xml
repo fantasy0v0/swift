@@ -3,26 +3,30 @@
     <display-name>Context (com.github.fantasy0v0.swift.jdbc)</display-name>
     <single-file value="false"/>
     <place>
-      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("insert").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.jdbc.Context"))]]></place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("insert").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.Context"))]]></place>
     <place>
-      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.jdbc.Context"))]]></place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.Context"))]]></place>
     <place>
-      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.util.List").definedInClass("com.github.fantasy0v0.swift.jdbc.Context"))]]></place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.util.List").definedInClass("com.github.fantasy0v0.swift.Context"))]]></place>
     <place>
-      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("update").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.jdbc.Context"))]]></place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("update").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.Context"))]]></place>
   </injection>
   <injection language="SQL" injector-id="java">
-    <display-name>JDBC (com.github.fantasy0v0.swift.jdbc)</display-name>
+    <display-name>JDBC (com.github.fantasy0v0.swift)</display-name>
     <single-file value="false" />
     <place>
-      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("insert").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.jdbc.JDBC"))]]></place>
-    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.jdbc.JDBC"))]]></place>
-    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.util.List").definedInClass("com.github.fantasy0v0.swift.jdbc.JDBC"))]]></place>
-    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("update").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.jdbc.JDBC"))]]></place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("insert").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.Swift"))]]></place>
+    <place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.Swift"))]]></place>
+    <place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("select").withParameters("java.lang.String", "java.util.List").definedInClass("com.github.fantasy0v0.swift.Swift"))]]></place>
+    <place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("update").withParameters("java.lang.String").definedInClass("com.github.fantasy0v0.swift.Swift"))]]></place>
   </injection>
   <injection language="SQL" injector-id="java">
-    <display-name>PaginateBuilder.count (com.github.fantasy0v0.swift.jdbc)</display-name>
+    <display-name>PaginateBuilder.count (com.github.fantasy0v0.swift)</display-name>
     <single-file value="false" />
-    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("count").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.jdbc.PaginateBuilder"))]]></place>
+    <place>
+      <![CDATA[psiParameter().ofMethod(0, psiMethod().withName("count").withParameters("java.lang.String", "java.lang.Object...").definedInClass("com.github.fantasy0v0.swift.PaginateBuilder"))]]></place>
   </injection>
 </LanguageInjectionConfiguration>

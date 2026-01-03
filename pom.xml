@@ -9,9 +9,9 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>jdbc</module>
-    <module>jdbc-junit-support</module>
-    <module>jdbc-spring-support</module>
-      <module>codegen</module>
+    <module>core</module>
+    <module>junit</module>
+    <module>spring</module>
+    <module>codegen</module>
   </modules>
 </project>
