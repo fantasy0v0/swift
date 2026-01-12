@@ -1,6 +1,5 @@
 package com.github.fantasy0v0.swift.predicate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +21,6 @@ class ExpressionPredicate implements Predicate {
 
   @Override
   public List<Object> getParameters() {
-    return new ArrayList<>(Arrays.stream(parameters).toList());
+    return Arrays.stream(parameters).toList();
   }
 }

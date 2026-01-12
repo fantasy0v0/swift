@@ -1,5 +1,6 @@
 package test;
 
+import com.github.fantasy0v0.swift.Row;
 import com.github.fantasy0v0.swift.Swift;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
@@ -16,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.github.fantasy0v0.swift.Swift.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -150,14 +152,18 @@ public class InsertTest {
     insert into swift_user(name, status) values(?, ?)
       """).fetchKey("测试学生33", 2);
     // pg会返回整行数据
+    // 相关讨论 https://stackoverflow.com/questions/19766816/postgresql-jdbc-getgeneratedkeys-returns-all-columns
     assertTrue(row.length > 0);
     assertTrue(((Number) row[0]).longValue() > 0);
+    for (int i = 0; i < row.length; i++) {
+      log.debug("column: {} value: {}", i, row[i]);
+    }
 
-    row = Swift.insert("""
+    Map<String, Object> mapRow = Swift.insert("""
       insert into swift_user(name, status) values('测试学生34', 2)
-    """).fetchKey();
-    // pg会返回整行数据
-    assertTrue(row.length > 0);
-    assertTrue(((Number) row[0]).longValue() > 0);
+      """).fetchKey(Row::toMap);
+    for (var entry : mapRow.entrySet()) {
+      log.debug("column: {} value: {}", entry.getKey(), entry.getValue());
+    }
   }
 }

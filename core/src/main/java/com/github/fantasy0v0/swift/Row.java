@@ -7,14 +7,12 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Row {
 
@@ -152,6 +150,37 @@ public class Row {
     } finally {
       array.free();
     }
+  }
+
+  /**
+   * 将当前行数据转为数组
+   *
+   * @return Object[]
+   * @throws SQLException 获取数据失败
+   */
+  public Object[] toArray() throws SQLException {
+    int columnCount = getColumnCount();
+    Object[] row = new Object[columnCount];
+    for (int i = 0; i < columnCount; i++) {
+      row[i] = getObject(i + 1);
+    }
+    return row;
+  }
+
+  /**
+   * 将当前行数据转为Map
+   *
+   * @return Map<String, Object>
+   * @throws SQLException 获取数据失败
+   */
+  public Map<String, Object> toMap() throws SQLException {
+    int columnCount = getColumnCount();
+    Map<String, Object> row = new HashMap<>();
+    for (int i = 0; i < columnCount; i++) {
+      String columnLabel = getColumnLabel(i + 1);
+      row.put(columnLabel, getObject(i + 1));
+    }
+    return Collections.unmodifiableMap(row);
   }
 
   // 以下均为自动生成的代码

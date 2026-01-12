@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift.predicate;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class DisjunctionPredicate implements Predicate {
@@ -12,6 +12,6 @@ class DisjunctionPredicate implements Predicate {
 
   @Override
   public List<Object> getParameters() {
-    return new ArrayList<>();
+    return Collections.emptyList();
   }
 }

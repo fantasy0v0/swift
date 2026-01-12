@@ -15,12 +15,7 @@ import java.util.Map;
 final class Utils {
 
   static Object[] fetchByRow(Row row) throws SQLException {
-    int columnCount = row.getColumnCount();
-    Object[] array = new Object[columnCount];
-    for (int i = 0; i < columnCount; i++) {
-      array[i] = row.getObject(i + 1);
-    }
-    return array;
+    return row.toArray();
   }
 
   static <T> List<T> fetch(Context context,
@@ -68,7 +63,7 @@ final class Utils {
       }
       first = false;
     }
-    return array;
+    return Collections.unmodifiableList(array);
   }
 
   /**
