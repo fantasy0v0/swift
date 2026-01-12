@@ -25,7 +25,7 @@ public class InsertBuilder extends UpdateBuilder {
    * @param <T> 主键类型
    * @return 返回生成的主键
    */
-  public <T> List<T> batch(List<List<Object>> batchParams, FetchMapper<T> keyMapper) {
+  public <T> List<T> batch(List<List<Object>> batchParams, RowMapper<T> keyMapper) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), statementConfiguration, sql, batchParams,
@@ -36,7 +36,7 @@ public class InsertBuilder extends UpdateBuilder {
     }
   }
 
-  private <T> T _fetchKey(FetchMapper<T> mapper,
+  private <T> T _fetchKey(RowMapper<T> mapper,
                           List<Object> params) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       Connection conn = ref.unwrap();
@@ -60,15 +60,15 @@ public class InsertBuilder extends UpdateBuilder {
     }
   }
 
-  public <T> T fetchKey(FetchMapper<T> mapper, List<Object> params) {
+  public <T> T fetchKey(RowMapper<T> mapper, List<Object> params) {
     return _fetchKey(mapper, params);
   }
 
-  public <T> T fetchKey(FetchMapper<T> mapper, Object... params) {
+  public <T> T fetchKey(RowMapper<T> mapper, Object... params) {
     return fetchKey(mapper, Arrays.stream(params).toList());
   }
 
-  public <T> T fetchKey(FetchMapper<T> mapper) {
+  public <T> T fetchKey(RowMapper<T> mapper) {
     return fetchKey(mapper, (List<Object>) null);
   }
 

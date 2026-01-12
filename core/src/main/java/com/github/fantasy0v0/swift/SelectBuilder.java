@@ -67,7 +67,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
     );
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper) {
+  public <T> List<T> fetch(RowMapper<T> mapper) {
     try {
       return Utils.fetch(
         context, getStatementConfiguration(), sql, params, mapper
@@ -81,7 +81,7 @@ public class SelectBuilder implements StatementConfigurator<SelectBuilder> {
     return fetch(Utils::fetchByRow);
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper) {
+  public <T> T fetchOne(RowMapper<T> mapper) {
     try {
       return Utils.fetchOne(
         context, getStatementConfiguration(), sql, params, mapper

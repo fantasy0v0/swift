@@ -68,7 +68,7 @@ public class PaginateBuilder {
     return count;
   }
 
-  private <T> List<T> getData(FetchMapper<T> mapper) throws SQLException {
+  private <T> List<T> getData(RowMapper<T> mapper) throws SQLException {
     SQLDialect dialect = context.getSQLDialect();
     Query query = dialect.paging(sql, params, pageNumber, pageSize);
     return Utils.fetch(
@@ -76,7 +76,7 @@ public class PaginateBuilder {
     );
   }
 
-  public <T> PageData<T> fetch(FetchMapper<T> mapper) {
+  public <T> PageData<T> fetch(RowMapper<T> mapper) {
     try {
       long total = getTotal();
       long totalPages = 0;

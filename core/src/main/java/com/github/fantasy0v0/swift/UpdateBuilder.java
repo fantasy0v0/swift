@@ -89,7 +89,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     }
   }
 
-  private <T> List<T> _fetch(FetchMapper<T> mapper,
+  private <T> List<T> _fetch(RowMapper<T> mapper,
                              List<Object> params, boolean firstOnly) {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return Utils.execute(
@@ -101,16 +101,16 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     }
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper,
+  public <T> List<T> fetch(RowMapper<T> mapper,
                            List<Object> params) {
     return _fetch(mapper, params, false);
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper, Object... params) {
+  public <T> List<T> fetch(RowMapper<T> mapper, Object... params) {
     return fetch(mapper, Arrays.stream(params).toList());
   }
 
-  public <T> List<T> fetch(FetchMapper<T> mapper) {
+  public <T> List<T> fetch(RowMapper<T> mapper) {
     return fetch(mapper, (List<Object>) null);
   }
 
@@ -126,17 +126,17 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     return fetch(Utils::fetchByRow, (List<Object>) null);
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper,
+  public <T> T fetchOne(RowMapper<T> mapper,
                         List<Object> params) {
     List<T> list = _fetch(mapper, params, true);
     return list.isEmpty() ? null : list.getFirst();
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper, Object... params) {
+  public <T> T fetchOne(RowMapper<T> mapper, Object... params) {
     return fetchOne(mapper, Arrays.stream(params).toList());
   }
 
-  public <T> T fetchOne(FetchMapper<T> mapper) {
+  public <T> T fetchOne(RowMapper<T> mapper) {
     return fetchOne(mapper, (List<Object>) null);
   }
 

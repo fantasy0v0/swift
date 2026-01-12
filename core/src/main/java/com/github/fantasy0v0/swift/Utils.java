@@ -26,7 +26,7 @@ final class Utils {
   static <T> List<T> fetch(Context context,
                            StatementConfiguration statementConfiguration,
                            String sql, List<Object> params,
-                           FetchMapper<T> mapper) throws SQLException {
+                           RowMapper<T> mapper) throws SQLException {
 
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       return executeQuery(context,
@@ -39,7 +39,7 @@ final class Utils {
   static <T> T fetchOne(Context context,
                         StatementConfiguration statementConfiguration,
                         String sql, List<Object> params,
-                        FetchMapper<T> mapper) throws SQLException {
+                        RowMapper<T> mapper) throws SQLException {
     try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
       List<T> list = executeQuery(
         context, ref.unwrap(), statementConfiguration, context.getGetterMap(),
@@ -51,13 +51,13 @@ final class Utils {
 
   static <T> List<T> fetchByResultSet(ResultSet resultSet,
                                       Map<Class<?>, ParameterGetter<?>> getterMap,
-                                      FetchMapper<T> fetchMapper,
+                                      RowMapper<T> rowMapper,
                                       boolean firstOnly) throws SQLException {
     List<T> array = new ArrayList<>();
     boolean first = true;
     var row = new Row(resultSet, getterMap);
     while (resultSet.next()) {
-      T data = fetchMapper.apply(row);
+      T data = rowMapper.apply(row);
       array.add(data);
       if (first && firstOnly) {
         // isLast不一定所有jdbc驱动都支持, 所以这里只能用next
@@ -112,7 +112,7 @@ final class Utils {
    * @param conn 数据库连接
    * @param sql sql语句
    * @param params 变量
-   * @param fetchMapper 行映射
+   * @param rowMapper 行映射
    * @param firstOnly 只取一条
    * @return 结果
    * @param <T> 映射后的类型
@@ -122,7 +122,7 @@ final class Utils {
                                   StatementConfiguration statementConfiguration,
                                   Map<Class<?>, ParameterGetter<?>> getterMap,
                                   String sql, List<Object> params,
-                                  FetchMapper<T> fetchMapper,
+                                  RowMapper<T> rowMapper,
                                   boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeQuery begin");
@@ -131,7 +131,7 @@ final class Utils {
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(context, conn, statement, params);
       try (ResultSet resultSet = statement.executeQuery()) {
-        return fetchByResultSet(resultSet, getterMap, fetchMapper, firstOnly);
+        return fetchByResultSet(resultSet, getterMap, rowMapper, firstOnly);
       }
     } finally {
       performanceLog("executeQuery", stopWatch, sql);
@@ -141,7 +141,7 @@ final class Utils {
   static <T> List<T> execute(Context context, Connection conn,
                              StatementConfiguration statementConfiguration,
                              String sql, List<Object> params,
-                             FetchMapper<T> mapper, boolean firstOnly) throws SQLException {
+                             RowMapper<T> mapper, boolean firstOnly) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("execute begin");
     String callerInfo = printCallerInfo();
@@ -163,7 +163,7 @@ final class Utils {
   static <T> List<T> executeBatch(Context context, Connection conn,
                                   StatementConfiguration statementConfiguration,
                                   String sql, List<List<Object>> batch,
-                                  FetchMapper<T> mapper) throws SQLException {
+                                  RowMapper<T> mapper) throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("executeBatch RETURN_GENERATED_KEYS begin");
     String callerInfo = printCallerInfo();
