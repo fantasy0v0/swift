@@ -128,7 +128,7 @@ List<List<String>> arrays = select("""
 
 ## 修改操作
 
-insert
+### insert
 ```java
 int executed = Swift.insert("""
 insert into student(id, name, status)
@@ -136,7 +136,7 @@ values(1000, '测试学生', 0)
 """).execute();
 ```
 
-支持postgres的returning
+### 支持postgres的returning
 ```java
 Long result = Swift.insert("""
 insert into student(id, name, status)
@@ -145,14 +145,26 @@ returning id
 """).fetchOne(row -> row.getLong(1), 1000L, "测试学生", 0);
 ```
 
-获取生成的主键
+### 获取生成的主键
 ```java
 long key = Swift.insert("""
 insert into swift_user(name, status) values('测试学生', 0)
 """).fetchKey(row -> row.getLong(1));
 ```
 
-批量插入
+#### PostgreSQL注意事项
+
+建议PostgreSQL使用fetchKey时，额外加一段returning id，否则PostgreSQL会把整行数据返回
+
+相关讨论：https://stackoverflow.com/questions/19766816/postgresql-jdbc-getgeneratedkeys-returns-all-columns
+
+```java
+long key = Swift.insert("""
+  insert into swift_user(name, status) values('测试学生1', 0) returning id
+  """).fetchKey(row -> row.getLong(1));
+```
+
+### 批量插入
 ```java
 List<List<Object>> batchParams = new ArrayList<>();
 batchParams.add(List.of(1000, "测试用户1", 0));
@@ -168,7 +180,7 @@ values(?, ?, ?)
 """).batch(batchParams);
 ```
 
-update
+### update
 ```java
 int executed = Swift.update("""
 update student set name = ? where id = ?

@@ -136,7 +136,7 @@ public class InsertTest {
   }
 
   @TestTemplate
-  void testFetchKey() {
+  void testFetchKey(Db db) {
     long key = Swift.insert("""
       insert into swift_user(name, status) values('测试学生31', 0)
     """).fetchKey(row -> row.getLong(1));
@@ -164,6 +164,15 @@ public class InsertTest {
       """).fetchKey(Row::toMap);
     for (var entry : mapRow.entrySet()) {
       log.debug("column: {} value: {}", entry.getKey(), entry.getValue());
+    }
+
+    if (db == Db.Postgres) {
+      mapRow = Swift.insert("""
+        insert into swift_user(name, status) values('测试学生35', 2) returning id
+        """).fetchKey(Row::toMap);
+      for (var entry : mapRow.entrySet()) {
+        log.debug("column: {} value: {}", entry.getKey(), entry.getValue());
+      }
     }
   }
 }
