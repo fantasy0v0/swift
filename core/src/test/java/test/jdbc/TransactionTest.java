@@ -46,10 +46,25 @@ public class TransactionTest {
 
   @TestTemplate
   void rollback() {
-    transaction(() -> {
-      update("update student set name = ? where id = ?")
-        .execute("修改", 1L);
-    });
+    long id = 1;
+    String result = select("select name from student where id = ?", id)
+      .fetchOne(row -> row.getString(1));
+    Assertions.assertNotEquals("修改", result);
+    try {
+      transaction(() -> {
+        update("update student set name = ? where id = ?")
+          .execute("修改", id);
+        String result1 = select("select name from student where id = ?", id)
+          .fetchOne(row -> row.getString(1));
+        Assertions.assertEquals("修改", result1);
+        throw new RuntimeException("rollback");
+      });
+    } catch (RuntimeException e) {
+      Assertions.assertEquals("rollback", e.getMessage());
+    }
+    result = select("select name from student where id = ?", id)
+      .fetchOne(row -> row.getString(1));
+    Assertions.assertNotEquals("修改", result);
   }
 
 }

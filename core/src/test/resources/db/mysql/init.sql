@@ -26,3 +26,9 @@ CREATE TABLE swift_user (
   created_at  datetime not null default now(),
   updated_at  datetime not null default now()
 );
+insert into swift_user(name, status)
+values ('小明', 0),
+       ('小王', 1),
+       ('小李', 2),
+       ('小赵', 2),
+       ('小钱', 0);
