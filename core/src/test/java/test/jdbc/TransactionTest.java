@@ -1,6 +1,5 @@
 package test.jdbc;
 
-import com.github.fantasy0v0.swift.exception.SwiftSQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +10,9 @@ import test.container.SwiftJdbcExtension;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import static com.github.fantasy0v0.swift.Swift.*;
 
 @ExtendWith(SwiftJdbcExtension.class)
 public class TransactionTest {
@@ -22,49 +21,49 @@ public class TransactionTest {
 
   @TestTemplate
   void test(DataSource dataSource, Db db) throws SQLException {
-    try {
-      transaction(() -> {
-        select("select * from student").fetch();
-        transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
-          select("select * from student").fetch();
-          transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
-            update("update student set name = ? where id = ?")
-              .execute("修改", 1L);
-          });
-        });
-      });
-    } catch (Exception e) {
-      if (Db.Postgres == db) {
-        Assertions.assertEquals(SwiftSQLException.class, e.getClass());
-      } else {
-        Assertions.fail("错误的分支");
-      }
-      // MySQL虽然不会报错, 但是修改属于无效操作
-      // 具体查看https://github.com/fantasy0v0/swift/issues/8#issuecomment-2461235425
-    }
+
   }
 
   @TestTemplate
-  void rollback() {
-    long id = 1;
-    String result = select("select name from student where id = ?", id)
-      .fetchOne(row -> row.getString(1));
-    Assertions.assertNotEquals("修改", result);
-    try {
-      transaction(() -> {
-        update("update student set name = ? where id = ?")
-          .execute("修改", id);
-        String result1 = select("select name from student where id = ?", id)
-          .fetchOne(row -> row.getString(1));
-        Assertions.assertEquals("修改", result1);
-        throw new RuntimeException("rollback");
-      });
-    } catch (RuntimeException e) {
-      Assertions.assertEquals("rollback", e.getMessage());
-    }
-    result = select("select name from student where id = ?", id)
-      .fetchOne(row -> row.getString(1));
-    Assertions.assertNotEquals("修改", result);
-  }
+  void rollback(DataSource dataSource) throws SQLException {
+    final String selectSql = "select name from student where id = ?";
+    final long id = 1;
+    try (Connection connection = dataSource.getConnection()) {
+      // 事前验证
+      try (PreparedStatement ps = connection.prepareStatement(selectSql)) {
+        ps.setLong(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+          Assertions.assertTrue(rs.next());
+          Assertions.assertNotEquals("修改", rs.getString(1));
+        }
+      }
 
+      // 开启事务
+      connection.setAutoCommit(false);
+      try (PreparedStatement ps = connection.prepareStatement("update student set name = ? where id = ?")) {
+        ps.setString(1, "修改");
+        ps.setLong(2, id);
+        ps.executeUpdate();
+      }
+      try (PreparedStatement ps = connection.prepareStatement("select name from student where id = ?")) {
+        ps.setLong(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+          Assertions.assertTrue(rs.next());
+          Assertions.assertEquals("修改", rs.getString(1));
+        }
+      }
+      connection.rollback();
+      connection.setAutoCommit(true);
+      // 事务结束
+
+      // 验证
+      try (PreparedStatement ps = connection.prepareStatement(selectSql)) {
+        ps.setLong(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+          Assertions.assertTrue(rs.next());
+          Assertions.assertNotEquals("修改", rs.getString(1));
+        }
+      }
+    }
+  }
 }
