@@ -10,7 +10,6 @@ import test.container.Allowed;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +20,7 @@ public class UpdateTest {
   private final Logger log = LoggerFactory.getLogger(UpdateTest.class);
 
   @TestTemplate
-  void testExecuteUpdate(DataSource dataSource) {
+  void testExecuteUpdate() {
     int executed = Swift.update("""
       update student set name = ? where id = ?
       """).execute("测试修改", 1);
@@ -89,7 +88,7 @@ public class UpdateTest {
   }
 
   @TestTemplate
-  void testArrayParams(DataSource dataSource) {
+  void testArrayParams() {
     Object[] params = {"测试修改", 1L};
     int executed = Swift.update("""
       update student set name = ? where id = ?
@@ -103,7 +102,7 @@ public class UpdateTest {
   }
 
   @TestTemplate
-  void testBatch(DataSource dataSource) {
+  void testBatch() {
     int[] executedBatch = Swift.update("""
       update student set name = ? where id = ?
       """).batch(

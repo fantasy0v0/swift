@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
-import javax.sql.DataSource;
-
 import static com.github.fantasy0v0.swift.Swift.select;
 import static com.github.fantasy0v0.swift.clauses.Clauses.where;
 import static com.github.fantasy0v0.swift.predicate.Predicates.exp;
@@ -21,7 +19,7 @@ class PagingTest {
   private final Logger log = LoggerFactory.getLogger(PagingTest.class);
 
   @TestTemplate
-  void testWithOutWhere(DataSource dataSource) {
+  void testWithOutWhere() {
     PageData<Student> data = select("select * from student")
       .paginate(0, 10)
       .fetch(Student::from);

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import test.container.Allowed;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
-import test.exception.WorkException;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.fantasy0v0.swift.Swift.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,35 +28,35 @@ public class InsertTest {
 
   @TestTemplate
   void test() {
-    Assertions.assertThrowsExactly(WorkException.class, () -> {
-      transaction(() -> {
-        int executed = Swift.insert("""
-          insert into student(id, name, status)
-          values(1000, '测试学生', 0)""").execute();
-        assertEquals(1, executed);
+    int executed = Swift.insert("""
+      insert into student(id, name, status)
+      values(1000, '测试学生', 0)""").execute();
+    assertEquals(1, executed);
 
-        executed = Swift.insert("""
-          insert into student(id, name, status)
-          values(?, ?, ?)""").execute(1001, "测试学生", 0);
-        assertEquals(1, executed);
+    executed = Swift.insert("""
+      insert into student(id, name, status)
+      values(?, ?, ?)""").execute(1001, "测试学生", 0);
+    assertEquals(1, executed);
 
-        // test null
-        executed = Swift.insert("""
-          insert into student(id, name, status, ext)
-          values(?, ?, ?, ?)""").execute(1002, "测试学生", 0, null);
-        assertEquals(1, executed);
-        Object[] row = Swift.select("""
-          select ext from student where id = ?""", 1002).fetchOne();
-        assertEquals(1, row.length);
-        Assertions.assertNull(row[0]);
-
-        throw new WorkException();
-      });
-    });
+    // test null
+    executed = Swift.insert("""
+      insert into student(id, name, status, ext)
+      values(?, ?, ?, ?)""").execute(1002, "测试学生", 0, null);
+    assertEquals(1, executed);
+    Object[] row = Swift.select("""
+      select ext from student where id = ?""", 1002).fetchOne();
+    assertEquals(1, row.length);
+    Assertions.assertNull(row[0]);
   }
 
   @TestTemplate
   void testBatch() {
+    Object[] row1 = Swift.select("""
+      select count(id) from student
+      """).fetchOne();
+    assertEquals(1, row1.length);
+    Assertions.assertEquals(5L, row1[0]);
+
     List<List<Object>> batchParams = new ArrayList<>();
     batchParams.add(List.of(2000, "测试用户1", 0));
     batchParams.add(List.of(2001, "测试用户2", 1));

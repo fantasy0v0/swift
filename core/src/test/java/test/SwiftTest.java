@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.SwiftJdbcExtension;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 import static com.github.fantasy0v0.swift.Swift.select;
@@ -19,7 +18,7 @@ class SwiftTest {
   private final Logger log = LoggerFactory.getLogger(SwiftTest.class);
 
   @TestTemplate
-  void testStatement(DataSource dataSource) {
+  void testStatement() {
     List<Object[]> data = select("""
       select * from student;
     """).fetch();

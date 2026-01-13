@@ -1,11 +1,15 @@
 package test.container;
 
+import com.github.fantasy0v0.swift.ConnectionPoolUtil;
 import com.github.fantasy0v0.swift.Context;
 import com.github.fantasy0v0.swift.Swift;
+import com.github.fantasy0v0.swift.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.connection.ConnectionTransaction;
 import org.junit.jupiter.api.extension.*;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Parameter;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +83,13 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
 
   static class InnerExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback, ParameterResolver {
 
+    private static final ExtensionContext.Namespace TEST_CONTEXT_NAMESPACE =
+      ExtensionContext.Namespace.create(SwiftJdbcExtension.class);
+
+    private static final String ConnectionReferenceKey = "ConnectionReference";
+
+    private static final String ConnectionTransactionKey = "ConnectionTransaction";
+
     private final String dockerImageName;
 
     private final DataSource dataSource;
@@ -90,16 +101,28 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       this.dataSource = dataSource;
     }
 
-    @Override
-    public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
-      Swift.setContext(null);
-      context = null;
+    private ExtensionContext.Store getStore(ExtensionContext context) {
+      return context.getRoot().getStore(TEST_CONTEXT_NAMESPACE);
     }
 
     @Override
-    public void beforeTestExecution(ExtensionContext extensionContext) {
+    public void beforeTestExecution(ExtensionContext extensionContext) throws SQLException {
       context = Swift.newContext(dataSource);
       Swift.setContext(context);
+      ConnectionReference reference = ConnectionPoolUtil.getReference(context);
+      getStore(extensionContext).put(ConnectionReferenceKey, reference);
+      ConnectionTransaction transaction = reference.getTransaction(null);
+      getStore(extensionContext).put(ConnectionTransactionKey, transaction);
+    }
+
+    @Override
+    public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
+      ConnectionTransaction transaction = (ConnectionTransaction) getStore(extensionContext).get(ConnectionTransactionKey);
+      transaction.rollback();
+      ConnectionReference reference = (ConnectionReference) getStore(extensionContext).get(ConnectionReferenceKey);
+      reference.close();
+      Swift.setContext(null);
+      context = null;
     }
 
     @Override

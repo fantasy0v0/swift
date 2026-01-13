@@ -1,19 +1,16 @@
 package test;
 
-
 import com.github.fantasy0v0.swift.exception.SwiftException;
 import com.github.fantasy0v0.swift.predicate.Predicate;
-import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.container.Db;
 import test.container.SwiftJdbcExtension;
 import test.vo.Student;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,9 +26,8 @@ class SelectTest {
 
   private final Logger log = LoggerFactory.getLogger(SelectTest.class);
 
-
   @TestTemplate
-  void testFetch(DataSource dataSource) {
+  void testFetch() {
     List<Student> students = select("select * from student").fetch(Student::from);
 
     for (Student student : students) {
@@ -46,7 +42,7 @@ class SelectTest {
   }
 
   @TestTemplate
-  void testFetchOne(DataSource dataSource) {
+  void testFetchOne() {
     Object[] row = select("select * from student limit 1").fetchOne();
     Assertions.assertNotNull(row);
     SwiftException exception = Assertions.assertThrowsExactly(SwiftException.class, () -> {
@@ -56,7 +52,7 @@ class SelectTest {
   }
 
   @TestTemplate
-  void testPredicate(DataSource dataSource) {
+  void testPredicate() {
     String sql = "select * from student";
     Predicate predicate = and(
       exp("id > ?", 0),
@@ -73,15 +69,14 @@ class SelectTest {
   }
 
   @TestTemplate
-  void testJson(DataSource dataSource) throws SQLException {
-    String driverClassName = dataSource.unwrap(HikariDataSource.class).getDriverClassName();
-    if (driverClassName.contains("postgresql")) {
+  void testJson(Db db) {
+    if (Db.Postgres == db) {
       List<String> result = select("""
       select '{ "test": 123}'::jsonb
       """).fetch(row -> row.getString(1));
       Assertions.assertEquals(1, result.size());
       Assertions.assertEquals("{\"test\": 123}", result.getFirst());
-    } else if (driverClassName.contains("mysql")) {
+    } else if (Db.MySQL == db) {
       List<String> result = select("""
       select cast('{"test": 123}' as JSON)
       """).fetch(row -> row.getString(1));
