@@ -81,8 +81,8 @@ select * from student
 """).fetch();
 // 返回Map
 List<Map<String, Object>> students1 = select("""
-  select id, name, status from student where id = ?
-  """, 1L).fetch(Row::toMap);
+select id, name, status from student where id = ?
+""", 1L).fetch(Row::toMap);
 ```
 
 ### 查询单条记录(有映射参数, 预编译参数设置)
@@ -126,8 +126,8 @@ select * from student
 
 ```java
 List<List<String>> arrays = select("""
-  select tags from swift_user where tags is not null
-  """).fetch(row -> row.getArray(1, String.class));
+select tags from swift_user where tags is not null
+""").fetch(row -> row.getArray(1, String.class));
 ```
 
 ## 修改操作
@@ -164,8 +164,8 @@ insert into swift_user(name, status) values('测试学生', 0)
 
 ```java
 long key = Swift.insert("""
-  insert into swift_user(name, status) values('测试学生1', 0) returning id
-  """).fetchKey(row -> row.getLong(1));
+insert into swift_user(name, status) values('测试学生1', 0) returning id
+""").fetchKey(row -> row.getLong(1));
 ```
 
 ### 批量插入
