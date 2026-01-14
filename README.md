@@ -73,15 +73,19 @@ Swift.setContext(Swift.newContext(dataSource));
 
 ### 查询所有记录(无映射参数)
 
-如果不传递映射参数, 则默认返回的泛型类型为Object[]
+如果不传递映射参数, 则默认返回的类型为Object[]
 
 ```java
 List<Object[]> students = select("""
 select * from student
 """).fetch();
+// 返回Map
+List<Map<String, Object>> students1 = select("""
+  select id, name, status from student where id = ?
+  """, 1L).fetch(Row::toMap);
 ```
 
-### 查询所有记录(有映射参数, 预编译参数设置)
+### 查询单条记录(有映射参数, 预编译参数设置)
 
 ```java
 select("""
