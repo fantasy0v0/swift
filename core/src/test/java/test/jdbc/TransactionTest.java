@@ -1,9 +1,9 @@
 package test.jdbc;
 
-import com.github.fantasy0v0.swift.exception.SwiftException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.Db;
@@ -34,12 +34,43 @@ public class TransactionTest {
       log.debug("transactionIsolation: {}", transactionIsolation);
       // 开启事务后无法修改
       if (Db.Postgres == db) {
-        Assertions.assertThrowsExactly(SwiftException.class, () -> {
+        Assertions.assertThrowsExactly(PSQLException.class, () -> {
           connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         });
       } else {
         // MySQL虽然不报错但是无法修改
         connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+      }
+      connection.commit();
+      log.debug("autoCommit: {}", connection.getAutoCommit());
+    }
+  }
+
+  @TestTemplate
+  void testSQLError(DataSource dataSource, Db db) throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      connection.setAutoCommit(false);
+      try (Statement stmt = connection.createStatement()) {
+        try (ResultSet resultSet = stmt.executeQuery("select 1")) {
+          Assertions.assertTrue(resultSet.next());
+        }
+        // 主动制造错误
+        try {
+          try (ResultSet resultSet = stmt.executeQuery("select 1 / 0")) {
+            Assertions.assertTrue(resultSet.next());
+          }
+        } catch (SQLException e) {
+          log.debug("error", e);
+        }
+
+        // PostgreSQL在发生错误后, 无法再执行任何语句
+        if (Db.Postgres == db) {
+          Assertions.assertThrowsExactly(PSQLException.class, () -> {
+            try (ResultSet resultSet = stmt.executeQuery("select 1")) {
+              Assertions.assertTrue(resultSet.next());
+            }
+          });
+        }
       }
       connection.commit();
       log.debug("autoCommit: {}", connection.getAutoCommit());
