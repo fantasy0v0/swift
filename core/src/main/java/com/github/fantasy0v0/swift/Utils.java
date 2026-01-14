@@ -47,23 +47,28 @@ final class Utils {
   static <T> List<T> fetchByResultSet(ResultSet resultSet,
                                       Map<Class<?>, ParameterGetter<?>> getterMap,
                                       RowMapper<T> rowMapper,
-                                      boolean firstOnly) throws SQLException {
-    List<T> array = new ArrayList<>();
-    boolean first = true;
-    var row = new Row(resultSet, getterMap);
-    while (resultSet.next()) {
-      T data = rowMapper.apply(row);
-      array.add(data);
-      if (first && firstOnly) {
-        // isLast不一定所有jdbc驱动都支持, 所以这里只能用next
-        if (resultSet.next()) {
-          throw new SwiftException("Expected one result, but found more than one");
+                                      boolean firstOnly,
+                                      String callerInfo) throws SQLException {
+    try {
+      List<T> array = new ArrayList<>();
+      boolean first = true;
+      var row = new Row(resultSet, getterMap);
+      while (resultSet.next()) {
+        T data = rowMapper.apply(row);
+        array.add(data);
+        if (first && firstOnly) {
+          // isLast不一定所有jdbc驱动都支持, 所以这里只能用next
+          if (resultSet.next()) {
+            throw new SwiftException("Expected one result, but found more than one");
+          }
+          break;
         }
-        break;
+        first = false;
       }
-      first = false;
+      return Collections.unmodifiableList(array);
+    } finally {
+      logWarnings(resultSet.getWarnings(), callerInfo);
     }
-    return Collections.unmodifiableList(array);
   }
 
   /**
@@ -103,14 +108,34 @@ final class Utils {
   }
 
   /**
+   * 打印SQL警告信息
+   *
+   * @param warning warning
+   * @param caller  调用者信息
+   */
+  static void logWarnings(SQLWarning warning, String caller) {
+    if (!LogUtil.sql().isWarnEnabled()) {
+      return;
+    }
+    if (warning != null) {
+      while (warning != null) {
+        LogUtil.sql().warn("SQL Warning: [State: {}, Code: {}] {}，caller: {}",
+          warning.getSQLState(), warning.getErrorCode(), warning.getMessage(), caller);
+        warning = warning.getNextWarning();
+      }
+    }
+  }
+
+  /**
    * 执行查询语句
-   * @param conn 数据库连接
-   * @param sql sql语句
-   * @param params 变量
+   *
+   * @param conn      数据库连接
+   * @param sql       sql语句
+   * @param params    变量
    * @param rowMapper 行映射
    * @param firstOnly 只取一条
+   * @param <T>       映射后的类型
    * @return 结果
-   * @param <T> 映射后的类型
    * @throws SQLException 执行失败异常
    */
   static <T> List<T> executeQuery(Context context, Connection conn,
@@ -126,9 +151,12 @@ final class Utils {
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(context, conn, statement, params);
       try (ResultSet resultSet = statement.executeQuery()) {
-        return fetchByResultSet(resultSet, getterMap, rowMapper, firstOnly);
+        return fetchByResultSet(resultSet, getterMap, rowMapper, firstOnly, callerInfo);
+      } finally {
+        logWarnings(statement.getWarnings(), callerInfo);
       }
     } finally {
+      logWarnings(conn.getWarnings(), callerInfo);
       performanceLog("executeQuery", stopWatch, sql);
     }
   }
@@ -148,9 +176,12 @@ final class Utils {
         return Collections.emptyList();
       }
       try (ResultSet resultSet = statement.getResultSet()) {
-        return fetchByResultSet(resultSet, context.getGetterMap(), mapper, firstOnly);
+        return fetchByResultSet(resultSet, context.getGetterMap(), mapper, firstOnly, callerInfo);
+      } finally {
+        logWarnings(statement.getWarnings(), callerInfo);
       }
     } finally {
+      logWarnings(conn.getWarnings(), callerInfo);
       performanceLog("execute", stopWatch, sql);
     }
   }
@@ -170,12 +201,18 @@ final class Utils {
         fillStatementParams(context, conn, statement, params);
         statement.addBatch();
       }
-      int[] result = statement.executeBatch();
-      LogUtil.sql().debug("executeBatch: {}", result.length);
-      return fetchByResultSet(
-        statement.getGeneratedKeys(), context.getGetterMap(), mapper, false
-      );
+      try {
+        int[] result = statement.executeBatch();
+        LogUtil.sql().debug("executeBatch: {}", result.length);
+        return fetchByResultSet(
+          statement.getGeneratedKeys(), context.getGetterMap(), mapper, false,
+          callerInfo
+        );
+      } finally {
+        logWarnings(statement.getWarnings(), callerInfo);
+      }
     } finally {
+      logWarnings(conn.getWarnings(), callerInfo);
       performanceLog("executeBatch RETURN_GENERATED_KEYS", stopWatch, sql);
     }
   }
@@ -194,8 +231,13 @@ final class Utils {
         fillStatementParams(context, conn, statement, params);
         statement.addBatch();
       }
-      return statement.executeBatch();
+      try {
+        return statement.executeBatch();
+      } finally {
+        logWarnings(statement.getWarnings(), callerInfo);
+      }
     } finally {
+      logWarnings(conn.getWarnings(), callerInfo);
       performanceLog("executeBatch", stopWatch, sql);
     }
   }
@@ -209,8 +251,13 @@ final class Utils {
     LogUtil.sql().debug("executeUpdate: [{}], caller: {}", sql, callerInfo);
     try (PreparedStatement statement = prepareStatement(conn, sql, statementConfiguration)) {
       fillStatementParams(context, conn, statement, params);
-      return statement.executeUpdate();
+      try {
+        return statement.executeUpdate();
+      } finally {
+        logWarnings(statement.getWarnings(), callerInfo);
+      }
     } finally {
+      logWarnings(conn.getWarnings(), callerInfo);
       performanceLog("executeUpdate", stopWatch, sql);
     }
   }
@@ -264,8 +311,8 @@ final class Utils {
   }
 
   static PreparedStatement prepareStatement(Connection conn,
-                                                    String sql,
-                                                    StatementConfiguration configuration) throws SQLException {
+                                            String sql,
+                                            StatementConfiguration configuration) throws SQLException {
     return prepareStatement(conn, sql, Statement.NO_GENERATED_KEYS, configuration);
   }
 

@@ -152,17 +152,4 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     return fetchOne(Utils::fetchByRow, (List<Object>) null);
   }
 
-  /*public <T> List<T> fetchBatch(FetchMapper<T> mapper,
-                                List<List<Object>> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(dataSource)) {
-      return Utils.executeBatch(ref.unwrap(), statementConfiguration, sql, params, parameterHandler, mapper);
-    } catch (SQLException e) {
-      throw new SwiftSQLException(e);
-    }
-  }
-
-  public List<Object[]> fetchBatch(List<List<Object>> params) {
-    return fetchBatch(Utils::fetchByRow, params);
-  }*/
-
 }

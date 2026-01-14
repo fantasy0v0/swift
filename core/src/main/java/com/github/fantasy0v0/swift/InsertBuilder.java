@@ -46,13 +46,19 @@ public class InsertBuilder extends UpdateBuilder {
       LogUtil.sql().debug("fetchKey: [{}], caller: {}", sql, callerInfo);
       try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, statementConfiguration)) {
         fillStatementParams(context, conn, statement, params);
-        int updated = statement.executeUpdate();
-        LogUtil.sql().debug("executeUpdate: {}", updated);
-        List<T> list = fetchByResultSet(
-          statement.getGeneratedKeys(), context.getGetterMap(), mapper, true
-        );
-        return list.isEmpty() ? null : list.getFirst();
+        try {
+          int updated = statement.executeUpdate();
+          LogUtil.sql().debug("executeUpdate: {}", updated);
+          List<T> list = fetchByResultSet(
+            statement.getGeneratedKeys(), context.getGetterMap(), mapper, true,
+            callerInfo
+          );
+          return list.isEmpty() ? null : list.getFirst();
+        } finally {
+          Utils.logWarnings(statement.getWarnings(), callerInfo);
+        }
       } finally {
+        Utils.logWarnings(conn.getWarnings(), callerInfo);
         LogUtil.performance().debug("fetchKey cost: {}", stopWatch);
       }
     } catch (SQLException e) {
