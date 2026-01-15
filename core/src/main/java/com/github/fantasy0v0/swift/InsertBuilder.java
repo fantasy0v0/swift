@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
 import com.github.fantasy0v0.swift.exception.SwiftSQLException;
 import com.github.fantasy0v0.swift.util.LogUtil;
 
@@ -26,7 +26,7 @@ public class InsertBuilder extends UpdateBuilder {
    * @return 返回生成的主键
    */
   public <T> List<T> batch(List<List<Object>> batchParams, RowMapper<T> keyMapper) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), statementConfiguration, sql, batchParams,
         keyMapper
@@ -38,7 +38,7 @@ public class InsertBuilder extends UpdateBuilder {
 
   private <T> T _fetchKey(RowMapper<T> mapper,
                           List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       Connection conn = ref.unwrap();
       StopWatch stopWatch = new StopWatch();
       LogUtil.performance().trace("fetchKey begin");

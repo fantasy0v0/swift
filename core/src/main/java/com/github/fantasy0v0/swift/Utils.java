@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
 import com.github.fantasy0v0.swift.exception.SwiftException;
 import com.github.fantasy0v0.swift.parameter.ParameterGetter;
 import com.github.fantasy0v0.swift.parameter.ParameterSetter;
@@ -23,7 +23,7 @@ final class Utils {
                            String sql, List<Object> params,
                            RowMapper<T> mapper) throws SQLException {
 
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       return executeQuery(context,
         ref.unwrap(), statementConfiguration, context.getGetterMap(), sql, params,
         mapper, false
@@ -35,7 +35,7 @@ final class Utils {
                         StatementConfiguration statementConfiguration,
                         String sql, List<Object> params,
                         RowMapper<T> mapper) throws SQLException {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       List<T> list = executeQuery(
         context, ref.unwrap(), statementConfiguration, context.getGetterMap(),
         sql, params, mapper, true

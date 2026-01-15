@@ -13,9 +13,9 @@ import javax.sql.DataSource;
 import java.sql.*;
 
 @ExtendWith(SwiftJdbcExtension.class)
-public class TransactionTest {
+public class JdbcTransactionTest {
 
-  private final Logger log = LoggerFactory.getLogger(TransactionTest.class);
+  private final Logger log = LoggerFactory.getLogger(JdbcTransactionTest.class);
 
   @TestTemplate
   void test(DataSource dataSource, Db db) throws SQLException {

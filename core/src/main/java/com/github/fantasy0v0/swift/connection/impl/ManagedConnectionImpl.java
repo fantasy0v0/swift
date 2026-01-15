@@ -1,14 +1,14 @@
 package com.github.fantasy0v0.swift.connection.impl;
 
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
-import com.github.fantasy0v0.swift.connection.ConnectionTransaction;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
+import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import com.github.fantasy0v0.swift.util.LogUtil;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-class DefaultConnectionReference implements ConnectionReference {
+class ManagedConnectionImpl implements ManagedConnection {
 
   private int referenceCounting = 0;
 
@@ -18,21 +18,21 @@ class DefaultConnectionReference implements ConnectionReference {
 
   private final Runnable onClose;
 
-  DefaultConnectionReference(DataSource dataSource, Runnable onClose) {
+  ManagedConnectionImpl(DataSource dataSource, Runnable onClose) {
     LogUtil.common().debug("connection create rc:{}", referenceCounting);
     this.dataSource = dataSource;
     this.onClose = onClose;
   }
 
-  public ConnectionReference reference() {
+  public ManagedConnection reference() {
     referenceCounting += 1;
     LogUtil.common().debug("connection reference rc:{}", referenceCounting);
     return this;
   }
 
   @Override
-  public ConnectionTransaction getTransaction(Integer level) throws SQLException {
-    return new DefaultConnectionTransaction(this, level);
+  public ManagedTransaction getTransaction(Integer level) throws SQLException {
+    return new ManagedTransactionImpl(this, level);
   }
 
   @Override

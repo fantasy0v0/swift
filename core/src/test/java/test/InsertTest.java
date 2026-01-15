@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import test.container.Allowed;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
+import test.container.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -27,6 +28,7 @@ public class InsertTest {
   private final Logger log = LoggerFactory.getLogger(InsertTest.class);
 
   @TestTemplate
+  @Transactional
   void test() {
     int executed = Swift.insert("""
       insert into student(id, name, status)
@@ -50,6 +52,7 @@ public class InsertTest {
   }
 
   @TestTemplate
+  @Transactional
   void testBatch() {
     Object[] row1 = Swift.select("""
       select count(id) from student
@@ -90,6 +93,7 @@ public class InsertTest {
   }
 
   @TestTemplate
+  @Transactional
   @Allowed(Db.Postgres)
   void fetchWithReturning() {
     List<Object[]> result = Swift.insert("""
@@ -118,6 +122,7 @@ public class InsertTest {
    * MySQL没有像PostgreSQL的timestamptz, 所以只对PostgreSQL执行
    */
   @TestTemplate
+  @Transactional
   @Allowed(Db.Postgres)
   void testOffsetDateTime() {
     ZoneOffset CST = ZoneOffset.ofHours(8);
@@ -134,6 +139,7 @@ public class InsertTest {
   }
 
   @TestTemplate
+  @Transactional
   void testFetchKey(Db db) {
     long key = Swift.insert("""
       insert into swift_user(name, status) values('测试学生31', 0)

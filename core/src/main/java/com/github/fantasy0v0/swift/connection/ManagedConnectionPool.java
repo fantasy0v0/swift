@@ -7,8 +7,8 @@ import java.sql.SQLException;
 /**
  * 数据库连接池
  */
-public interface ConnectionPool {
+public interface ManagedConnectionPool {
 
-  ConnectionReference getReference(Context context) throws SQLException;
+  ManagedConnection getConnection(Context context) throws SQLException;
 
 }

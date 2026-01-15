@@ -1,4 +1,4 @@
-import com.github.fantasy0v0.swift.connection.ConnectionPool;
+import com.github.fantasy0v0.swift.connection.ManagedConnectionPool;
 
 module fantasy0v0.swift {
   requires transitive java.sql;
@@ -13,5 +13,5 @@ module fantasy0v0.swift {
   exports com.github.fantasy0v0.swift.util to fantasy0v0.swift.spring;
   exports com.github.fantasy0v0.swift.connection;
 
-  uses ConnectionPool;
+  uses ManagedConnectionPool;
 }

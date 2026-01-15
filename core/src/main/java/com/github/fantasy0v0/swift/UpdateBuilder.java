@@ -1,6 +1,6 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
 import com.github.fantasy0v0.swift.exception.SwiftSQLException;
 
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int execute(List<Object> params) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       return Utils.executeUpdate(
         context, ref.unwrap(), getStatementConfiguration(), sql, params
       );
@@ -80,7 +80,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
   }
 
   public int[] batch(List<List<Object>> batchParams) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       return Utils.executeBatch(
         context, ref.unwrap(), getStatementConfiguration(), sql, batchParams
       );
@@ -91,7 +91,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   private <T> List<T> _fetch(RowMapper<T> mapper,
                              List<Object> params, boolean firstOnly) {
-    try (ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       return Utils.execute(
         context, ref.unwrap(), getStatementConfiguration(), sql, params,
         mapper, firstOnly

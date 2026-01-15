@@ -1,7 +1,7 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionPool;
-import com.github.fantasy0v0.swift.connection.impl.DefaultConnectionPool;
+import com.github.fantasy0v0.swift.connection.ManagedConnectionPool;
+import com.github.fantasy0v0.swift.connection.impl.ManagedConnectionPoolImpl;
 import com.github.fantasy0v0.swift.dialect.ANSI;
 import com.github.fantasy0v0.swift.dialect.SQLDialect;
 import com.github.fantasy0v0.swift.exception.SwiftException;
@@ -18,9 +18,9 @@ public final class Swift {
   private static Context context;
 
   static {
-    ConnectionPoolUtil.pool = ServiceLoader.load(ConnectionPool.class)
+    ConnectionPoolUtil.pool = ServiceLoader.load(ManagedConnectionPool.class)
       .findFirst()
-      .orElse(new DefaultConnectionPool());
+      .orElse(new ManagedConnectionPoolImpl());
     LogUtil.common().debug("使用的ConnectionPool: {}", ConnectionPoolUtil.pool.getClass().getName());
   }
 

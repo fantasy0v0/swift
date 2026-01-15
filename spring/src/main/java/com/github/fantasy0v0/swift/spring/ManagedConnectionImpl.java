@@ -1,31 +1,31 @@
 package com.github.fantasy0v0.swift.spring;
 
 import com.github.fantasy0v0.swift.Context;
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
-import com.github.fantasy0v0.swift.connection.ConnectionTransaction;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
+import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-class SpringConnectionReference implements ConnectionReference {
+class ManagedConnectionImpl implements ManagedConnection {
 
   private Connection connection;
 
   private final Context context;
 
-  SpringConnectionReference(Context context) {
+  ManagedConnectionImpl(Context context) {
     this.context = context;
   }
 
   @Override
-  public ConnectionReference reference() {
+  public ManagedConnection reference() {
     return this;
   }
 
   @Override
-  public ConnectionTransaction getTransaction(Integer level) {
-    return new SpringConnectionTransaction(level);
+  public ManagedTransaction getTransaction(Integer level) {
+    return new ManagedTransactionImpl(level);
   }
 
   @Override

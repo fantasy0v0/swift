@@ -1,5 +1,5 @@
-import com.github.fantasy0v0.swift.connection.ConnectionPool;
-import com.github.fantasy0v0.swift.spring.SpringConnectionPool;
+import com.github.fantasy0v0.swift.connection.ManagedConnectionPool;
+import com.github.fantasy0v0.swift.spring.ManagedConnectionPoolImpl;
 
 module fantasy0v0.swift.spring {
   requires fantasy0v0.swift;
@@ -9,5 +9,5 @@ module fantasy0v0.swift.spring {
 
   exports com.github.fantasy0v0.swift.spring;
 
-  provides ConnectionPool with SpringConnectionPool;
+  provides ManagedConnectionPool with ManagedConnectionPoolImpl;
 }

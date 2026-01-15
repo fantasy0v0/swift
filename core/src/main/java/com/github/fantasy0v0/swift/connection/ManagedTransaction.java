@@ -2,7 +2,7 @@ package com.github.fantasy0v0.swift.connection;
 
 import java.sql.SQLException;
 
-public interface ConnectionTransaction {
+public interface ManagedTransaction {
 
   void commit() throws SQLException;
 

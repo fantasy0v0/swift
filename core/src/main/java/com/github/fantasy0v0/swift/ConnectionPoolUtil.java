@@ -1,16 +1,16 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionPool;
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
+import com.github.fantasy0v0.swift.connection.ManagedConnectionPool;
 
 import java.sql.SQLException;
 
 public final class ConnectionPoolUtil {
 
-  static ConnectionPool pool;
+  static ManagedConnectionPool pool;
 
-  public static ConnectionReference getReference(Context context) throws SQLException {
-    return pool.getReference(context);
+  public static ManagedConnection getConnection(Context context) throws SQLException {
+    return pool.getConnection(context);
   }
 
 }

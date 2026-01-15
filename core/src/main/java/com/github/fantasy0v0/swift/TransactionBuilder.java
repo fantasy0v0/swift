@@ -1,7 +1,7 @@
 package com.github.fantasy0v0.swift;
 
-import com.github.fantasy0v0.swift.connection.ConnectionReference;
-import com.github.fantasy0v0.swift.connection.ConnectionTransaction;
+import com.github.fantasy0v0.swift.connection.ManagedConnection;
+import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import com.github.fantasy0v0.swift.util.LogUtil;
 
 import java.sql.SQLException;
@@ -37,8 +37,8 @@ public class TransactionBuilder<T> {
   T execute() throws SQLException {
     StopWatch stopWatch = new StopWatch();
     LogUtil.performance().trace("transaction begin");
-    try(ConnectionReference ref = ConnectionPoolUtil.getReference(context)) {
-      ConnectionTransaction transaction = ref.getTransaction(level);
+    try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
+      ManagedTransaction transaction = ref.getTransaction(level);
       try {
         T result;
         if (null != supplier) {
