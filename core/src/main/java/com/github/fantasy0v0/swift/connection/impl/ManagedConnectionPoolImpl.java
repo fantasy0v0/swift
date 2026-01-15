@@ -15,12 +15,13 @@ public class ManagedConnectionPoolImpl implements ManagedConnectionPool {
   @Override
   public ManagedConnection getConnection(Context context) {
     Map<Context, ManagedConnection> map = threadLocal.get();
-    if (map.containsKey(context)) {
-      ManagedConnection ref = map.get(context);
+    ManagedConnection ref = map.get(context);
+    if (ref != null) {
       return ref.reference();
+    } else {
+      ref = new ManagedConnectionImpl(context.getDataSource(), () -> map.remove(context));
+      map.put(context, ref);
+      return ref;
     }
-    ManagedConnection ref = new ManagedConnectionImpl(context.getDataSource(), () -> map.remove(context));
-    map.put(context, ref);
-    return ref;
   }
 }
