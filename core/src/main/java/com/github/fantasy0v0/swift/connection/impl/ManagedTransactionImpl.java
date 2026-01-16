@@ -1,6 +1,7 @@
 package com.github.fantasy0v0.swift.connection.impl;
 
 import com.github.fantasy0v0.swift.connection.ManagedConnection;
+import com.github.fantasy0v0.swift.connection.ManagedSavepoint;
 import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import com.github.fantasy0v0.swift.util.LogUtil;
 
@@ -71,5 +72,10 @@ class ManagedTransactionImpl implements ManagedTransaction {
     } else {
       LogUtil.common().debug("skip connection rollback when autoCommit is false");
     }
+  }
+
+  @Override
+  public ManagedSavepoint createSavepoint() throws SQLException {
+    return new ManagedSavepointImpl(managedConnection);
   }
 }

@@ -125,4 +125,22 @@ public class Context {
   public <T> T transaction(Supplier<T> supplier) {
     return transaction(null, supplier);
   }
+
+  public void savepoint(Runnable runnable) {
+    SavepointBuilder<?> builder = SavepointBuilder.create(this, runnable);
+    try {
+      builder.execute();
+    } catch (SQLException e) {
+      throw new SwiftSQLException(e);
+    }
+  }
+
+  public <T> T savepoint(Supplier<T> supplier) {
+    SavepointBuilder<T> builder = SavepointBuilder.create(this, supplier);
+    try {
+      return builder.execute();
+    } catch (SQLException e) {
+      throw new SwiftSQLException(e);
+    }
+  }
 }

@@ -8,4 +8,6 @@ public interface ManagedTransaction {
 
   void rollback() throws SQLException;
 
+  ManagedSavepoint createSavepoint() throws SQLException;
+
 }

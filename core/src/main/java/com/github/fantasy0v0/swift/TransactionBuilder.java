@@ -50,7 +50,11 @@ public class TransactionBuilder<T> {
         transaction.commit();
         return result;
       } catch (Exception e) {
-        transaction.rollback();
+        try {
+          transaction.rollback();
+        } catch (SQLException ex) {
+          LogUtil.common().error("rollback failed", ex);
+        }
         throw e;
       }
     } finally {

@@ -1,5 +1,6 @@
 package com.github.fantasy0v0.swift.spring;
 
+import com.github.fantasy0v0.swift.connection.ManagedSavepoint;
 import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import com.github.fantasy0v0.swift.util.LogUtil;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -16,23 +17,27 @@ class ManagedTransactionImpl implements ManagedTransaction {
   ManagedTransactionImpl(Integer level) {
     this.txManager = ContextUtil.getBean(PlatformTransactionManager.class);
     DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-    def.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+    def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
     if (null != level) {
       def.setIsolationLevel(level);
     }
     this.status = txManager.getTransaction(def);
-    status.createSavepoint();
   }
 
   @Override
   public void commit() {
     LogUtil.common().debug("txManager commit");
-    this.txManager.commit(this.status);
+    txManager.commit(status);
   }
 
   @Override
   public void rollback() {
     LogUtil.common().debug("txManager rollback");
-    this.txManager.rollback(this.status);
+    txManager.rollback(status);
+  }
+
+  @Override
+  public ManagedSavepoint createSavepoint() {
+    return new ManagedSavepointImpl(status);
   }
 }
