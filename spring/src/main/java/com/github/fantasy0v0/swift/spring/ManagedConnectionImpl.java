@@ -40,6 +40,7 @@ class ManagedConnectionImpl implements ManagedConnection {
   public void close() throws SQLException {
     if (null != connection) {
       DataSourceUtils.doReleaseConnection(connection, context.getDataSource());
+      connection = null;
     }
   }
 }

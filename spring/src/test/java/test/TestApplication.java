@@ -20,7 +20,7 @@ public class TestApplication {
 
   @Bean
   public DataSource dataSource() {
-    PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+    PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:18-alpine");
     String PG_LOCATIONS = "classpath:db/pg";
     pg.start();
     HikariConfig config = new HikariConfig();

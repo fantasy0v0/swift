@@ -196,7 +196,8 @@ update student set name = ? where id = ?
 ### 开启事务
 ```java
 transaction(() -> {
-  modify("update student set name = ? where id = ?")
+
+update("update student set name = ? where id = ?")
     .execute("修改", 1L);
 });
 ```
@@ -205,19 +206,20 @@ transaction(() -> {
 
 ```java
 transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
-  modify("update student set name = ? where id = ?")
+
+update("update student set name = ? where id = ?")
     .execute("修改", 1L);
 });
 ```
 
 当参数中Lambda方法正常执行完成时, transaction方法会将创建的事务提交, 如果抛出了异常, 则会进行回滚, 并将异常继续向上抛出, 由使用者根据自己的业务自行处理
 
-### 嵌套事务
+#### 事务共享
 
-该方法期望能灵活地处理嵌套事务的问题, 内部物抛出异常, 将会被回滚, 但如果外部事务对该异常进行捕获, 将不会导致外部事务回滚。
+多个transaction会共享事务，类似Spring的Propagation.REQUIRED，如果想要做到部分回滚，请浏览[保存点](#保存点-Savepoint)章节
 
 > [!CAUTION]
-> 不支持在事务中修改隔离级别, 仅在最开始的事务中设置, 后续嵌套的事务隔离级别将不会生效(部分JDBC会直接报错)
+> 不支持在事务中修改隔离级别, 仅在最外层或Spring的事务中设置, 后续设置事务隔离级别将不会生效(部分JDBC会直接报错)
 
 ```java
 transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
@@ -225,7 +227,8 @@ transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () -> {
   transaction(() -> {
     select("select * from student").fetch();
     transaction(() -> {
-      modify("update student set name = ? where id = ?")
+
+update("update student set name = ? where id = ?")
         .execute("修改", 1L);
     });
   });
@@ -241,6 +244,27 @@ public Long getId() {
     """).fetchOne(row -> row.getLong(1));
   });
 }
+```
+
+### 保存点 Savepoint
+
+该功能与数据库中的保存点功能一致，可以在transaction中做到部分回滚
+
+```java
+transaction(Connection.TRANSACTION_READ_UNCOMMITTED, () ->{
+
+select("select * from student").
+
+fetch();
+
+savepoint(() ->{
+
+update("update student set name = ? where id = ?")
+      .
+
+execute("修改",1L);
+  });
+  });
 ```
 
 ## 调试功能

@@ -99,6 +99,14 @@ public final class Swift {
     return transaction(null, supplier);
   }
 
+  public static void savepoint(Runnable runnable) {
+    getContext().savepoint(runnable);
+  }
+
+  public static <T> T savepoint(Supplier<T> supplier) {
+    return getContext().savepoint(supplier);
+  }
+
   public static void setSlowExecuteThreshold(long slowExecuteThreshold) {
     LogUtil.common().debug("set slowExecuteThreshold to {}", slowExecuteThreshold);
     Swift.slowExecuteThreshold = slowExecuteThreshold;

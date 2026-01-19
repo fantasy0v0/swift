@@ -28,7 +28,7 @@ public class TestSpring {
   @Test
   void test() {
     try {
-      Swift.transaction(() -> {
+      Swift.savepoint(() -> {
         Swift.update("""
         update student set name = ? where id = ?
         """).execute("大明", 1);
