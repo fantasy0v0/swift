@@ -44,7 +44,8 @@ API设计遵循JDBC原生语义，开发者无需学习新概念即可快速上�
 
 ## 注意事项
 
-本工具使用ThreadLocal管理连接，非线程安全，不能跨线程使用。
+> [!CAUTION]
+> 本工具使用ThreadLocal管理连接，非线程安全，不能跨线程使用。
 
 如果想在spring环境下(比如@Transaction)使用spring的事务能力, 需要添加jdbc-spring-support依赖。
 
