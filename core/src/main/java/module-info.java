@@ -10,7 +10,6 @@ module fantasy0v0.swift {
   exports com.github.fantasy0v0.swift.clauses;
   exports com.github.fantasy0v0.swift.dialect;
   exports com.github.fantasy0v0.swift.parameter;
-  exports com.github.fantasy0v0.swift.util to fantasy0v0.swift.spring;
   exports com.github.fantasy0v0.swift.connection;
 
   uses ManagedConnectionPool;

@@ -2,7 +2,6 @@ package com.github.fantasy0v0.swift.spring;
 
 import com.github.fantasy0v0.swift.connection.ManagedSavepoint;
 import com.github.fantasy0v0.swift.connection.ManagedTransaction;
-import com.github.fantasy0v0.swift.util.LogUtil;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -26,13 +25,11 @@ class ManagedTransactionImpl implements ManagedTransaction {
 
   @Override
   public void commit() {
-    LogUtil.common().debug("txManager commit");
     txManager.commit(status);
   }
 
   @Override
   public void rollback() {
-    LogUtil.common().debug("txManager rollback");
     txManager.rollback(status);
   }
 
