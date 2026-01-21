@@ -17,7 +17,7 @@ public class ManagedConnectionPoolImpl implements ManagedConnectionPool {
     Map<Context, ManagedConnection> map = threadLocal.get();
     ManagedConnection ref = map.get(context);
     if (ref != null) {
-      return ref.reference();
+      return ref.retain();
     } else {
       ref = new ManagedConnectionImpl(context.getDataSource(), () -> map.remove(context));
       map.put(context, ref);

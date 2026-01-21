@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 class ManagedConnectionImpl implements ManagedConnection {
 
-  private int referenceCounting = 0;
+  private int refCount = 0;
 
   private Connection connection;
 
@@ -19,14 +19,14 @@ class ManagedConnectionImpl implements ManagedConnection {
   private final Runnable onClose;
 
   ManagedConnectionImpl(DataSource dataSource, Runnable onClose) {
-    LogUtil.common().debug("connection create rc:{}", referenceCounting);
+    LogUtil.common().debug("connection create refCount:{}", refCount);
     this.dataSource = dataSource;
     this.onClose = onClose;
   }
 
-  public ManagedConnection reference() {
-    referenceCounting += 1;
-    LogUtil.common().debug("connection reference rc:{}", referenceCounting);
+  public ManagedConnection retain() {
+    refCount += 1;
+    LogUtil.common().debug("connection retain refCount:{}", refCount);
     return this;
   }
 
@@ -37,15 +37,15 @@ class ManagedConnectionImpl implements ManagedConnection {
 
   @Override
   public void close() throws SQLException {
-    if (0 == referenceCounting) {
+    if (0 == refCount) {
       this.onClose.run();
       if (null != connection) {
         connection.close();
       }
-      LogUtil.common().debug("connection clear rc:{}", referenceCounting);
+      LogUtil.common().debug("connection close refCount:{}", refCount);
     } else {
-      referenceCounting -= 1;
-      LogUtil.common().debug("connection close rc:{}", referenceCounting);
+      refCount -= 1;
+      LogUtil.common().debug("connection release refCount:{}", refCount);
     }
   }
 

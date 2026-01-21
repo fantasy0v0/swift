@@ -6,6 +6,8 @@ import com.github.fantasy0v0.swift.Swift;
 import com.github.fantasy0v0.swift.connection.ManagedConnection;
 import com.github.fantasy0v0.swift.connection.ManagedTransaction;
 import org.junit.jupiter.api.extension.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Parameter;
@@ -20,6 +22,7 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
   BeforeAllCallback {
 
   private final static Map<JdbcContainer, DataSource> containerMap = new HashMap<>();
+  private static final Logger log = LoggerFactory.getLogger(SwiftJdbcExtension.class);
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext extensionContext) {
@@ -112,6 +115,7 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
       boolean enableTransaction = extensionContext.getTestMethod()
         .map(m -> m.getAnnotation(Transactional.class)).isPresent();
       if (enableTransaction) {
+        log.info("通过单元测试开启的事务");
         ManagedConnection reference = ConnectionPoolUtil.getConnection(context);
         getStore(extensionContext).put(ConnectionKey, reference);
         ManagedTransaction transaction = reference.getTransaction(null);
@@ -123,6 +127,7 @@ public class SwiftJdbcExtension implements TestTemplateInvocationContextProvider
     public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
       ManagedTransaction transaction = getStore(extensionContext).get(TransactionKey, ManagedTransaction.class);
       if (null != transaction) {
+        log.info("通过单元测试回滚的事务");
         transaction.rollback();
         getStore(extensionContext).remove(TransactionKey);
         ManagedConnection connection = getStore(extensionContext).get(ConnectionKey, ManagedConnection.class);

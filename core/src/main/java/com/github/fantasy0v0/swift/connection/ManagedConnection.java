@@ -8,7 +8,7 @@ import java.sql.SQLException;
  */
 public interface ManagedConnection extends AutoCloseable {
 
-  ManagedConnection reference();
+  ManagedConnection retain();
 
   ManagedTransaction getTransaction(Integer level) throws SQLException;
 

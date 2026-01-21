@@ -19,7 +19,7 @@ class ManagedConnectionImpl implements ManagedConnection {
   }
 
   @Override
-  public ManagedConnection reference() {
+  public ManagedConnection retain() {
     return this;
   }
 

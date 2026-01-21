@@ -36,7 +36,7 @@ public class SavepointBuilder<T> {
 
   T execute() throws SQLException {
     StopWatch stopWatch = new StopWatch();
-    LogUtil.performance().trace("savepoint begin");
+    LogUtil.performance().trace("savepoint execute begin");
     try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
       boolean autoCommit = ref.unwrap().getAutoCommit();
       if (autoCommit) {
@@ -63,7 +63,7 @@ public class SavepointBuilder<T> {
         throw e;
       }
     } finally {
-      LogUtil.performance().debug("savepoint cost: {}", stopWatch);
+      LogUtil.performance().debug("savepoint execute cost: {}", stopWatch);
     }
   }
 
