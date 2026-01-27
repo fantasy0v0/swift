@@ -35,7 +35,7 @@ public class TestSpring {
         throw new SwiftException("测试");
       });
     } catch (SwiftException e) {
-      // ignore
+      Assertions.assertEquals("测试", e.getMessage());
     }
     String name = Swift.select("""
     select name from student where id = ?
