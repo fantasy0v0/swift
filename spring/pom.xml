@@ -11,7 +11,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>6.2.0</spring.version>
-    <springboot.version>3.4.0</springboot.version>
+    <springboot.version>3.5.10</springboot.version>
     <flyway.version>10.17.2</flyway.version>
     <testcontainers.version>1.19.8</testcontainers.version>
   </properties>

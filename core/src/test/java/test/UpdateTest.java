@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import test.container.Allowed;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
+import test.container.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ public class UpdateTest {
   private final Logger log = LoggerFactory.getLogger(UpdateTest.class);
 
   @TestTemplate
+  @Transactional
   void testExecuteUpdate() {
     int executed = Swift.update("""
       update student set name = ? where id = ?
@@ -36,6 +38,7 @@ public class UpdateTest {
   }
 
   @TestTemplate
+  @Transactional
   @Allowed(Db.Postgres)
   void testFetch() {
     List<Object[]> result = Swift.update("""
@@ -88,6 +91,7 @@ public class UpdateTest {
   }
 
   @TestTemplate
+  @Transactional
   void testArrayParams() {
     Object[] params = {"测试修改", 1L};
     int executed = Swift.update("""
@@ -102,6 +106,7 @@ public class UpdateTest {
   }
 
   @TestTemplate
+  @Transactional
   void testBatch() {
     int[] executedBatch = Swift.update("""
       update student set name = ? where id = ?
