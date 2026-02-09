@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.container.Db;
 import test.container.SwiftJdbcExtension;
+import test.container.Transactional;
 
 import java.sql.Connection;
 
@@ -20,6 +21,7 @@ public class TransactionTest {
   private final Logger log = LoggerFactory.getLogger(TransactionTest.class);
 
   @TestTemplate
+  @Transactional
   void test(Db db) {
     // 不能在事务交易过程中改变事物交易隔绝等级
     try {
