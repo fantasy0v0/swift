@@ -4,6 +4,7 @@ import com.github.fantasy0v0.swift.ResultSetExtractFunction;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,14 +13,14 @@ import java.util.Set;
  */
 public abstract class AbstractParameterHandler<T> implements ParameterGetter<T>, ParameterSetter<T> {
 
-  protected final Map<Class<? extends T>, Integer> parameterMap;
+  protected final Map<Class<? extends T>, Integer> parameterMap = new HashMap<>();
 
   protected AbstractParameterHandler(Class<T> parameterClass, int sqlType) {
-    this.parameterMap = Map.of(parameterClass, sqlType);
+    this.parameterMap.put(parameterClass, sqlType);
   }
 
-  protected AbstractParameterHandler(Map<Class<? extends T>, Integer> parameterMap) {
-    this.parameterMap = parameterMap;
+  protected AbstractParameterHandler() {
+
   }
 
   /**
