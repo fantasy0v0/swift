@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public final class Swift {
 
-  private static Context context;
+  private volatile static Context context;
 
   static {
     ConnectionPoolUtil.pool = ServiceLoader.load(ManagedConnectionPool.class)
@@ -27,12 +27,12 @@ public final class Swift {
   /**
    * 慢执行阈值, 单位毫秒
    */
-  private static long slowExecuteThreshold = 5000;
+  private volatile static long slowExecuteThreshold = 5000;
 
   /**
    * 获取设置的默认Context
    */
-  public synchronized static Context getContext() {
+  public static Context getContext() {
     if (null == context) {
       throw new SwiftException("未设置默认Context");
     }
