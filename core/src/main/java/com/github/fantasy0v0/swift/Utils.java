@@ -79,8 +79,7 @@ final class Utils {
       return "need to enable the debug log level";
     }
     var optional = StackWalker.getInstance().walk(s ->
-      s.skip(1)
-        .filter(f -> !f.getClassName().startsWith("com.github.fantasy0v0.swift.jdbc"))
+      s.skip(1).filter(f -> !f.getClassName().startsWith("com.github.fantasy0v0.swift"))
         .findFirst()
     );
     if (optional.isEmpty()) {
