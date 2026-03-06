@@ -27,8 +27,7 @@ public class InsertBuilder extends UpdateBuilder {
    */
   public <T> List<T> batch(List<List<Object>> batchParams, RowMapper<T> keyMapper) {
     try (ManagedConnection ref = ConnectionPoolUtil.getConnection(context)) {
-      return Utils.executeBatch(
-        context, ref.unwrap(), statementConfiguration, sql, batchParams,
+      return Utils.executeBatch(context, ref.unwrap(), getStatementConfiguration(), sql, batchParams,
         keyMapper
       );
     } catch (SQLException e) {
@@ -44,7 +43,7 @@ public class InsertBuilder extends UpdateBuilder {
       LogUtil.performance().trace("fetchKey begin");
       String callerInfo = printCallerInfo();
       LogUtil.sql().debug("fetchKey: [{}], caller: {}", sql, callerInfo);
-      try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, statementConfiguration)) {
+      try (PreparedStatement statement = prepareStatement(conn, sql, PreparedStatement.RETURN_GENERATED_KEYS, getStatementConfiguration())) {
         fillStatementParams(context, conn, statement, params);
         try {
           int updated = statement.executeUpdate();

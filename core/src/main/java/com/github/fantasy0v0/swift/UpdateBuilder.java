@@ -11,7 +11,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
 
   protected final Context context;
 
-  protected StatementConfiguration statementConfiguration;
+  private StatementConfiguration statementConfiguration;
 
   protected final String sql;
 
@@ -20,7 +20,7 @@ public class UpdateBuilder implements StatementConfigurator<UpdateBuilder> {
     this.sql = sql;
   }
 
-  private StatementConfiguration getStatementConfiguration() {
+  protected StatementConfiguration getStatementConfiguration() {
     if (null == statementConfiguration) {
       return context.getStatementConfiguration();
     }
